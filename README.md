@@ -1,2 +1,2 @@
-# ki
-MacOS macros with vim-style composability
+# Ki
+A little thing to allow vi-like commands to automate macOS

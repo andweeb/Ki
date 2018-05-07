@@ -1,0 +1,41 @@
+[
+  {
+    "Constant" : [
+
+    ],
+    "submodules" : [
+
+    ],
+    "Function" : [
+
+    ],
+    "Variable" : [
+
+    ],
+    "stripped_doc" : [
+
+    ],
+    "Deprecated" : [
+
+    ],
+    "type" : "Module",
+    "desc" : "Enables macOS macros with composable commands",
+    "Constructor" : [
+
+    ],
+    "doc" : "Enables macOS macros with composable commands\n\nDownload:",
+    "Method" : [
+
+    ],
+    "Command" : [
+
+    ],
+    "Field" : [
+
+    ],
+    "items" : [
+
+    ],
+    "name" : "Ki"
+  }
+]
