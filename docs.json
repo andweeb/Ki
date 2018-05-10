@@ -10,7 +10,30 @@
 
     ],
     "Variable" : [
+      {
+        "doc" : "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.\n * `show` - A function invoked when a mode transition event occurs, with the following argument:\n   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)\n\nDefaults to a simple text display in the center of the menu bar of the focused screen.",
+        "name" : "statusDisplay",
+        "stripped_doc" : [
+          "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.",
+          " * `show` - A function invoked when a mode transition event occurs, with the following argument:",
+          "   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)",
+          "",
+          "Defaults to a simple text display in the center of the menu bar of the focused screen."
+        ],
+        "desc" : "",
+        "notes" : [
 
+        ],
+        "signature" : "Ki.statusDisplay",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "Ki.statusDisplay",
+        "parameters" : [
+
+        ]
+      }
     ],
     "stripped_doc" : [
 
@@ -18,22 +41,45 @@
     "Deprecated" : [
 
     ],
+    "desc" : "macOS macros with composable commands",
     "type" : "Module",
-    "desc" : "Enables macOS macros with composable commands",
     "Constructor" : [
 
     ],
-    "doc" : "Enables macOS macros with composable commands\n\nDownload:",
+    "doc" : "macOS macros with composable commands",
     "Method" : [
 
     ],
     "Command" : [
 
     ],
-    "Field" : [
-
-    ],
     "items" : [
+      {
+        "doc" : "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.\n * `show` - A function invoked when a mode transition event occurs, with the following argument:\n   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)\n\nDefaults to a simple text display in the center of the menu bar of the focused screen.",
+        "name" : "statusDisplay",
+        "stripped_doc" : [
+          "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.",
+          " * `show` - A function invoked when a mode transition event occurs, with the following argument:",
+          "   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)",
+          "",
+          "Defaults to a simple text display in the center of the menu bar of the focused screen."
+        ],
+        "desc" : "",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.statusDisplay",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "Ki.statusDisplay",
+        "parameters" : [
+
+        ]
+      }
+    ],
+    "Field" : [
 
     ],
     "name" : "Ki"

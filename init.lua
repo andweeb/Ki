@@ -1,13 +1,11 @@
 --- === Ki ===
 ---
---- Enables macOS macros with composable commands
+--- macOS macros with composable commands
 ---
---- Download:
 
 local ki = {}
 ki.__index = ki
 
--- Metadata
 ki.name = "Ki"
 ki.version = "1.0.0"
 ki.author = "Andrew Kwon"
@@ -34,85 +32,23 @@ local modifiers = {
 }
 
 local function getScriptPath()
-    local str = debug.getinfo(2, 'S').source:sub(2)
-
-    return str:match('(.*/)')
+    return debug.getinfo(2, 'S').source:sub(2):match('(.*/)')
 end
 
-ki.spoonPath = getScriptPath()
+local spoonPath = getScriptPath()
 
-local statusDisplay = {
-    DEFAULT_WIDTH = 75,
-    DEFAULT_HEIGHT = 22,
-    DEFAULT_FADE_TIMEOUT = 1.5,
-    config = {
-        normal = {
-            text = modes.normal:upper(),
-            backgroundColor = {
-                alpha = 0.9,
-                red = 180 / 255,
-                blue = 180 / 255,
-                green = 180 / 255,
-            },
-        },
-        entity = {
-            text = modes.entity:upper(),
-            backgroundColor = {
-                alpha = 0.9,
-                red = 140 / 255,
-                blue = 140 / 255,
-                green = 200 / 255,
-            },
-        },
-        action = {
-            text = modes.action:upper(),
-            backgroundColor = {
-                alpha = 0.9,
-                red = 255 / 255,
-                blue = 180 / 255,
-                green = 180 / 255,
-            },
-        },
-    },
-}
+-- Normal/Trigger/Action Mode Finite State Machine
+local machine = dofile(spoonPath..'/statemachine.lua')
 
-function statusDisplay:initStatusElements(options)
-    return {
-        {
-            action = 'fill',
-            type = 'rectangle',
-            fillColor = options.backgroundColor,
-        },
-        {
-            type = 'text',
-            frame = { h = self.DEFAULT_HEIGHT, w = self.DEFAULT_WIDTH, x = 0, y = 0 },
-            text = hs.styledtext.new(
-                options.text,
-                {
-                    color = { red = 0.15, blue = 0.15, green = 0.15 },
-                    font = { name = 'Menlo', size = 11.5 },
-                    paragraphStyle = { alignment = 'center' },
-                }
-            ),
-        },
-    }
-end
-
-function statusDisplay:show(status)
-    local options = self.config[status]
-    local screenFrame = hs.window.focusedWindow():screen():frame()
-    local dimensions = {
-        x = screenFrame.x,
-        y = screenFrame.y + screenFrame.h - statusDisplay.DEFAULT_HEIGHT,
-        h = statusDisplay.DEFAULT_HEIGHT,
-        w = statusDisplay.DEFAULT_WIDTH,
-    }
-    local statusElements = self:initStatusElements(options)
-    local screenFrame = hs.window.focusedWindow():screen():frame()
-    local statusDisplay = hs.canvas.new(dimensions):appendElements(statusElements):show()
-
-    statusDisplay:delete(self.DEFAULT_FADE_TIMEOUT)
-end
+--- Ki.statusDisplay
+--- Variable
+---
+--- A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.
+---  * `show` - A function invoked when a mode transition event occurs, with the following argument:
+---    * `status` - a string value containing the current mode of the finite state machine (i.e., "normal", "entity", etc.)
+---
+--- Defaults to a simple text display in the center of the menu bar of the focused screen.
+ki.statusDisplay = nil
 
 -- Event Triggers
 ki.triggers = {
@@ -136,25 +72,38 @@ ki.triggers = {
     },
 }
 
--- Events
-ki.events = {
+-- Transition events
+local transitionEvents = {
     { name = 'enterTriggerMode', from = modes.normal, to = modes.entity },
     { name = 'enterActionMode', from = modes.normal, to = modes.action },
     { name = 'exitMode', from = modes.entity, to = modes.normal },
     { name = 'exitMode', from = modes.action, to = modes.normal },
 }
 
--- Normal/Trigger/Action Mode Finite State Machine
-local machine = dofile(ki.spoonPath..'/statemachine.lua')
+-- Initialize transition status display callbacks with mode transition events
+function createStatusDisplayCallbacks(events)
+    local callbacks = {}
+
+    -- Set event callbacks with auto-hide on entering normal mode
+    for _, event in pairs(events) do
+        local eventName = 'on'..event.name
+
+        if not callbacks[eventName] then
+            callbacks[eventName] = function(self)
+                ki.statusDisplay:show(self.current, event.to == modes.normal)
+            end
+        end
+    end
+
+    return callbacks
+end
+
+ki.events = transitionEvents
 
 ki.state = machine.create({
     initial = modes.normal,
     events = ki.events,
-    callbacks = {
-        onenterTriggerMode = function(self) statusDisplay:show(self.current) end,
-        onenterActionMode = function(self) statusDisplay:show(self.current) end,
-        onexitMode = function(self) statusDisplay:show(self.current) end,
-    },
+    callbacks = createStatusDisplayCallbacks(transitionEvents),
 })
 
 -- Keydown event listener and handler
@@ -164,9 +113,9 @@ ki.listener = hs.eventtap.new(
         local mode = ki.state.current
         local triggers = ki.triggers[ki.state.current]
         local eventFlags = event:getFlags()
-        local modifierName = 'none'
 
-      -- Determine modifier combination name
+        -- Determine modifier combination key
+        local modifierName = 'none'
         for name, list in pairs(modifiers) do
             if eventFlags:containExactly(list) then
                 modifierName = name
@@ -176,20 +125,30 @@ ki.listener = hs.eventtap.new(
         local keyName = keyCodeMap[event:getKeyCode()]
         local trigger = triggers[modifierName] and triggers[modifierName][keyName]
 
-        print(mode..' mode ', modifierName, keyName)
+        print('-- '..mode:upper()..' -- { '..modifierName..' + '..keyName..' }')
 
+        -- Avoid propagation on existing trigger or non-existent trigger in a non-normal mode
         if trigger then
             trigger()
-
             return true
         elseif mode ~= 'normal' then
             return true
         end
+
+        -- Propagate event in normal mode
     end
 )
 
--- Expose keydown listener start function
 function ki:start()
+    -- Set default status display if not provided
+    self.statusDisplay = self.statusDisplay or dofile(spoonPath..'/status-display.lua')
+
+    -- Set transition events
+
+    -- Set trigger events
+    -- Print overwritten default triggers
+
+    -- Start keydown event listener
     self.listener:start()
 end
 
