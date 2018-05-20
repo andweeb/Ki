@@ -2,7 +2,7 @@ local obj = {}
 obj.__index = obj
 obj.__name = 'status-display'
 
-obj.DEFAULT_WIDTH = 100
+obj.DEFAULT_WIDTH = 500
 obj.DEFAULT_HEIGHT = 18
 obj.DEFAULT_FADE_TIMEOUT = 0.8
 
@@ -25,7 +25,7 @@ function obj:createTextElement(text)
     }
 end
 
-function obj:show(status)
+function obj:show(status, action)
     -- Clear any pre-existing status display canvases
     for state, display in pairs(self.displays) do
         if display ~= nil then
@@ -41,7 +41,9 @@ function obj:show(status)
         h = self.DEFAULT_HEIGHT,
         w = self.DEFAULT_WIDTH,
     }
-    local textElement = self:createTextElement('-- '..status:upper()..' --')
+    local statusText = status:upper()
+    local text = action and statusText..' ('..action..')' or statusText
+    local textElement = self:createTextElement('-- '..text..' --')
     local screenFrame = hs.window.focusedWindow():screen():frame()
     local display = hs.canvas.new(dimensions):appendElements({ textElement }):show()
 
