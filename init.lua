@@ -16,20 +16,9 @@ local keyCodeMap = hs.keycodes.map
 
 local modes = {
     normal = "normal",
+    action = "action",
     entity = "entity",
     url = "url",
-    action = "action",
-}
-
-local modifiers = {
-    none = {},
-    alt = {"alt"},
-    cmd = {"cmd"},
-    ctrl = {"ctrl"},
-    shift = {"shift"},
-    altcmd = {"alt", "cmd"},
-    altshift = {"alt", "shift"},
-    altcmdshift = {"alt", "cmd", "shift"},
 }
 
 local function getScriptPath()
@@ -45,48 +34,85 @@ local machine = dofile(spoonPath.."/statemachine.lua")
 --- The internal finite state machine that exposes transition events for use in event handlers.
 ki.state = {}
 
--- Transition Event Triggers
+local EVENT_MODIFIERS_INDEX = 1
+local EVENT_HOTKEY_INDEX = 2
+local EVENT_TRIGGER_INDEX = 3
+local EVENT_AUTOEXIT_INDEX = 4
+
+--- Ki.transitions
+--- Variable
+---
+--- A table containing the definitions of transition events.
 ki.transitions = {
     normal = {
-        cmd = {
-            [";"] = function() ki.state:enterEntityMode() end,
-            ["'"] = function() ki.state:enterActionMode() end,
-        },
+        { {"cmd"}, ";", function() ki.state:enterEntityMode() end },
+        { {"cmd"}, "'", function() ki.state:enterActionMode() end },
     },
     entity = {
-        none = {
-            escape = function() ki.state:exitMode() end,
-            u = function() ki.state:enterUrlMode() end,
-        },
+        { nil, "escape", function() ki.state:exitMode() end },
+        { nil, "u", function() ki.state:enterUrlMode() end },
     },
     action = {
-        none = {
-            escape = function() ki.state:exitMode() end,
-        },
+        { nil, "escape", function() ki.state:exitMode() end },
     },
     url = {
-        none = {
-            escape = function() ki.state:exitMode() end,
-        },
+        { nil, "escape", function() ki.state:exitMode() end },
     },
 }
 
--- Allow adding event triggers without overriding the set mode transitions
+-- Merge event triggers without overriding transition events
 setmetatable(ki.transitions, {
     __add = function(lhs, rhs)
-        for mode, actions in pairs(rhs) do
-            for modifier, events in pairs(actions) do
-                for key, handler in pairs(events) do
-                    if not lhs[mode] then lhs[mode] = {} end
-                    if not lhs[mode][modifier] then lhs[mode][modifier] = {} end
+        local function areListsEqual(list1, list2)
+            if #list1 ~= #list2 then return false end
+            if #list1 == 0 and #list2 == 0 then return true end
 
-                    if lhs[mode][modifier][key] then
-                        local modifierName = modifier ~= "none" and modifier.." + " or ""
+            for _, value1 in pairs(list1) do
+                local valueExists = false
 
-                        hs.showError("Cannot overwrite reserved binding <"..modifierName..key.."> in "..mode.." mode")
-                    else
-                        lhs[mode][modifier][key] = handler
+                for _, value2 in pairs(list2) do
+                    if value1 == value2 then
+                        valueExists = true
+                        break
                     end
+                end
+
+                if not valueExists then return false end
+            end
+
+            return true
+        end
+
+        for mode, events in pairs(rhs) do
+            local transitionEvents = lhs[mode]
+            local hotkeyMap = {}
+
+            -- Map keyname to modifier keys list
+            for _, transitionEvent in pairs(transitionEvents) do
+                local eventModifiers = transitionEvent[EVENT_MODIFIERS_INDEX] or {}
+                local eventKeyName = transitionEvent[EVENT_HOTKEY_INDEX]
+
+                hotkeyMap[eventKeyName] = eventModifiers
+            end
+
+            for _, event in pairs(events) do
+                -- Determine if event exists in transition events
+                local eventModifiers = event[EVENT_MODIFIERS_INDEX] or {}
+                local eventKeyName = event[EVENT_HOTKEY_INDEX]
+                local eventTrigger = event[EVENT_TRIGGER_INDEX]
+
+                if hotkeyMap[eventKeyName] and areListsEqual(hotkeyMap[eventKeyName], eventModifiers) then
+                    local modifierName = ''
+
+                    for index, modifiers in pairs(eventModifiers) do
+                        modifierName = (index == 1 and modifierName or modifierName..'+')..modifiers
+                    end
+
+                    local binding = "{"..(#eventModifiers == 0 and '' or modifierName..'+')..eventKeyName.."}"
+
+                    hs.showError("Cannot overwrite hotkey binding "..binding.." in "..mode.." mode reserved for transition events")
+                else
+                    table.insert(lhs[mode], event)
                 end
             end
         end
@@ -98,7 +124,7 @@ setmetatable(ki.transitions, {
 --- Ki.events
 --- Variable
 ---
---- A table containing the definitions of user-defined events.
+--- A table containing the definitions of non-transition workflow events.
 ---
 --- With some event handlers
 --- ```
@@ -129,43 +155,35 @@ setmetatable(ki.transitions, {
 --- ```
 ki.events = {
     entity = {
-        none = {
-            s = function(action)
-                hs.application.launchOrFocus("Safari")
+        { nil, "s", function(action)
+            hs.application.launchOrFocus("Safari")
 
-                local safari = hs.application.open("Safari", 1, true)
+            local safari = hs.application.open("Safari", 1, true)
 
-                if safari and action == "open" then
-                    safari:selectMenuItem("Open File...")
-                elseif safari and action == "new" then
-                    safari:selectMenuItem("New Window")
-                elseif safari and action == "new *" then
-                    safari:selectMenuItem("New Private Window")
-                elseif safari and action == "tab" then
-                    safari:selectMenuItem("New Tab")
-                elseif safari and action == "fullscreen" then
-                    safari:selectMenuItem("Enter Full Screen")
-                end
+            if safari and action == "open" then
+                safari:selectMenuItem("Open File...")
+            elseif safari and action == "new" then
+                safari:selectMenuItem("New Window")
+            elseif safari and action == "new *" then
+                safari:selectMenuItem("New Private Window")
+            elseif safari and action == "tab" then
+                safari:selectMenuItem("New Tab")
+            elseif safari and action == "fullscreen" then
+                safari:selectMenuItem("Enter Full Screen")
+            end
 
-                ki.state:exitMode()
-            end,
-        },
+            ki.state:exitMode()
+        end },
     },
     action = {
-        none = {
-            f = function() ki.state:enterEntityMode("fullscreen", "f") end,
-            n = function() ki.state:enterEntityMode("new", "n") end,
-            o = function() ki.state:enterEntityMode("open", "o") end,
-            t = function() ki.state:enterEntityMode("tab", "t") end,
-        },
-        shift = {
-            n = function() ki.state:enterEntityMode("new *", "n") end,
-        },
+        { nil, "f", function() ki.state:enterEntityMode("fullscreen", "f") end },
+        { nil, "n", function() ki.state:enterEntityMode("new", "n") end },
+        { nil, "o", function() ki.state:enterEntityMode("open", "o") end },
+        { nil, "t", function() ki.state:enterEntityMode("tab", "t") end },
+        { {"shift"}, "n", function() ki.state:enterEntityMode("new *", "n") end },
     },
     url = {
-        none = {
-            g = function() hs.urlevent.openURL("https://google.com") ki.state:exitMode() end,
-        },
+        { nil, "g", function() hs.urlevent.openURL("https://google.com") ki.state:exitMode() end },
     },
 }
 
@@ -245,24 +263,26 @@ function ki:init()
         { hs.eventtap.event.types.keyDown },
         function(event)
             local mode = self.state.current
-            local triggers = self.triggers[mode]
-            local eventFlags = event:getFlags()
+            local events = self.triggers[mode]
+            local action = self.trail.lastEvent.action
+            local trigger = nil
 
-            -- Determine modifier combination key
-            local modifierName = "none"
-            for name, list in pairs(modifiers) do
-                if eventFlags:containExactly(list) then
-                    modifierName = name
+            local flags = event:getFlags()
+            local keyName = keyCodeMap[event:getKeyCode()]
+
+            -- Determine event handler
+            for _, event in pairs(events) do
+                local eventModifiers = event[EVENT_MODIFIERS_INDEX] or {}
+                local eventKeyName = event[EVENT_HOTKEY_INDEX]
+                local eventTrigger = event[EVENT_TRIGGER_INDEX]
+                local autoExitMode = event[EVENT_AUTOEXIT_INDEX]
+
+                if flags:containExactly(eventModifiers) and keyName == eventKeyName then
+                    trigger = eventTrigger
                 end
             end
 
-            local keyName = keyCodeMap[event:getKeyCode()]
-            local trigger = triggers[modifierName] and triggers[modifierName][keyName]
-            local action = self.trail.lastEvent.action
-
-            print("-- "..mode:upper().." -- { "..modifierName.." + "..keyName.." }")
-
-            -- Avoid propagation on existing trigger or non-existent trigger in a non-normal mode
+            -- Avoid propagating existing trigger or non-existent trigger in a non-normal mode
             if trigger then
                 trigger(action)
                 return true
