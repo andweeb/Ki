@@ -1,6 +1,6 @@
 --- === Ki ===
 ---
---- Enable composable and modal macOS workflows, in the spirit of vi
+--- Enable composable and modal macOS workflows in the spirit of vi
 ---
 
 local ki = {}
@@ -14,24 +14,18 @@ ki.license = "MIT - https://opensource.org/licenses/MIT"
 
 local keyCodeMap = hs.keycodes.map
 
-local modes = {
-    normal = "normal",
-    action = "action",
-    entity = "entity",
-    url = "url",
-}
-
 local function getScriptPath()
     return debug.getinfo(2, "S").source:sub(2):match("(.*/)")
 end
 
 local spoonPath = getScriptPath()
+local util = dofile(spoonPath.."/util.lua")
 local machine = dofile(spoonPath.."/statemachine.lua")
 
 --- Ki.state
 --- Variable
 ---
---- The internal finite state machine that exposes transition events for use in event handlers.
+--- The internal finite state machine for use in event definitions.
 ki.state = {}
 
 local EVENT_MODIFIERS_INDEX = 1
@@ -47,12 +41,17 @@ ki.transitions = {
     normal = {
         { {"cmd"}, ";", function() ki.state:enterEntityMode() end },
         { {"cmd"}, "'", function() ki.state:enterActionMode() end },
+        { {"cmd", "shift"}, ";", function() ki.state:enterUrlMode() end },
+        { {"cmd", "shift"}, "'", function() ki.state:enterChooseMode() end },
     },
     entity = {
         { nil, "escape", function() ki.state:exitMode() end },
-        { nil, "u", function() ki.state:enterUrlMode() end },
+        { {"cmd", "shift"}, "'", function() ki.state:enterChooseMode() end },
     },
     action = {
+        { nil, "escape", function() ki.state:exitMode() end },
+    },
+    choose = {
         { nil, "escape", function() ki.state:exitMode() end },
     },
     url = {
@@ -60,132 +59,129 @@ ki.transitions = {
     },
 }
 
--- Merge event triggers without overriding transition events
-setmetatable(ki.transitions, {
-    __add = function(lhs, rhs)
-        local function areListsEqual(list1, list2)
-            if #list1 ~= #list2 then return false end
-            if #list1 == 0 and #list2 == 0 then return true end
+--- Ki.states
+--- Variable
+---
+--- A table containing the state events in the finite state machine.
+ki.states = {
+    { name = "enterEntityMode", from = "normal", to = "entity" },
+    { name = "enterEntityMode", from = "action", to = "entity" },
+    { name = "enterActionMode", from = "normal", to = "action" },
+    { name = "enterChooseMode", from = "entity", to = "choose" },
+    { name = "enterChooseMode", from = "normal", to = "choose" },
+    { name = "enterUrlMode", from = "normal", to = "url" },
+    { name = "exitMode", from = "entity", to = "normal" },
+    { name = "exitMode", from = "url", to = "normal" },
+    { name = "exitMode", from = "choose", to = "normal" },
+    { name = "exitMode", from = "action", to = "normal" },
+}
 
-            for _, value1 in pairs(list1) do
-                local valueExists = false
+-- Merge Ki events with the option of overriding events
+-- Events with conflicting hotkeys will result in the lhs event being overwritten by the rhs event
+function ki:_mergeEvents(mode, lhs, rhs, overrideLHS)
+    -- LHS event modifiers keyed by event keyname
+    local lhsHotkeys = {}
 
-                for _, value2 in pairs(list2) do
-                    if value1 == value2 then
-                        valueExists = true
-                        break
-                    end
-                end
+    -- Map lhs keynames to modifier keys list
+    for _, lhsEvent in pairs(lhs) do
+        local eventModifiers = lhsEvent[EVENT_MODIFIERS_INDEX] or {}
+        local eventKeyName = lhsEvent[EVENT_HOTKEY_INDEX]
 
-                if not valueExists then return false end
-            end
-
-            return true
-        end
-
-        for mode, events in pairs(rhs) do
-            local transitionEvents = lhs[mode]
-            local hotkeyMap = {}
-
-            -- Map keyname to modifier keys list
-            for _, transitionEvent in pairs(transitionEvents) do
-                local eventModifiers = transitionEvent[EVENT_MODIFIERS_INDEX] or {}
-                local eventKeyName = transitionEvent[EVENT_HOTKEY_INDEX]
-
-                hotkeyMap[eventKeyName] = eventModifiers
-            end
-
-            for _, event in pairs(events) do
-                -- Determine if event exists in transition events
-                local eventModifiers = event[EVENT_MODIFIERS_INDEX] or {}
-                local eventKeyName = event[EVENT_HOTKEY_INDEX]
-                local eventTrigger = event[EVENT_TRIGGER_INDEX]
-
-                if hotkeyMap[eventKeyName] and areListsEqual(hotkeyMap[eventKeyName], eventModifiers) then
-                    local modifierName = ''
-
-                    for index, modifiers in pairs(eventModifiers) do
-                        modifierName = (index == 1 and modifierName or modifierName..'+')..modifiers
-                    end
-
-                    local binding = "{"..(#eventModifiers == 0 and '' or modifierName..'+')..eventKeyName.."}"
-
-                    hs.showError("Cannot overwrite hotkey binding "..binding.." in "..mode.." mode reserved for transition events")
-                else
-                    table.insert(lhs[mode], event)
-                end
-            end
-        end
-
-        return lhs
+        lhsHotkeys[eventKeyName] = eventModifiers
     end
-})
+
+    -- Merge events from rhs to lhs
+    for _, rhsEvent in pairs(rhs) do
+        -- Determine if event exists in lhs events
+        local rhsEventModifiers = rhsEvent[EVENT_MODIFIERS_INDEX] or {}
+        local eventKeyName = rhsEvent[EVENT_HOTKEY_INDEX]
+        local eventTrigger = rhsEvent[EVENT_TRIGGER_INDEX]
+        local hasHotkeyConflict = util:areListsEqual(lhsHotkeys[eventKeyName] , rhsEventModifiers)
+
+        if not overrideLHS and hasHotkeyConflict then
+            local modifierName = ""
+
+            for index, modifiers in pairs(rhsEventModifiers) do
+                modifierName = (index == 1 and modifierName or modifierName.."+")..modifiers
+            end
+
+            local binding = "{"..(#rhsEventModifiers == 0 and "" or modifierName.."+")..eventKeyName.."}"
+
+            hs.showError("Cannot overwrite hotkey binding "..binding.." in "..mode.." mode reserved for transition events")
+        else
+            table.insert(lhs, rhsEvent)
+        end
+    end
+end
+
+-- Merge events under all modes
+function ki:createEventsMetatable(overrideLHS)
+    return {
+        __add = function(lhs, rhs)
+            for mode, events in pairs(rhs) do
+                if not lhs[mode] then
+                    hs.showError("Unexpected mode "..mode.." specified in custom events")
+                else
+                    self:_mergeEvents(mode, lhs[mode], events, overrideLHS)
+                end
+            end
+
+            return lhs
+        end,
+    }
+end
+
+setmetatable(ki.transitions, ki:createEventsMetatable())
 
 --- Ki.events
 --- Variable
 ---
---- A table containing the definitions of non-transition workflow events.
+--- A table containing the definitions of non-transition workflow events under their respective mode names.
 ---
---- With some event handlers
+--- The following example initializes two url events to open google.com and reddit.com and a Safari entity event
 --- ```
---- local handleSafariEvent function(action)
----     if action then
----         -- Apply action to Safari (new tab, new private window, etc)
----     else
----         hs.application.open("Safari")
+---     local function handleUrlEvent(url)
+---         hs.urlevent.openURL(url)
+---         spoon.Ki.state:exitMode()
 ---     end
----     spoon.Ki.state:exitMode()
---- end
+---     local function handleSafariEvent()
+---         hs.application.launchOrFocus("Safari")
+---         spoon.Ki.state:exitMode()
+---     end
+---
+---     spoon.Ki.events = {
+---         url = {
+---             { nil, "g", handleUrlEvent("https://google.com") },
+---             { nil, "r", handleUrlEvent("https://reddit.com") },
+---         },
+---         entity = {
+---             { nil, "s", handleSafariEvent },
+---         },
+---     }
 --- ```
---- an example configuration for the triggers would look like
---- ```
---- spoon.Ki.events = {
----       entity = {
----           none = {
----               s = handleSafariEvent,
----           },
----       },
----       url = {
----           none = {
----               g = handleGoogleUrlEvent,
----               r = handleRedditUrlEvent,
----           },
----       },
---- }
---- ```
-ki.events = {
-    entity = {
-        { nil, "s", function(action)
-            hs.application.launchOrFocus("Safari")
+ki.events = {}
 
-            local safari = hs.application.open("Safari", 1, true)
+--- Ki:createEntityEvent(applicationName, eventHandler)
+--- Method
+--- Initializes an entity event to provide a handler with an `hs.application`, key name, and key flags
+---
+--- Parameters:
+---  * applicationName - The application name for use in finding the `hs.application`
+---  * eventHandler - A function that handles the entity event with the following arguments:
+---   * app - The `hs.application` object of the provided application name
+---   * keyName - A string containing the name of a keyboard key (in `hs.keycodes.map`)
+---   * flags - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)
+function ki:createEntityEvent(applicationName, eventHandler)
+    local keyName = self.trail.lastEvent.keyName
+    local flags = self.trail.lastEvent.flags
+    local app = hs.application.get(applicationName) or hs.application.launchOrFocus(applicationName, 0.5)
 
-            if safari and action == "open" then
-                safari:selectMenuItem("Open File...")
-            elseif safari and action == "new" then
-                safari:selectMenuItem("New Window")
-            elseif safari and action == "new *" then
-                safari:selectMenuItem("New Private Window")
-            elseif safari and action == "tab" then
-                safari:selectMenuItem("New Tab")
-            elseif safari and action == "fullscreen" then
-                safari:selectMenuItem("Enter Full Screen")
-            end
+    app = hs.appfinder.appFromName(applicationName)
 
-            ki.state:exitMode()
-        end },
-    },
-    action = {
-        { nil, "f", function() ki.state:enterEntityMode("fullscreen", "f") end },
-        { nil, "n", function() ki.state:enterEntityMode("new", "n") end },
-        { nil, "o", function() ki.state:enterEntityMode("open", "o") end },
-        { nil, "t", function() ki.state:enterEntityMode("tab", "t") end },
-        { {"shift"}, "n", function() ki.state:enterEntityMode("new *", "n") end },
-    },
-    url = {
-        { nil, "g", function() hs.urlevent.openURL("https://google.com") ki.state:exitMode() end },
-    },
-}
+    eventHandler(app, keyName, flags)
+
+    self.state:exitMode()
+end
 
 --- Ki.statusDisplay
 --- Variable
@@ -204,108 +200,136 @@ ki.trail = {
     lastEvent = {},
 }
 
--- Initialize transition events, internal fsm, and event listener and callbacks
-function ki:init()
-    -- Transition events
-    self.transitionEvents = {
-        { name = "enterEntityMode", from = modes.normal, to = modes.entity },
-        { name = "enterEntityMode", from = modes.action, to = modes.entity },
-        { name = "enterActionMode", from = modes.normal, to = modes.action },
-        { name = "enterUrlMode", from = modes.entity, to = modes.url },
-        { name = "exitMode", from = modes.entity, to = modes.normal },
-        { name = "exitMode", from = modes.url, to = modes.normal },
-        { name = "exitMode", from = modes.action, to = modes.normal },
-    }
+-- Automate the creation of finite state machine callbacks depending on the state events passed in
+function ki:_createFsmCallbacks()
+    local callbacks = {}
 
+    -- Add generic state change callback for all events to record state transition trail from normal mode
+    callbacks.onstatechange = function(_, eventName, _, nextState, flags, keyName)
+        if nextState == "normal" then
+            self.trail = { breadcrumb = {}, lastEvent = {} }
+        else
+            table.insert(self.trail.breadcrumb, {
+                flags = flags,
+                keyName = keyName,
+                eventName = eventName,
+            })
+        end
+    end
+
+    -- Set event-specific callbacks for saving a breadcrumb trail of events and showing the status display
+    for _, event in pairs(self.states) do
+        local eventName = "on"..event.name
+
+        if not callbacks[eventName] then
+            callbacks[eventName] = function(fsm, _, _, _, flags, keyName)
+                -- Save latest event
+                self.trail.lastEvent = {
+                    flags = flags,
+                    keyName = keyName,
+                    eventName = eventName,
+                }
+
+                self.statusDisplay:show(fsm.current, keyName)
+            end
+        end
+    end
+
+    return callbacks
+end
+
+-- Handle keydown event by triggering the appropriate event handler depending on the state and modifiers/keycode
+function ki:_handleKeyDown(event)
+    local mode = self.state.current
+    local events = self.triggers[mode]
+    local trigger = nil
+
+    local flags = event:getFlags()
+    local keyName = keyCodeMap[event:getKeyCode()]
+
+    -- Determine event handler
+    for _, event in pairs(events) do
+        local eventModifiers = event[EVENT_MODIFIERS_INDEX] or {}
+        local eventKeyName = event[EVENT_HOTKEY_INDEX]
+        local eventTrigger = event[EVENT_TRIGGER_INDEX]
+        local autoExitMode = event[EVENT_AUTOEXIT_INDEX]
+
+        if flags:containExactly(eventModifiers) and keyName == eventKeyName then
+            trigger = eventTrigger
+        end
+    end
+
+    -- Automatically proxy action events to trigger entity mode to avoid unnecessary action event definitions
+    if mode == "action" and not trigger then
+        trigger = function(flags, keyName)
+            ki.state:enterEntityMode(flags, keyName)
+        end
+    end
+
+    -- Avoid propagating existing trigger or non-existent trigger in a non-normal mode
+    if trigger then
+        trigger(flags, keyName)
+        return true
+    elseif mode ~= "normal" then
+        hs.sound.getByName("Funk"):volume(1):play()
+        return true
+    end
+
+    -- Propagate event in normal mode
+end
+
+-- Initialize Ki transition events, internal finite state machine, and the principal event listener and its callbacks
+function ki:init()
     -- Create internal finite state machine
     self.state = machine.create({
-        initial = modes.normal,
-        events = self.transitionEvents,
-        callbacks = (function()
-            -- Initialize transition status display callbacks with mode transition events
-            local callbacks = {}
-
-            -- Add generic callback to record state transition trail from normal mode
-            callbacks.onstatechange = function(self, event, prevState, nextState, action)
-                -- Reset to normal mode or add event/action to breadcrumb trail
-                if nextState == modes.normal then
-                    ki.trail = { breadcrumb = {}, lastEvent = {} }
-                else
-                    table.insert(ki.trail.breadcrumb, { event = event, action = action })
-                end
-            end
-
-            -- Set event callbacks
-            for _, event in pairs(self.transitionEvents) do
-                local eventName = "on"..event.name
-
-                if not callbacks[eventName] then
-                    callbacks[eventName] = function(self, event, prevState, nextState, action, key)
-                        -- Save latest event
-                        ki.trail.lastEvent = {
-                            event = event,
-                            action = action,
-                        }
-
-                        ki.statusDisplay:show(self.current, action)
-
-                        print(event.." with action: <"..(action or "none")..">")
-                    end
-                end
-            end
-
-            return callbacks
-        end)()
+        initial = "normal",
+        events = self.states,
+        callbacks = self:_createFsmCallbacks()
     })
 
     -- Set keydown listener and primary event handler function
-    self.listener = hs.eventtap.new(
-        { hs.eventtap.event.types.keyDown },
-        function(event)
-            local mode = self.state.current
-            local events = self.triggers[mode]
-            local action = self.trail.lastEvent.action
-            local trigger = nil
-
-            local flags = event:getFlags()
-            local keyName = keyCodeMap[event:getKeyCode()]
-
-            -- Determine event handler
-            for _, event in pairs(events) do
-                local eventModifiers = event[EVENT_MODIFIERS_INDEX] or {}
-                local eventKeyName = event[EVENT_HOTKEY_INDEX]
-                local eventTrigger = event[EVENT_TRIGGER_INDEX]
-                local autoExitMode = event[EVENT_AUTOEXIT_INDEX]
-
-                if flags:containExactly(eventModifiers) and keyName == eventKeyName then
-                    trigger = eventTrigger
-                end
-            end
-
-            -- Avoid propagating existing trigger or non-existent trigger in a non-normal mode
-            if trigger then
-                trigger(action)
-                return true
-            elseif mode ~= "normal" then
-                hs.sound.getByName("Funk"):volume(1):play()
-                return true
-            end
-
-            -- Propagate event in normal mode
-        end
-    )
-
+    local eventHandler = function(event)
+        return self:_handleKeyDown(event)
+    end
+    self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, eventHandler)
 end
 
+--- Ki:start()
+--- Method
+--- Sets the status display, transition events, and the default and custom keyboard events, and starts the keyboard event listener
+---
+--- Parameters:
+---  * None
+---
+---  Returns:
+---   * The `hs.eventtap` event tap object
 function ki:start()
     -- Set default status display if not provided
     self.statusDisplay = self.statusDisplay or dofile(spoonPath.."/status-display.lua")
 
+    -- Initialize default events
+    local defaultEvents = dofile(spoonPath.."/default-events.lua"):init(ki)
+    setmetatable(defaultEvents, self:createEventsMetatable(true))
+
     -- Set transition events and triggers
-    ki.triggers = ki.transitions + ki.events
+    local triggers = defaultEvents + ki.events
+    ki.triggers = ki.transitions + triggers
 
     -- Start keydown event listener
-    self.listener:start()
+    return self.listener:start()
+end
+
+--- Ki:stop()
+--- Method
+--- Stops the keyboard event listener
+---
+--- Parameters:
+---  * None
+---
+---  Returns:
+---   * The `hs.eventtap` event tap object
+function ki:stop()
+    return self.listener:stop()
 end
 
 return ki

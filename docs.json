@@ -11,16 +11,121 @@
     ],
     "Variable" : [
       {
-        "doc" : "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.\n * `show` - A function invoked when a mode transition event occurs, with the following argument:\n   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)\n\nDefaults to a simple text display in the center of the menu bar of the focused screen.",
-        "name" : "statusDisplay",
+        "desc" : "",
+        "parameters" : [
+
+        ],
         "stripped_doc" : [
-          "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.",
-          " * `show` - A function invoked when a mode transition event occurs, with the following argument:",
+          "The internal finite state machine for use in event definitions."
+        ],
+        "doc" : "The internal finite state machine for use in event definitions.",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.state",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "state",
+        "def" : "Ki.state"
+      },
+      {
+        "desc" : "",
+        "parameters" : [
+
+        ],
+        "stripped_doc" : [
+          "A table containing the definitions of transition events."
+        ],
+        "doc" : "A table containing the definitions of transition events.",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.transitions",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "transitions",
+        "def" : "Ki.transitions"
+      },
+      {
+        "desc" : "",
+        "parameters" : [
+
+        ],
+        "stripped_doc" : [
+          "A table containing the state events in the finite state machine."
+        ],
+        "doc" : "A table containing the state events in the finite state machine.",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.states",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "states",
+        "def" : "Ki.states"
+      },
+      {
+        "desc" : "",
+        "parameters" : [
+
+        ],
+        "stripped_doc" : [
+          "A table containing the definitions of non-transition workflow events under their respective mode names.",
+          "",
+          "The following example initializes two url events to open google.com and reddit.com and a Safari entity event",
+          "```",
+          "    local function handleUrlEvent(url)",
+          "        hs.urlevent.openURL(url)",
+          "        spoon.Ki.state:exitMode()",
+          "    end",
+          "    local function handleSafariEvent()",
+          "        hs.application.launchOrFocus(\"Safari\")",
+          "        spoon.Ki.state:exitMode()",
+          "    end",
+          "",
+          "    spoon.Ki.events = {",
+          "        url = {",
+          "            { nil, \"g\", handleUrlEvent(\"https:\/\/google.com\") },",
+          "            { nil, \"r\", handleUrlEvent(\"https:\/\/reddit.com\") },",
+          "        },",
+          "        entity = {",
+          "            { nil, \"s\", handleSafariEvent },",
+          "        },",
+          "    }",
+          "```"
+        ],
+        "doc" : "A table containing the definitions of non-transition workflow events under their respective mode names.\n\nThe following example initializes two url events to open google.com and reddit.com and a Safari entity event\n```\n    local function handleUrlEvent(url)\n        hs.urlevent.openURL(url)\n        spoon.Ki.state:exitMode()\n    end\n    local function handleSafariEvent()\n        hs.application.launchOrFocus(\"Safari\")\n        spoon.Ki.state:exitMode()\n    end\n\n    spoon.Ki.events = {\n        url = {\n            { nil, \"g\", handleUrlEvent(\"https:\/\/google.com\") },\n            { nil, \"r\", handleUrlEvent(\"https:\/\/reddit.com\") },\n        },\n        entity = {\n            { nil, \"s\", handleSafariEvent },\n        },\n    }\n```",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.events",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "events",
+        "def" : "Ki.events"
+      },
+      {
+        "desc" : "",
+        "parameters" : [
+
+        ],
+        "stripped_doc" : [
+          "A table that defines the behavior for displaying the status on mode transitions. The `show` function should clear out any previous display and show the current transitioned mode with an action if available.",
+          " * `show` - A function invoked when a mode transition event occurs, with the following argument(s):",
           "   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)",
+          "   * `key` - an optional char value of the key that triggered the state (i.e., \"n\", \"N\", etc.)",
           "",
           "Defaults to a simple text display in the center of the menu bar of the focused screen."
         ],
-        "desc" : "",
+        "doc" : "A table that defines the behavior for displaying the status on mode transitions. The `show` function should clear out any previous display and show the current transitioned mode with an action if available.\n * `show` - A function invoked when a mode transition event occurs, with the following argument(s):\n   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)\n   * `key` - an optional char value of the key that triggered the state (i.e., \"n\", \"N\", etc.)\n\nDefaults to a simple text display in the center of the menu bar of the focused screen.",
         "notes" : [
 
         ],
@@ -29,10 +134,8 @@
         "returns" : [
 
         ],
-        "def" : "Ki.statusDisplay",
-        "parameters" : [
-
-        ]
+        "name" : "statusDisplay",
+        "def" : "Ki.statusDisplay"
       }
     ],
     "stripped_doc" : [
@@ -41,30 +144,185 @@
     "Deprecated" : [
 
     ],
-    "desc" : "macOS macros with composable commands",
     "type" : "Module",
+    "desc" : "Enable composable and modal macOS workflows in the spirit of vi",
     "Constructor" : [
 
     ],
-    "doc" : "macOS macros with composable commands",
-    "Method" : [
+    "Field" : [
 
+    ],
+    "Method" : [
+      {
+        "desc" : "Initializes an entity event to provide a handler with an `hs.application`, key name, and key flags",
+        "parameters" : [
+          " * applicationName - The application name for use in finding the `hs.application`",
+          " * eventHandler - A function that handles the entity event with the following arguments:",
+          "  * app - The `hs.application` object of the provided application name",
+          "  * keyName - A string containing the name of a keyboard key (in `hs.keycodes.map`)",
+          "  * flags - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)"
+        ],
+        "stripped_doc" : [
+          "Initializes an entity event to provide a handler with an `hs.application`, key name, and key flags",
+          ""
+        ],
+        "doc" : "Initializes an entity event to provide a handler with an `hs.application`, key name, and key flags\n\nParameters:\n * applicationName - The application name for use in finding the `hs.application`\n * eventHandler - A function that handles the entity event with the following arguments:\n  * app - The `hs.application` object of the provided application name\n  * keyName - A string containing the name of a keyboard key (in `hs.keycodes.map`)\n  * flags - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)",
+        "notes" : [
+
+        ],
+        "signature" : "Ki:createEntityEvent(applicationName, eventHandler)",
+        "type" : "Method",
+        "returns" : [
+
+        ],
+        "name" : "createEntityEvent",
+        "def" : "Ki:createEntityEvent(applicationName, eventHandler)"
+      },
+      {
+        "desc" : "Sets the status display, transition events, and the default and custom keyboard events, and starts the keyboard event listener",
+        "parameters" : [
+          " * None",
+          ""
+        ],
+        "stripped_doc" : [
+          "Sets the status display, transition events, and the default and custom keyboard events, and starts the keyboard event listener",
+          ""
+        ],
+        "doc" : "Sets the status display, transition events, and the default and custom keyboard events, and starts the keyboard event listener\n\nParameters:\n * None\n\n Returns:\n  * The `hs.eventtap` event tap object",
+        "notes" : [
+
+        ],
+        "signature" : "Ki:start()",
+        "type" : "Method",
+        "returns" : [
+          "  * The `hs.eventtap` event tap object"
+        ],
+        "name" : "start",
+        "def" : "Ki:start()"
+      },
+      {
+        "desc" : "Stops the keyboard event listener",
+        "parameters" : [
+          " * None",
+          ""
+        ],
+        "stripped_doc" : [
+          "Stops the keyboard event listener",
+          ""
+        ],
+        "doc" : "Stops the keyboard event listener\n\nParameters:\n * None\n\n Returns:\n  * The `hs.eventtap` event tap object",
+        "notes" : [
+
+        ],
+        "signature" : "Ki:stop()",
+        "type" : "Method",
+        "returns" : [
+          "  * The `hs.eventtap` event tap object"
+        ],
+        "name" : "stop",
+        "def" : "Ki:stop()"
+      }
     ],
     "Command" : [
 
     ],
     "items" : [
       {
-        "doc" : "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.\n * `show` - A function invoked when a mode transition event occurs, with the following argument:\n   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)\n\nDefaults to a simple text display in the center of the menu bar of the focused screen.",
-        "name" : "statusDisplay",
+        "desc" : "",
+        "parameters" : [
+
+        ],
         "stripped_doc" : [
-          "A table that defines the behavior for displaying the status on mode transition changes. The `show` function should initially clear out existing displays and display the transitioned mode.",
-          " * `show` - A function invoked when a mode transition event occurs, with the following argument:",
+          "A table containing the definitions of non-transition workflow events under their respective mode names.",
+          "",
+          "The following example initializes two url events to open google.com and reddit.com and a Safari entity event",
+          "```",
+          "    local function handleUrlEvent(url)",
+          "        hs.urlevent.openURL(url)",
+          "        spoon.Ki.state:exitMode()",
+          "    end",
+          "    local function handleSafariEvent()",
+          "        hs.application.launchOrFocus(\"Safari\")",
+          "        spoon.Ki.state:exitMode()",
+          "    end",
+          "",
+          "    spoon.Ki.events = {",
+          "        url = {",
+          "            { nil, \"g\", handleUrlEvent(\"https:\/\/google.com\") },",
+          "            { nil, \"r\", handleUrlEvent(\"https:\/\/reddit.com\") },",
+          "        },",
+          "        entity = {",
+          "            { nil, \"s\", handleSafariEvent },",
+          "        },",
+          "    }",
+          "```"
+        ],
+        "doc" : "A table containing the definitions of non-transition workflow events under their respective mode names.\n\nThe following example initializes two url events to open google.com and reddit.com and a Safari entity event\n```\n    local function handleUrlEvent(url)\n        hs.urlevent.openURL(url)\n        spoon.Ki.state:exitMode()\n    end\n    local function handleSafariEvent()\n        hs.application.launchOrFocus(\"Safari\")\n        spoon.Ki.state:exitMode()\n    end\n\n    spoon.Ki.events = {\n        url = {\n            { nil, \"g\", handleUrlEvent(\"https:\/\/google.com\") },\n            { nil, \"r\", handleUrlEvent(\"https:\/\/reddit.com\") },\n        },\n        entity = {\n            { nil, \"s\", handleSafariEvent },\n        },\n    }\n```",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.events",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "events",
+        "def" : "Ki.events"
+      },
+      {
+        "desc" : "",
+        "parameters" : [
+
+        ],
+        "stripped_doc" : [
+          "The internal finite state machine for use in event definitions."
+        ],
+        "doc" : "The internal finite state machine for use in event definitions.",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.state",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "state",
+        "def" : "Ki.state"
+      },
+      {
+        "desc" : "",
+        "parameters" : [
+
+        ],
+        "stripped_doc" : [
+          "A table containing the state events in the finite state machine."
+        ],
+        "doc" : "A table containing the state events in the finite state machine.",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.states",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "states",
+        "def" : "Ki.states"
+      },
+      {
+        "desc" : "",
+        "parameters" : [
+
+        ],
+        "stripped_doc" : [
+          "A table that defines the behavior for displaying the status on mode transitions. The `show` function should clear out any previous display and show the current transitioned mode with an action if available.",
+          " * `show` - A function invoked when a mode transition event occurs, with the following argument(s):",
           "   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)",
+          "   * `key` - an optional char value of the key that triggered the state (i.e., \"n\", \"N\", etc.)",
           "",
           "Defaults to a simple text display in the center of the menu bar of the focused screen."
         ],
-        "desc" : "",
+        "doc" : "A table that defines the behavior for displaying the status on mode transitions. The `show` function should clear out any previous display and show the current transitioned mode with an action if available.\n * `show` - A function invoked when a mode transition event occurs, with the following argument(s):\n   * `status` - a string value containing the current mode of the finite state machine (i.e., \"normal\", \"entity\", etc.)\n   * `key` - an optional char value of the key that triggered the state (i.e., \"n\", \"N\", etc.)\n\nDefaults to a simple text display in the center of the menu bar of the focused screen.",
         "notes" : [
 
         ],
@@ -73,15 +331,100 @@
         "returns" : [
 
         ],
-        "def" : "Ki.statusDisplay",
+        "name" : "statusDisplay",
+        "def" : "Ki.statusDisplay"
+      },
+      {
+        "desc" : "",
         "parameters" : [
 
-        ]
+        ],
+        "stripped_doc" : [
+          "A table containing the definitions of transition events."
+        ],
+        "doc" : "A table containing the definitions of transition events.",
+        "notes" : [
+
+        ],
+        "signature" : "Ki.transitions",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "name" : "transitions",
+        "def" : "Ki.transitions"
+      },
+      {
+        "desc" : "Initializes an entity event to provide a handler with an `hs.application`, key name, and key flags",
+        "parameters" : [
+          " * applicationName - The application name for use in finding the `hs.application`",
+          " * eventHandler - A function that handles the entity event with the following arguments:",
+          "  * app - The `hs.application` object of the provided application name",
+          "  * keyName - A string containing the name of a keyboard key (in `hs.keycodes.map`)",
+          "  * flags - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)"
+        ],
+        "stripped_doc" : [
+          "Initializes an entity event to provide a handler with an `hs.application`, key name, and key flags",
+          ""
+        ],
+        "doc" : "Initializes an entity event to provide a handler with an `hs.application`, key name, and key flags\n\nParameters:\n * applicationName - The application name for use in finding the `hs.application`\n * eventHandler - A function that handles the entity event with the following arguments:\n  * app - The `hs.application` object of the provided application name\n  * keyName - A string containing the name of a keyboard key (in `hs.keycodes.map`)\n  * flags - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)",
+        "notes" : [
+
+        ],
+        "signature" : "Ki:createEntityEvent(applicationName, eventHandler)",
+        "type" : "Method",
+        "returns" : [
+
+        ],
+        "name" : "createEntityEvent",
+        "def" : "Ki:createEntityEvent(applicationName, eventHandler)"
+      },
+      {
+        "desc" : "Sets the status display, transition events, and the default and custom keyboard events, and starts the keyboard event listener",
+        "parameters" : [
+          " * None",
+          ""
+        ],
+        "stripped_doc" : [
+          "Sets the status display, transition events, and the default and custom keyboard events, and starts the keyboard event listener",
+          ""
+        ],
+        "doc" : "Sets the status display, transition events, and the default and custom keyboard events, and starts the keyboard event listener\n\nParameters:\n * None\n\n Returns:\n  * The `hs.eventtap` event tap object",
+        "notes" : [
+
+        ],
+        "signature" : "Ki:start()",
+        "type" : "Method",
+        "returns" : [
+          "  * The `hs.eventtap` event tap object"
+        ],
+        "name" : "start",
+        "def" : "Ki:start()"
+      },
+      {
+        "desc" : "Stops the keyboard event listener",
+        "parameters" : [
+          " * None",
+          ""
+        ],
+        "stripped_doc" : [
+          "Stops the keyboard event listener",
+          ""
+        ],
+        "doc" : "Stops the keyboard event listener\n\nParameters:\n * None\n\n Returns:\n  * The `hs.eventtap` event tap object",
+        "notes" : [
+
+        ],
+        "signature" : "Ki:stop()",
+        "type" : "Method",
+        "returns" : [
+          "  * The `hs.eventtap` event tap object"
+        ],
+        "name" : "stop",
+        "def" : "Ki:stop()"
       }
     ],
-    "Field" : [
-
-    ],
+    "doc" : "Enable composable and modal macOS workflows in the spirit of vi",
     "name" : "Ki"
   }
 ]

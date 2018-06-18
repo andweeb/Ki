@@ -25,7 +25,8 @@ fi
 if [ -f "$CWD/docs.json" ]; then
     cp "$CWD/docs.json" "$DIST/docs.json"
 fi
-echo "build.sh: Copied lua scripts and docs to dist folder"
+cp -r "$CWD/scripts" "$DIST/scripts"
+echo "build.sh: Copied all source files and docs to dist folder"
 
 # Remove pre-existing spoon link
 if [ -d "$LINK_TARGET" ]; then
