@@ -19,7 +19,8 @@ describe("init.lua", function()
             local publicApi = {
                 "start",
                 "stop",
-                "createEntityEvent",
+                "showSelectionModal",
+                "createEntityEventHandler",
             }
 
             for _, functionName in pairs(publicApi) do
@@ -67,16 +68,16 @@ describe("init.lua", function()
             assert.are.same(ki.statusDisplay, testDisplay)
         end)
 
-        insulate("should set default triggers", function()
+        insulate("should set default workflow events", function()
             local ki = require("init")
 
             ki:init()
             ki:start()
 
-            assert.has_property(ki, "triggers")
+            assert.has_property(ki, "workflows")
         end)
 
-        insulate("should set custom triggers", function()
+        insulate("should set custom workflow events", function()
             local ki = require("init")
             local testEvents = {
                 entity = {
@@ -86,18 +87,18 @@ describe("init.lua", function()
             }
 
             ki:init()
-            ki.events = testEvents
+            ki.workflows = testEvents
             ki:start()
 
-            assert.has_property(ki, "triggers")
-            assert.has_property(ki.triggers, "entity")
-            assert.has_value(ki.triggers.entity, testEvents.entity[1])
-            assert.has_value(ki.triggers.entity, testEvents.entity[2])
+            assert.has_property(ki, "workflows")
+            assert.has_property(ki.workflows, "entity")
+            assert.has_value(ki.workflows.entity, testEvents.entity[1])
+            assert.has_value(ki.workflows.entity, testEvents.entity[2])
         end)
     end)
 
-    describe("ki event creation", function()
-        insulate("should create new entity events using a helper function", function()
+    describe("ki event configuration and creation", function()
+        insulate("should create new entity workflow events using a helper function", function()
             local ki = require("init")
             local mockHs, hsMocks = hsInitializer()
             local eventHandler = spy.new(function() end)
@@ -106,7 +107,7 @@ describe("init.lua", function()
             _G.hs = mock(mockHs({ appfinder = hsMocks.appfinder }))
 
             ki.state = { exitMode = spy.new(function() end) }
-            ki:createEntityEvent("test", eventHandler)
+            ki:createEntityEventHandler("test", eventHandler)
 
             assert.spy(eventHandler).was.called()
             assert.spy(ki.state.exitMode).was.called()
@@ -162,7 +163,7 @@ describe("init.lua", function()
             local lhsEvent = { { nil, "t", "should be overwritten" } }
             local rhsEvent = { { nil, "t", "should overwrite the old value" } }
 
-            ki:_mergeEvents("entity", lhsEvent, rhsEvent, true)
+            ki._mergeEvents("entity", lhsEvent, rhsEvent, true)
 
             assert.are.equal(lhsEvent[3], rhsEvent[3])
         end)
@@ -176,45 +177,76 @@ describe("init.lua", function()
             hsMocks.showError = spy.new(function() end)
             _G.hs = mock(mockHs({ showError = hsMocks.showError }))
 
-            ki:_mergeEvents("entity", lhsEvent, rhsEvent, false)
+            ki._mergeEvents("entity", lhsEvent, rhsEvent, false)
 
             assert.spy(hsMocks.showError).was.called()
         end)
     end)
 
-    describe("fsm event callbacks", function()
-        insulate("should create a generic `onstatechange` callback", function()
+    describe("ki state event callbacks", function()
+        insulate("should create a generic state change callback", function()
             local ki = require("init")
             local callbacks = ki:_createFsmCallbacks()
 
-            assert.has_property(callbacks, "onstatechange")
+            assert.has_property(callbacks, "on_enter_state")
         end)
 
-        insulate("should record the event breadcrumb trail on fsm state changes", function()
+        insulate("should render action hotkey text on enter state", function()
             local ki = require("init")
             local callbacks = ki:_createFsmCallbacks()
             local eventName = "test event name"
             local keyName = "test key name"
             local flags = "test flags"
+            local fsm = { current = "test" }
+            local action = {
+                flags = { ctrl = true },
+                keyName = "t",
+            }
 
-            callbacks.onstatechange(_, eventName, _, _, flags, keyName)
+            ki:init()
+            ki.listener = { isEnabled = function() return true end }
+            ki.statusDisplay = { show = function() end };
 
-            assert.are.same(ki.trail.breadcrumb[1], {
+            local showSpy = spy.on(ki.statusDisplay, "show")
+
+            callbacks.on_enter_state(_, eventName, _, fsm.current, fsm, flags, keyName, action)
+
+            assert.spy(showSpy).was.called()
+        end)
+
+        insulate("should record the event history on fsm state changes", function()
+            local ki = require("init")
+            local callbacks = ki:_createFsmCallbacks()
+            local eventName = "test event name"
+            local keyName = "test key name"
+            local flags = "test flags"
+            local fsm = { current = "test" }
+
+            ki:init()
+            ki.listener = { isEnabled = function() return true end }
+            ki.statusDisplay = { show = function() end };
+
+            callbacks.on_enter_state(_, eventName, _, fsm.current, fsm, flags, keyName)
+
+            assert.are.same(ki.history.workflow.events[1], {
                 flags = flags,
                 keyName = keyName,
                 eventName = eventName,
             })
         end)
 
-        insulate("should clear the event breadcrumb trail on state change to the initial state", function()
+        insulate("should clear out the event history on state change to the initial state", function()
             local ki = require("init")
             local callbacks = ki:_createFsmCallbacks()
             local eventName = "test event name"
             local keyName = "test key name"
             local flags = "test flags"
-            local nextState = "normal"
+            local fsm = { current = "normal" }
 
-            ki.trail.breadcrumb = {
+            ki:init()
+            ki.listener = { isEnabled = function() return true end }
+            ki.statusDisplay = { show = function() end };
+            ki.history.workflow.events = {
                 {
                     flags = "previous flags",
                     keyName = "previous key name",
@@ -222,66 +254,54 @@ describe("init.lua", function()
                 },
             }
 
-            callbacks.onstatechange(_, eventName, _, nextState, flags, keyName)
+            callbacks.on_enter_state(_, eventName, _, fsm.current, fsm, flags, keyName)
 
-            assert.are.same(ki.trail.breadcrumb, {})
+            assert.are.same(ki.history.workflow.events, {})
         end)
+    end)
 
-        insulate("should create transition event-specific state change callbacks based on states table", function()
+    describe("ki selection modal", function()
+        insulate("should show selection modal", function()
             local ki = require("init")
+            local mockHs, hsMocks = hsInitializer()
+            local showListenerSpy = spy.new(function() end)
 
-            ki.states = {
-                { name = "enterEntityMode", from = "normal", to = "entity" },
-                { name = "enterActionMode", from = "normal", to = "action" },
-                { name = "exitMode", from = "entity", to = "normal" },
-                { name = "exitMode", from = "action", to = "normal" },
-            }
-
-            local callbacks = ki:_createFsmCallbacks()
-
-            for _, state in pairs(ki.states) do
-                assert.has_property(callbacks, 'on'..state.name)
+            hsMocks.chooser.new = function()
+                return {
+                    show = showListenerSpy,
+                    choices = function() end,
+                    bgDark = function() end,
+                }
             end
+            _G.hs = mock(mockHs({ chooser = hsMocks.chooser }))
+
+            ki:showSelectionModal()
+
+            assert.spy(showListenerSpy).was.called()
         end)
 
-        insulate("should save latest event in transition event-specific state change callback", function()
+        insulate("should select a choice", function()
             local ki = require("init")
-            local keyName = "test key name"
-            local flags = "test flags"
-            local eventName = 'onenterEntityMode'
+            local choice = "test choice"
+            local mockHs, hsMocks = hsInitializer()
+            local selectSpy = spy.new(function() end)
+            local mockCallback = nil
 
-            ki.statusDisplay = { show = function() end };
-            ki.states = { { name = "enterEntityMode", from = "normal", to = "entity" } }
+            ki.history.workflow.events = {{ }}
+            hsMocks.chooser.new = function(callback)
+                mockCallback = callback
+                return {
+                    show = function() end,
+                    choices = function() end,
+                    bgDark = function() end,
+                }
+            end
+            _G.hs = mock(mockHs({ chooser = hsMocks.chooser }))
 
-            local callbacks = ki:_createFsmCallbacks()
+            ki:showSelectionModal({}, selectSpy)
+            mockCallback(choice)
 
-            assert.has_property(callbacks, eventName)
-
-            callbacks.onenterEntityMode({}, _, _, _, flags, keyName)
-
-            assert.are.same(ki.trail.lastEvent, {
-                flags = flags,
-                keyName = keyName,
-                eventName = eventName,
-            })
-        end)
-
-        insulate("should display current state in transition event-specific state change callback", function()
-            local ki = require("init")
-            local keyName = "test key name"
-            local eventName = 'onenterEntityMode'
-            local fsm = { current = "test state" }
-
-            ki.statusDisplay = { show = spy.new(function() end) };
-            ki.states = { { name = "enterEntityMode", from = "normal", to = "entity" } }
-
-            local callbacks = ki:_createFsmCallbacks()
-
-            assert.has_property(callbacks, eventName)
-
-            callbacks.onenterEntityMode(fsm, _, _, _, _, keyName)
-
-            assert.spy(ki.statusDisplay.show).was.called_with(ki.statusDisplay, fsm.current, keyName)
+            assert.spy(selectSpy).was_called_with(choice)
         end)
     end)
 
@@ -313,11 +333,11 @@ describe("init.lua", function()
         end)
 
         insulate("should transition event in action mode to entity mode", function()
-            local mockHs, hsMocks = hsInitializer()
+            local _, hsMocks = hsInitializer()
             local enterEntityMode = spy.new(function() end)
             local ki = require("init")
 
-            ki.triggers = { action = {} }
+            ki.workflows = { action = {} }
             ki.state = { current = "action", enterEntityMode = enterEntityMode }
 
             ki:_handleKeyDown(hsMocks.event)
@@ -344,7 +364,7 @@ describe("init.lua", function()
 
             _G.hs = mock(mockHs({ sound = hsMocks.sound }))
 
-            ki.triggers = { entity = {} }
+            ki.workflows = { entity = {} }
             ki.state = { current = "entity" }
 
             ki:_handleKeyDown(hsMocks.event)
@@ -371,7 +391,7 @@ describe("init.lua", function()
             ki:init()
             ki:start()
             ki.state.current = testState
-            ki.triggers = {
+            ki.workflows = {
                 [testState] = {
                     { nil, keyName, triggerSpy },
                 },

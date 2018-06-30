@@ -1,4 +1,3 @@
-.luacheckrc
 luacov.*
 dist/
-docs/
+deps/

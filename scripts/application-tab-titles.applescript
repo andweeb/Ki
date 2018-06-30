@@ -1,6 +1,6 @@
 -- AppleScript template for returning a record of application tab titles keyed by window id
--- The `application` template variable should be any tabbable application with AppleScript support
-tell application "{{ application }}"
+-- `application` - name of any tabbable application (with AppleScript support)
+tell application "{{application}}"
 	set windowTabTitles to {}
 	set windowList to every window
 	

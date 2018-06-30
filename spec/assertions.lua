@@ -23,12 +23,12 @@ end
 assertions.has_property = {
     positive = "Expected %s \nto have value: %s",
     negative = "Expected %s \nto not have value: %s",
-    assertion = function(state, arguments)
+    assertion = function(_, arguments)
         if not type(arguments[1]) == "table" or #arguments ~= 2 then
             return false
         end
 
-        for key, value in pairs(arguments[1]) do
+        for key, _ in pairs(arguments[1]) do
             if key == arguments[2] then return true end
         end
     end,
@@ -37,12 +37,12 @@ assertions.has_property = {
 assertions.has_value = {
     positive = "Expected %s \nto exist in list: %s",
     negative = "Expected %s \nto not exist in list: %s",
-    assertion = function(state, arguments)
+    assertion = function(_, arguments)
         if #arguments ~= 2 or type(arguments[1]) ~= "table" then
             return false
         end
 
-        for key, value in pairs(arguments[1]) do
+        for _, value in pairs(arguments[1]) do
             if type(value) == "table" and type(arguments[2]) == "table" then
                 if areListsEqual(value, arguments[2]) then
                     return true

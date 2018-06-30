@@ -63,7 +63,6 @@ describe("status-display.lua", function()
 
         it("should render display with status and action text", function()
             local statusDisplay = require('status-display')
-            local mockDisplay = { delete = function() end }
             local testStatus = "test"
             local testAction = "test-action"
 

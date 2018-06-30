@@ -1,3 +1,8 @@
+--- === StatusDisplay ===
+---
+--- A small menubar text display to show the current Ki mode
+---
+
 local obj = {}
 obj.__index = obj
 obj.__name = "status-display"
@@ -8,6 +13,7 @@ obj.DEFAULT_FADE_TIMEOUT = 0.8
 
 obj.displays = {}
 
+-- Create the canvas text element
 function obj:createTextElement(text)
     return {
         type = "text",
@@ -25,6 +31,13 @@ function obj:createTextElement(text)
     }
 end
 
+--- StatusDisplay:show(status, key)
+--- Method
+--- Creates a text display on center of the menu bar to indicate the current Ki mode
+---
+--- Parameters:
+---  * `status` - a string value containing the current mode (i.e., "normal", "entity", etc.)
+---  * `key` - an optional string value of the key that triggered the state (i.e., "n", "N", etc.)
 function obj:show(status, action)
     -- Clear any pre-existing status display canvases
     for state, display in pairs(self.displays) do

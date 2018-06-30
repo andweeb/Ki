@@ -28,11 +28,19 @@ local mocks = {
             }
         end,
     },
+    chooser = {
+        new = function()
+            return nil
+        end,
+    },
     keycodes = { map = {} },
     eventtap = {
         new = function()
             return {
                 start = function()
+                    return nil
+                end,
+                isEnabled = function()
                     return nil
                 end,
                 stop = function()
@@ -90,23 +98,23 @@ local mocks = {
     },
 }
 
--- Mock the Hammerspoon's `hs` environment object with either provided or pre-defined mocks
-function mockHammerspoon(data)
-    data = data or {}
+-- Init function that returns the `hs` mock object initializer and its default mocked fields
+return function()
+    -- Mock the Hammerspoon's `hs` environment object with either provided or pre-defined mocks
+    local function mockHammerspoon(data)
+        data = data or {}
 
-    local hs = {}
-    local hsMocks = util:clone(mocks)
+        local hs = {}
+        local hsMocks = util:clone(mocks)
 
-    for name, mock in pairs(hsMocks) do
-        hs[name] = data[name] or mock
+        for name, mock in pairs(hsMocks) do
+            hs[name] = data[name] or mock
+        end
+
+        return hs
     end
 
-    return hs
-end
-
--- Return primary mock object and expose mocked fields for granular composition in test files
-function init()
+    -- Return primary mock object and expose mocked fields for granular composition in test files
     return mockHammerspoon, util:clone(mocks)
 end
 
-return init

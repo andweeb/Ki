@@ -1,0 +1,13 @@
+return {
+    configfile = '.luacov',
+    statsfile = 'luacov.stats.out',
+    reportfile = 'luacov.report.out',
+    runreport = true,
+    exclude = {
+        'luacov$',
+        'luacov.stats$',
+        'luacov.stats$',
+        'deps',
+        'spec',
+    },
+}

@@ -1,6 +1,6 @@
 local util = {}
 
-function util:areListsEqual(list1, list2)
+function util.areListsEqual(list1, list2)
     if type(list1) ~= "table" or type(list2) ~= "table" or #list1 ~= #list2 then
         return false
     end
