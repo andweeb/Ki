@@ -1,4 +1,4 @@
-local mockHs = require("spec.mock-hs")()
+local mockHs = require("spec.mock-hammerspoon")()
 local assertions = require("spec.assertions")
 
 assertions:init(require("say"), assert)

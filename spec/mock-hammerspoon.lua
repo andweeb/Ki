@@ -1,4 +1,4 @@
-local util = require("util")
+local util = require "util"
 
 -- Define generic mocks of any `hs` functions used in Ki
 local mocks = {
@@ -33,7 +33,24 @@ local mocks = {
             return nil
         end,
     },
+    dockicon = {
+        hide = function()
+            return nil
+        end
+    },
     keycodes = { map = {} },
+    event = {
+        getKeyCode = function()
+            return ""
+        end,
+        getFlags = function()
+            return {
+                containExactly = function()
+                    return true
+                end
+            }
+        end,
+    },
     eventtap = {
         new = function()
             return {
@@ -54,18 +71,6 @@ local mocks = {
             },
         },
     },
-    event = {
-        getKeyCode = function()
-            return ""
-        end,
-        getFlags = function()
-            return {
-                containExactly = function()
-                    return true
-                end
-            }
-        end,
-    },
     screen = {
         mainScreen = function()
             return {
@@ -75,6 +80,9 @@ local mocks = {
             }
         end
     },
+    showError = function()
+        return nil
+    end,
     sound = {
         getByName = function()
             return {
@@ -88,9 +96,6 @@ local mocks = {
             }
         end,
     },
-    showError = function()
-        return nil
-    end,
     styledtext = {
         new = function()
             return nil
@@ -101,12 +106,11 @@ local mocks = {
 -- Init function that returns the `hs` mock object initializer and its default mocked fields
 return function()
     -- Mock the Hammerspoon's `hs` environment object with either provided or pre-defined mocks
+    local hsMocks = util:clone(mocks)
     local function mockHammerspoon(data)
         data = data or {}
 
         local hs = {}
-        local hsMocks = util:clone(mocks)
-
         for name, mock in pairs(hsMocks) do
             hs[name] = data[name] or mock
         end
@@ -115,6 +119,6 @@ return function()
     end
 
     -- Return primary mock object and expose mocked fields for granular composition in test files
-    return mockHammerspoon, util:clone(mocks)
+    return mockHammerspoon, hsMocks
 end
 

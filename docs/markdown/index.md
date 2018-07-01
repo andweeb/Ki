@@ -17,5 +17,5 @@
 | Module                                                             | Description           |
 | ------------------------------------------------------------------ | --------------------- |
 | [DefaultWorkflows](DefaultWorkflows.md)                          | Definitions of default workflow events     |
-| [Ki](Ki.md)                          | **Enable composable, modal commands to automate your Mac environment**     |
+| [Ki](Ki.md)                          | **Enable composable, modal commands to automate your macOS environment**     |
 | [StatusDisplay](StatusDisplay.md)                          | A small menubar text display to show the current Ki mode     |

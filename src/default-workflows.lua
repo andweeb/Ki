@@ -2,27 +2,32 @@
 ---
 --- Definitions of default workflow events
 ---
+-- luacov: disable
 
 local obj = {}
 obj.__index = obj
 obj.__name = "default-events"
 
-local function getSpoonPath()
-    return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
+if not _G.getSpoonPath then
+    function _G.getSpoonPath()
+        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
+    end
 end
 
-local function requirePackage(name)
-    local luaVersion = _VERSION:match("%d+%.%d+")
-    local packagePath = getSpoonPath().."/deps/share/lua/"..luaVersion.."/"..name..".lua"
+if not _G.requirePackage then
+    function _G.requirePackage(name)
+        local luaVersion = _VERSION:match("%d+%.%d+")
+        local packagePath = _G.getSpoonPath().."/deps/share/lua/"..luaVersion.."/"..name..".lua"
 
-    return dofile(packagePath)
+        return dofile(packagePath)
+    end
 end
 
-local lustache = requirePackage("lustache")
+local lustache = _G.requirePackage("lustache")
 
 local function renderAppleScriptTemplate(scriptName, viewModel)
     viewModel = viewModel or {}
-    local scriptPath = getSpoonPath().."/scripts/"..scriptName..".applescript"
+    local scriptPath = _G.getSpoonPath().."/osascripts/"..scriptName..".applescript"
     local file = assert(io.open(scriptPath, "rb"))
     local scriptTemplate = file:read("*all")
 

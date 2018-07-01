@@ -1,6 +1,6 @@
 --- === Ki ===
 ---
---- **Enable composable, modal commands to automate your Mac environment**
+--- **Enable composable, modal commands to automate your macOS environment**
 ---
 --- Here's a list of terms with definitions specific to this extension:
 --- * **_event_** - a keydown event. The event object structure matches the argument list for hotkeys bindings in Hammerspoon: modifier keys, key name, and event handler function. For example, the following table represents an keydown event on `⇧⌘m`:
@@ -34,94 +34,49 @@ ki.license = "MIT - https://opensource.org/licenses/MIT"
 
 local luaVersion = _VERSION:match("%d+%.%d+")
 
-local function getSpoonPath()
-    return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
+if not _G.getSpoonPath then
+    function _G.getSpoonPath()
+        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
+    end
 end
 
-local spoonPath = getSpoonPath()
+local spoonPath = _G.getSpoonPath()
 package.cpath = spoonPath.."/deps/lib/lua/"..luaVersion.."/?.so;"..package.cpath
 package.path = spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
 
-local function requirePackage(name)
-    local packagePath = spoonPath.."/deps/share/lua/"..luaVersion.."/"..name..".lua"
+-- luacov: disable
+if not _G.requirePackage then
+    function _G.requirePackage(name, isInternal)
+        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
+        local packagePath = spoonPath..location..name..".lua"
 
-    return dofile(packagePath)
+        return dofile(packagePath)
+    end
 end
+-- luacov: enable
 
-local fsm = requirePackage("fsm")
-local util = dofile(spoonPath.."/util.lua")
-
---- Ki.state
---- Variable
---- The finite state machine implementation used to interface with predefined state events in transition event handlers.
-ki.state = {}
+local fsm = _G.requirePackage("fsm")
+local util = _G.requirePackage("util", true)
 
 local EVENT_MODIFIERS_INDEX = 1
 local EVENT_HOTKEY_INDEX = 2
 local EVENT_TRIGGER_INDEX = 3
 
---- Ki.transitions
---- Variable
---- A table containing the definitions of transition events. The following `normal` mode transition events are defined to enable the following transitions by default:
----  * `⌘;` to enter `entity` mode
----  * `⌘'` to enter `action` mode
----  * `⌘⇧;` to enter `url` mode
----  * `⌘⇧'` to enter `select` mode
----
---- Note: _`action` mode is special in that its transition events are generated at runtime, since hotkeys in `action` mode should be automatically dispatched to the intended `entity` handler. This is why there are no explicit transition events to `entity` mode defined in this default table (otherwise it would require manually defining every `action` event to transition to `entity` mode)._
-ki.transitions = {
-    normal = {
-        { {"cmd"}, ";", function(...) ki.state:enterEntityMode(table.unpack({...})) end },
-        { {"cmd"}, "'", function(...) ki.state:enterActionMode(table.unpack({...})) end },
-        { {"cmd", "shift"}, ";", function(...) ki.state:enterUrlMode(table.unpack({...})) end },
-        { {"cmd", "shift"}, "'", function(...) ki.state:enterSelectMode(table.unpack({...})) end },
-    },
-    entity = {
-        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
-        { {"cmd", "shift"}, "'", function(...) ki.state:enterSelectMode(table.unpack({...})) end },
-    },
-    action = {
-        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
-        { nil, ".", function()
-            local workflow = ki.history.commands[#ki.history.commands]
+-- The finite state machine implementation used to interface with predefined state events in transition event handlers.
+ki.state = {}
 
-            ki.state:exitMode()
-            ki:triggerWorkflow(workflow)
-        end },
-    },
-    url = {
-        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
-    },
-    select = {
-        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
-    },
-}
+-- Create a metatable defined with state events operations
+function ki._createStatesMetatable()
+    return {
+        __add = function(lhs, rhs)
+            for _, event in pairs(rhs) do
+                table.insert(lhs, event)
+            end
 
---- Ki.states
---- Variable
---- A table containing the state events in the finite state machine.
-ki.states = {
-    { name = "enterEntityMode", from = "normal", to = "entity" },
-    { name = "enterEntityMode", from = "action", to = "entity" },
-    { name = "enterActionMode", from = "normal", to = "action" },
-    { name = "enterSelectMode", from = "entity", to = "select" },
-    { name = "enterSelectMode", from = "normal", to = "select" },
-    { name = "enterUrlMode", from = "normal", to = "url" },
-    { name = "exitMode", from = "entity", to = "normal" },
-    { name = "exitMode", from = "url", to = "normal" },
-    { name = "exitMode", from = "select", to = "normal" },
-    { name = "exitMode", from = "action", to = "normal" },
-}
-
-setmetatable(ki.states, {
-    __add = function(lhs, rhs)
-        for _, event in pairs(rhs) do
-            table.insert(lhs, event)
-        end
-
-        return lhs
-    end,
-})
+            return lhs
+        end,
+    }
+end
 
 -- Merge Ki events with the option of overriding events
 -- Events with conflicting hotkeys will result in the lhs event being overwritten by the rhs event
@@ -160,15 +115,8 @@ function ki._mergeEvents(mode, lhs, rhs, overrideLHS)
     end
 end
 
---- Ki:createEventsMetatable(overrideLHS)
---- Method
---- A function that creates a metatable defined with operations specific to Ki events. The metatable comes with the following operations:
----  * `__add` - Allow events to be added together, with errors on conflicting hotkeys if the override is disabled. In the case of a merge, the event in the first addend (the left item in the operation) will be overwritten with the second addend.
----    * For example, this metatable is set for `ki.transitions` with the functionality of overriding events disabled, since we wouldn't want to accidentally override any of the transition event hotkeys.
----
---- Parameters:
----  * `overrideLHS` - an optional boolean value to indicate whether to override events in an add operation
-function ki:createEventsMetatable(overrideLHS)
+-- Create a metatable defined with transition or workflow events operations. An optional `overrideLHS` can be provided to enable overriding LHS events or show an error on conflicting hotkeys.
+function ki:_createEventsMetatable(overrideLHS)
     return {
         __add = function(lhs, rhs)
             for mode, events in pairs(rhs) do
@@ -184,7 +132,62 @@ function ki:createEventsMetatable(overrideLHS)
     }
 end
 
-setmetatable(ki.transitions, ki:createEventsMetatable())
+--- Ki.transitions
+--- Variable
+--- A table containing the definitions of transition events. The following `normal` mode transition events are defined to enable the following transitions by default:
+---  * `⌘;` to enter `entity` mode
+---  * `⌘'` to enter `action` mode
+---  * `⌘⇧;` to enter `url` mode
+---  * `⌘⇧'` to enter `select` mode
+---
+--- Note: _`action` mode is unique in that its events are generated at runtime, since hotkeys in `action` mode should be automatically dispatched to the intended `entity` handler. This is why there are no explicit transition events to `entity` mode defined in this default table (otherwise it would require manually defining every `action` event to transition to `entity` mode)._
+ki.transitions = {}
+ki._defaultTransitions = {
+    normal = {
+        { {"cmd"}, ";", function(...) ki.state:enterEntityMode(table.unpack({...})) end },
+        { {"cmd"}, "'", function(...) ki.state:enterActionMode(table.unpack({...})) end },
+        { {"cmd", "shift"}, ";", function(...) ki.state:enterUrlMode(table.unpack({...})) end },
+        { {"cmd", "shift"}, "'", function(...) ki.state:enterSelectMode(table.unpack({...})) end },
+    },
+    entity = {
+        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
+        { {"cmd", "shift"}, "'", function(...) ki.state:enterSelectMode(table.unpack({...})) end },
+    },
+    action = {
+        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
+        { nil, ".", function()
+            local workflow = ki.history.commands[#ki.history.commands]
+
+            ki.state:exitMode()
+            ki:triggerWorkflow(workflow)
+        end },
+    },
+    url = {
+        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
+    },
+    select = {
+        { nil, "escape", function(...) ki.state:exitMode(table.unpack({...})) end },
+    },
+}
+setmetatable(ki._defaultTransitions, ki:_createEventsMetatable())
+
+--- Ki.states
+--- Variable
+--- A table containing the state events in the finite state machine.
+ki.states = {}
+ki._defaultStates = {
+    { name = "enterEntityMode", from = "normal", to = "entity" },
+    { name = "enterEntityMode", from = "action", to = "entity" },
+    { name = "enterActionMode", from = "normal", to = "action" },
+    { name = "enterSelectMode", from = "entity", to = "select" },
+    { name = "enterSelectMode", from = "normal", to = "select" },
+    { name = "enterUrlMode", from = "normal", to = "url" },
+    { name = "exitMode", from = "entity", to = "normal" },
+    { name = "exitMode", from = "url", to = "normal" },
+    { name = "exitMode", from = "select", to = "normal" },
+    { name = "exitMode", from = "action", to = "normal" },
+}
+setmetatable(ki._defaultStates, ki._createStatesMetatable())
 
 --- Ki.workflows
 --- Variable
@@ -194,7 +197,7 @@ setmetatable(ki.transitions, ki:createEventsMetatable())
 ---         hs.urlevent.openURL(url)
 ---         spoon.Ki.state:exitMode()
 ---     end
----     local function handleApplicationEvent(appName)
+---     local function launchOrFocusApplicationEvent(appName)
 ---         hs.application.launchOrFocus(appName)
 ---         spoon.Ki.state:exitMode()
 ---     end
@@ -205,8 +208,8 @@ setmetatable(ki.transitions, ki:createEventsMetatable())
 ---             { nil, "r", function() handleUrlEvent("https://reddit.com") end },
 ---         },
 ---         entity = {
----             { nil, "s", function() handleApplicationEvent("Safari") end) },
----             { {"shift"}, "s", function() handleApplicationEvent("Spotify") end) },
+---             { nil, "s", function() launchOrFocusApplicationEvent("Safari") end) },
+---             { {"shift"}, "s", function() launchOrFocusApplicationEvent("Spotify") end) },
 ---         },
 ---     }
 --- ```
@@ -235,17 +238,17 @@ function ki:createEntityEventHandler(applicationName, eventHandler)
     self.state:exitMode()
 end
 
---- Ki:triggerWorkflow(event)
---- Method
---- A function that triggers a workflow (a series of events)
----
---- Parameters:
----  * `event` - A list of items describing an event with the following order:
----   * `app` - The `hs.application` object of the provided application name
----   * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
----   * `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)
+-- TODO
+-- Ki:triggerWorkflow(event)
+-- Method
+-- A function that triggers a workflow (a series of events)
+--
+-- Parameters:
+--  * `event` - A list of items describing an event with the following order:
+--   * `app` - The `hs.application` object of the provided application name
+--   * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
+--   * `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)
 function ki:triggerWorkflow(workflow)
-    -- TODO
     print(self, hs.inspect(workflow))
 end
 
@@ -259,9 +262,7 @@ end
 --- Defaults to a simple text display in the center of the menu bar of the focused screen.
 ki.statusDisplay = nil
 
---- Ki.history
---- Variable
---- A table that stores the `action`, `commands`, and `workflow` history of all state transitions. The `action` and `workflow` fields are cleared out and the `commands` stores the series of events (which make up the workflow) when the Ki mode transitions back to the initial state.
+-- A table that stores the `action`, `commands`, and `workflow` history of all state transitions. The `action` and `workflow` fields are cleared out and the `commands` stores the series of events (which make up the workflow) when the Ki mode transitions back to the initial state.
 ki.history = {
     action = {},
     commands = {},
@@ -272,7 +273,7 @@ ki.history = {
 }
 
 function ki.history:recordCommand(workflowEvents)
-    -- TODO: Replace command history data structure with fifo implementation for better item management
+    -- TODO: Replace command history data structure with optimized fifo implementation for better item management
     if #self.commands > 100 then
         local lastCommand = self.commands[#self.commands]
         self.commands = { lastCommand }
@@ -293,10 +294,19 @@ function ki.history:resetCurrentWorkflow()
     }
 end
 
--- Wrap the choice selection event handler to store the selection in the workflow history and refocus previous window
+--- Ki:showSelectionModal(choices, selectEventHandler)
+--- Method
+--- Show a selection modal with a list of choices
+---
+--- Parameters:
+---  * `choices` - a table of `hs.chooser` choices
+---  * `selectEventHandler` - the callback invoked when the modal is closed or a selection is made
 function ki:showSelectionModal(choices, selectEventHandler)
+    local selectionListener = nil
     local selectEvent = self.history.workflow.events[#self.history.workflow.events]
     local modal = hs.chooser.new(function(choice)
+        -- Stop selection listener, save history, and call event handler
+        selectionListener:stop()
         selectEvent.choice = choice
         selectEventHandler(choice)
     end)
@@ -304,6 +314,28 @@ function ki:showSelectionModal(choices, selectEventHandler)
     modal:choices(choices)
     modal:bgDark(true)
 
+    -- Create an event listener while the chooser is visible to select rows with ctrl+j/k
+    selectionListener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
+        local flags = event:getFlags()
+        local keyName = hs.keycodes.map[event:getKeyCode()]
+        local selectedRow = modal:selectedRow()
+
+        if keyName == "j" or keyName == "k" and flags:containExactly({"ctrl"}) then
+            if keyName == "j" then
+                modal:selectedRow(selectedRow + 1)
+            elseif keyName == "k" then
+                modal:selectedRow(selectedRow - 1)
+            end
+
+            return true
+        end
+    end)
+
+    -- Allow chooser to appear above full-screen windows
+    hs.dockicon.hide()
+
+    -- Start row selection listener and show the modal
+    selectionListener:start()
     modal:show()
 end
 
@@ -412,7 +444,7 @@ function ki:init()
     -- Create internal finite state machine
     self.state = fsm.create({
         initial = "normal",
-        events = self.states,
+        events = self._defaultStates,
         callbacks = self:_createFsmCallbacks()
     })
 
@@ -433,13 +465,23 @@ function ki:start()
     -- Set default status display if not provided
     self.statusDisplay = self.statusDisplay or dofile(spoonPath.."/status-display.lua")
 
+    -- Recreate the internal finite state machine if custom states are provided
+    if next(self.states) then
+        self.state = fsm.create({
+            initial = "normal",
+            events = self._defaultStates + self.states,
+            callbacks = self:_createFsmCallbacks()
+        })
+    end
+
     -- Initialize default workflow events
-    local defaultEvents = dofile(spoonPath.."/default-workflows.lua"):init(ki)
-    setmetatable(defaultEvents, self:createEventsMetatable(true))
+    local defaultWorkflows = dofile(spoonPath.."/default-workflows.lua"):init(self)
+    setmetatable(defaultWorkflows, self:_createEventsMetatable(true))
 
     -- Set transition and workflow events
-    local workflows = defaultEvents + ki.workflows
-    ki.workflows = ki.transitions + workflows
+    local workflows = defaultWorkflows + self.workflows
+    local transitions = self._defaultTransitions + self.transitions
+    self.workflows = transitions + workflows
 
     -- Start keydown event listener
     return self.listener:start()

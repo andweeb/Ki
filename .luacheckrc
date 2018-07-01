@@ -1,8 +1,9 @@
 globals = {
-    -- Source globals
+    -- Source code globals
     'hs', 'os', 'require', 'print', '_',
     -- Test environment globals
-    'describe', 'it', 'assert', 'mock', 'setup', 'teardown', 'insulate', 'spy',
+    'describe', 'it', 'assert', 'mock', 'setup', 'stub',
+    'teardown', 'insulate', 'spy', 'before_each', 'after_each',
 }
 
 ignore = {

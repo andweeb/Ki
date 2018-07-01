@@ -5,8 +5,6 @@ return {
     runreport = true,
     exclude = {
         'luacov$',
-        'luacov.stats$',
-        'luacov.stats$',
         'deps',
         'spec',
     },

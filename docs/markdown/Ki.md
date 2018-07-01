@@ -1,7 +1,7 @@
 # [docs](index.md) » Ki
 ---
 
-**Enable composable, modal commands to automate your Mac environment**
+**Enable composable, modal commands to automate your macOS environment**
 
 Here's a list of terms with definitions specific to this extension:
 * **_event_** - a keydown event. The event object structure matches the argument list for hotkeys bindings in Hammerspoon: modifier keys, key name, and event handler function. For example, the following table represents an keydown event on `⇧⌘m`:
@@ -26,34 +26,19 @@ Here's a list of terms with definitions specific to this extension:
 
 ## API Overview
 * Variables - Configurable values
- * [history](#history)
- * [state](#state)
  * [states](#states)
  * [statusDisplay](#statusDisplay)
  * [transitions](#transitions)
  * [workflows](#workflows)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [createEntityEventHandler](#createEntityEventHandler)
- * [createEventsMetatable](#createEventsMetatable)
+ * [showSelectionModal](#showSelectionModal)
  * [start](#start)
  * [stop](#stop)
- * [triggerWorkflow](#triggerWorkflow)
 
 ## API Documentation
 
 ### Variables
-
-| [history](#history)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.history`                                                                    |
-| **Type**                                    | Variable                                                                     |
-| **Description**                             | A table that stores the `action`, `commands`, and `workflow` history of all state transitions. The `action` and `workflow` fields are cleared out and the `commands` stores the series of events (which make up the workflow) when the Ki mode transitions back to the initial state.                                                                     |
-
-| [state](#state)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.state`                                                                    |
-| **Type**                                    | Variable                                                                     |
-| **Description**                             | The finite state machine implementation used to interface with predefined state events in transition event handlers.                                                                     |
 
 | [states](#states)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -88,12 +73,12 @@ Here's a list of terms with definitions specific to this extension:
 | **Description**                             | A helper function that invokes an event handler callback with the `hs.application` and keydown event information so event handlers are somewhat less boilerplate-y                                                                     |
 | **Parameters**                              | <ul><li>`applicationName` - The application name for use in finding the `hs.application`</li><li>`eventHandler` - A callback function that handles the entity event with the following arguments:</li><li> `app` - The `hs.application` object of the provided application name</li><li> `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)</li><li> `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)</li></ul> |
 
-| [createEventsMetatable](#createEventsMetatable)         |                                                                                     |
+| [showSelectionModal](#showSelectionModal)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki:createEventsMetatable(overrideLHS)`                                                                    |
+| **Signature**                               | `Ki:showSelectionModal(choices, selectEventHandler)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | A function that creates a metatable defined with operations specific to Ki events. The metatable comes with the following operations:                                                                     |
-| **Parameters**                              | <ul><li>`overrideLHS` - an optional boolean value to indicate whether to override events in an add operation</li></ul> |
+| **Description**                             | Show a selection modal with a list of choices                                                                     |
+| **Parameters**                              | <ul><li>`choices` - a table of `hs.chooser` choices</li><li>`selectEventHandler` - the callback invoked when the modal is closed or a selection is made</li></ul> |
 
 | [start](#start)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -110,11 +95,4 @@ Here's a list of terms with definitions specific to this extension:
 | **Description**                             | Stops the keyboard event listener                                                                     |
 | **Parameters**                              | <ul><li>None</li></ul> |
 | **Returns**                                 | <ul><li> The `hs.eventtap` object</li></ul>          |
-
-| [triggerWorkflow](#triggerWorkflow)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki:triggerWorkflow(event)`                                                                    |
-| **Type**                                    | Method                                                                     |
-| **Description**                             | A function that triggers a workflow (a series of events)                                                                     |
-| **Parameters**                              | <ul><li>`event` - A list of items describing an event with the following order:</li><li> `app` - The `hs.application` object of the provided application name</li><li> `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)</li><li> `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)</li></ul> |
 

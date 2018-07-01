@@ -6,7 +6,7 @@ A proof of concept to apply the ["Zen" of vi](https://stackoverflow.com/question
 
 Native desktop shortcuts are pretty handy but are contextual and shallow in execution, eventually requiring manual effort to achieve complicated tasks.
 
-Ki borrows principles from the [vi](https://en.wikipedia.org/wiki/Vi#Interface) text editor to <s>kill the mouse</s> streamline desktop workflows through modal, composable commands, constructed in the same way keystrokes in vi constitute "sentences":
+Ki borrows principles from the [vi](https://en.wikipedia.org/wiki/Vi#Interface) text editor <s>to kill the mouse</s> to streamline desktop workflows through modal, composable commands, constructed in the same way keystrokes in vi constitute "sentences":
 - `⌘;s`: target and focus an entity `⌘;`, the Safari `s` application
 - `⌘'<Space>s`: apply the action `⌘'` to toggle `<Space>` media playing in the frontmost Safari `s` window
 - `⌘⇧'s⌘3`: select `⌘⇧'` a specific Safari `s` tab and focus the third one `⌘3` from the left
@@ -37,7 +37,7 @@ Load, configure, and start the plugin in `~/.hammerspoon/init.lua`:
 
 ```lua
 hs.loadSpoon('Ki')            -- initialize the plugin
-spoon.Ki.workflows = {...}    -- add custom workflows and other various configurations
+spoon.Ki.workflows = {...}    -- add custom workflows, transitions, or other various configurations
 spoon.Ki:start()              -- enable keyboard shortcuts
 ```
 
@@ -62,7 +62,7 @@ spoon.Ki.workflows = {
 }
 ```
 
-Ki comes shipped with [default workflow events](), but custom definitions can be set to `Ki.workflows` to either override the default keybindings or set new ones. For example, the snippet above overwrites the default Safari, Siri, and Spotify events and adds new Slack and Skype events.  
+Ki comes shipped with [default workflow events](), but custom definitions can be set to `Ki.workflows` to either override the default keybindings or register new ones. For example, the snippet above overwrites the default Safari, Siri, and Spotify events and adds new Slack and Skype events.
 
 ### Transition events
 
@@ -83,7 +83,7 @@ Transition events are specific events in a workflow that either enter or exit a 
 - `-- SELECT --`: select a desktop entity from a list in a chooser modal
     - exit select mode with `<Esc>`
 
-New modes can be added by setting [state events](https://github.com/unindented/lua-fsm#usage) to `Ki.states` and transition events to `Ki.transitions`, where the defined state transition functions can be invoked.
+Custom modes can be added by setting [state events](https://github.com/unindented/lua-fsm#usage) to `Ki.states` and transition events to `Ki.transitions`, where the defined state event transition functions can be invoked.
 
 Documentation for all configurables can be found [here](https://github.com/andweeb/ki/blob/backup/docs/markdown/Ki.md).
 

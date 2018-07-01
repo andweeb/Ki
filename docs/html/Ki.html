@@ -15,7 +15,7 @@
   <body>
     <header>
       <h1><a href="./index.html">docs</a> &raquo; Ki</h1>
-      <p><strong>Enable composable, modal commands to automate your Mac environment</strong></p>
+      <p><strong>Enable composable, modal commands to automate your macOS environment</strong></p>
 <p>Here's a list of terms with definitions specific to this extension:</p>
 <ul>
 <li><p><strong><em>event</em></strong> - a keydown event. The event object structure matches the argument list for hotkeys bindings in Hammerspoon: modifier keys, key name, and event handler function. For example, the following table represents an keydown event on <code>⇧⌘m</code>:</p>
@@ -42,8 +42,6 @@
       <ul>
         <li>Variables - Configurable values</li>
           <ul>
-            <li><a href="#history">history</a></li>
-            <li><a href="#state">state</a></li>
             <li><a href="#states">states</a></li>
             <li><a href="#statusDisplay">statusDisplay</a></li>
             <li><a href="#transitions">transitions</a></li>
@@ -52,52 +50,13 @@
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
             <li><a href="#createEntityEventHandler">createEntityEventHandler</a></li>
-            <li><a href="#createEventsMetatable">createEventsMetatable</a></li>
+            <li><a href="#showSelectionModal">showSelectionModal</a></li>
             <li><a href="#start">start</a></li>
             <li><a href="#stop">stop</a></li>
-            <li><a href="#triggerWorkflow">triggerWorkflow</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
         <h4 class="documentation-section">Variables</h4>
-          <section id="history">
-            <a name="//apple_ref/cpp/Variable/history" class="dashAnchor"></a>
-            <h5><a href="#history">history</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Ki.history</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Variable</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>A table that stores the <code>action</code>, <code>commands</code>, and <code>workflow</code> history of all state transitions. The <code>action</code> and <code>workflow</code> fields are cleared out and the <code>commands</code> stores the series of events (which make up the workflow) when the Ki mode transitions back to the initial state.</p>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="state">
-            <a name="//apple_ref/cpp/Variable/state" class="dashAnchor"></a>
-            <h5><a href="#state">state</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Ki.state</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Variable</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>The finite state machine implementation used to interface with predefined state events in transition event handlers.</p>
-</td>
-              </tr>
-            </table>
-          </section>
           <section id="states">
             <a name="//apple_ref/cpp/Variable/states" class="dashAnchor"></a>
             <h5><a href="#states">states</a></h5>
@@ -165,7 +124,7 @@
 <li><code>⌘⇧;</code> to enter <code>url</code> mode</li>
 <li><code>⌘⇧'</code> to enter <code>select</code> mode</li>
 </ul>
-<p>Note: <em><code>action</code> mode is special in that its transition events are generated at runtime, since hotkeys in <code>action</code> mode should be automatically dispatched to the intended <code>entity</code> handler. This is why there are no explicit transition events to <code>entity</code> mode defined in this default table (otherwise it would require manually defining every <code>action</code> event to transition to <code>entity</code> mode).</em></p>
+<p>Note: <em><code>action</code> mode is unique in that its events are generated at runtime, since hotkeys in <code>action</code> mode should be automatically dispatched to the intended <code>entity</code> handler. This is why there are no explicit transition events to <code>entity</code> mode defined in this default table (otherwise it would require manually defining every <code>action</code> event to transition to <code>entity</code> mode).</em></p>
 </td>
               </tr>
             </table>
@@ -190,7 +149,7 @@
         hs.urlevent.openURL(url)
         spoon.Ki.state:exitMode()
     end
-    local function handleApplicationEvent(appName)
+    local function launchOrFocusApplicationEvent(appName)
         hs.application.launchOrFocus(appName)
         spoon.Ki.state:exitMode()
     end
@@ -201,8 +160,8 @@
             { nil, "r", function() handleUrlEvent("https://reddit.com") end },
         },
         entity = {
-            { nil, "s", function() handleApplicationEvent("Safari") end) },
-            { {"shift"}, "s", function() handleApplicationEvent("Spotify") end) },
+            { nil, "s", function() launchOrFocusApplicationEvent("Safari") end) },
+            { {"shift"}, "s", function() launchOrFocusApplicationEvent("Spotify") end) },
         },
     }</code></pre>
 </td>
@@ -239,13 +198,13 @@
               </tr>
             </table>
           </section>
-          <section id="createEventsMetatable">
-            <a name="//apple_ref/cpp/Method/createEventsMetatable" class="dashAnchor"></a>
-            <h5><a href="#createEventsMetatable">createEventsMetatable</a></h5>
+          <section id="showSelectionModal">
+            <a name="//apple_ref/cpp/Method/showSelectionModal" class="dashAnchor"></a>
+            <h5><a href="#showSelectionModal">showSelectionModal</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki:createEventsMetatable(overrideLHS)</code></td>
+                <td><code>Ki:showSelectionModal(choices, selectEventHandler)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -253,16 +212,11 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A function that creates a metatable defined with operations specific to Ki events. The metatable comes with the following operations:</p>
-<ul>
-<li><code>__add</code> - Allow events to be added together, with errors on conflicting hotkeys if the override is disabled. In the case of a merge, the event in the first addend (the left item in the operation) will be overwritten with the second addend.<ul>
-<li>For example, this metatable is set for <code>ki.transitions</code> with the functionality of overriding events disabled, since we wouldn't want to accidentally override any of the transition event hotkeys.</li>
-</ul>
-</li>
-</ul>
+                <td><p>Show a selection modal with a list of choices</p>
 <p>Parameters:</p>
 <ul>
-<li><code>overrideLHS</code> - an optional boolean value to indicate whether to override events in an add operation</li>
+<li><code>choices</code> - a table of <code>hs.chooser</code> choices</li>
+<li><code>selectEventHandler</code> - the callback invoked when the modal is closed or a selection is made</li>
 </ul>
 </td>
               </tr>
@@ -317,34 +271,6 @@
 <p>Returns:</p>
 <ul>
 <li>The <code>hs.eventtap</code> object</li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="triggerWorkflow">
-            <a name="//apple_ref/cpp/Method/triggerWorkflow" class="dashAnchor"></a>
-            <h5><a href="#triggerWorkflow">triggerWorkflow</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Ki:triggerWorkflow(event)</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>A function that triggers a workflow (a series of events)</p>
-<p>Parameters:</p>
-<ul>
-<li><code>event</code> - A list of items describing an event with the following order:<ul>
-<li><code>app</code> - The <code>hs.application</code> object of the provided application name</li>
-<li><code>keyName</code> - A string containing the name of a keyboard key (in <code>hs.keycodes.map</code>)</li>
-<li><code>flags</code> - A table containing the keyboard modifiers in the keyboard event (from <code>hs.eventtap.event:getFlags()</code>)</li>
-</ul>
-</li>
 </ul>
 </td>
               </tr>

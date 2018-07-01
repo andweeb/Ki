@@ -1,3 +1,4 @@
 luacov.*
-dist/
+dist/build
+dist/Ki.spoon
 deps/
