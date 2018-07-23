@@ -1,0 +1,29 @@
+language: c
+
+sudo: false
+
+os: osx
+
+env:
+  global:
+    - LUAROCKS=2.4.4
+  matrix:
+    - LUA=lua5.3
+
+branches:
+  only:
+    - master
+    - develop
+
+before_install:
+  - source .travis/setenv_lua.sh
+  - luarocks install busted
+  - luarocks install luacov
+  - luarocks install luacheck
+
+script:
+  - luacheck src/*.lua spec/*.lua
+  - busted -c
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 76bfe700-219a-48fe-8475-43e3e5342391
