@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    padding: 0;
+    color: #232823;
+    overflow: hidden;
+    line-height: 1.2;
+    -webkit-user-select: none;
+    background-color: #f7f7f9;
+    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, Arial, Helvetica, sans-serif;
+}
+
+hr {
+    height: 0;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+footer {
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    padding: 10px 15px;
+    align-items: center;
+    background-color: #edf0f2;
+}
+
+.title-section {
+    padding: 0 5px;
+    line-height: 1;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.subtitle {
+    color: #73818d;
+    font-size: 12px;
+}
+
+.icon {
+    height: 2.5rem;
+}
+
+.cheatsheet {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    height: 95%;
+    overflow-y: auto;
+    padding: 30px 20px 15px 20px;
+}
+
+.columns {
+    border-left: none;
+    column-rule: 1px solid #ddd;
+    column-count: 4;
+    column-gap: 0;
+}
+
+.block {
+    width: 100%;
+    display: inline-block;
+    padding-bottom: 20px;
+}
+
+.block-item {
+    display: flex;
+    padding: 3px 0;
+    font-size: 12px;
+}
+
+.block-item-title {
+    font-weight: bold;
+}
+
+.shortcut-hotkey {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 0 3px;
+}
+
+.shortcut-title {
+    flex: 4;
+    padding: 0 3px 0 5px;
+}

@@ -1,20 +1,24 @@
 --- === StatusDisplay ===
 ---
---- A small menubar text display to show the current Ki mode
+--- Small menubar text display
 ---
 
-local obj = {}
-obj.__index = obj
-obj.__name = "status-display"
+local StatusDisplay = {}
+StatusDisplay.__index = StatusDisplay
+StatusDisplay.__name = "status-display"
 
-obj.DEFAULT_WIDTH = 500
-obj.DEFAULT_HEIGHT = 18
-obj.DEFAULT_FADE_TIMEOUT = 0.8
+StatusDisplay.DEFAULT_WIDTH = 500
+StatusDisplay.DEFAULT_HEIGHT = 18
+StatusDisplay.DEFAULT_FADE_TIMEOUT = 0.8
 
-obj.displays = {}
+StatusDisplay.displays = {}
+
+local _, inDarkMode = hs.osascript.applescript([[
+    tell application "System Events" to tell appearance preferences to return dark mode
+]])
 
 -- Create the canvas text element
-function obj:createTextElement(text)
+function StatusDisplay:createTextElement(text)
     return {
         type = "text",
         frame = {
@@ -24,21 +28,26 @@ function obj:createTextElement(text)
             h = self.DEFAULT_HEIGHT,
         },
         text = hs.styledtext.new(text, {
-            color = { red = 0.8, blue = 0.8, green = 0.8 },
+            color = inDarkMode
+                and { red = 0.8, blue = 0.8, green = 0.8 }
+                or { red = 0, blue = 0, green = 0 },
             font = { name = "Menlo", size = 10 },
             paragraphStyle = { alignment = "center" },
         }),
     }
 end
 
---- StatusDisplay:show(status, key)
+--- StatusDisplay:show(status[, parenthetical])
 --- Method
---- Creates a text display on center of the menu bar to indicate the current Ki mode
+--- Shows a text display on center of the menu bar to indicate the current mode
 ---
 --- Parameters:
----  * `status` - a string value containing the current mode (i.e., "normal", "entity", etc.)
----  * `key` - an optional string value of the key that triggered the state (i.e., "n", "N", etc.)
-function obj:show(status, action)
+---  * `status` - a string value containing the current mode (i.e., `"normal"`, `"entity"`, etc.)
+---  * `parenthetical` - an optional string value of some parenthetical in the text display
+---
+--- Returns:
+---  * None
+function StatusDisplay:show(status, parenthetical)
     -- Clear any pre-existing status display canvases
     for state, display in pairs(self.displays) do
         if display ~= nil then
@@ -55,16 +64,16 @@ function obj:show(status, action)
         w = self.DEFAULT_WIDTH,
     }
     local statusText = status:upper()
-    local text = action and statusText.." ("..action..")" or statusText
-    local textElement = self:createTextElement("-- "..text.." --")
+    local text = parenthetical and statusText.." ("..parenthetical..")" or statusText
+    local textElement = self:createTextElement("-- "..text.." --", inDarkMode)
     local display = hs.canvas.new(dimensions):appendElements({ textElement }):show()
 
     self.displays[status] = display
 
-    if status == "normal" then
+    if status == "desktop" then
         display:delete(self.DEFAULT_FADE_TIMEOUT)
         self.displays[status] = nil
     end
 end
 
-return obj
+return StatusDisplay

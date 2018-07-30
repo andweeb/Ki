@@ -4,13 +4,6 @@ local assertions = require("spec.assertions")
 assertions:init(require("say"), assert)
 
 describe("status-display.lua", function()
-    it("should expose public functions", function()
-        local statusDisplay = require("status-display")
-
-        assert.are.equal(type(statusDisplay), "table")
-        assert.are.equal(type(statusDisplay.show), "function")
-    end)
-
     describe("show status display", function()
         setup(function()
             _G.hs = mock(mockHs())
@@ -18,6 +11,13 @@ describe("status-display.lua", function()
 
         teardown(function()
             _G.hs = nil
+        end)
+
+        it("should expose public functions", function()
+            local statusDisplay = require("status-display")
+
+            assert.are.equal(type(statusDisplay), "table")
+            assert.are.equal(type(statusDisplay.show), "function")
         end)
 
         it("should clear pre-existing canvases", function()

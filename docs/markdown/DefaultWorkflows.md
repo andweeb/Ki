@@ -14,9 +14,9 @@ Definitions of default workflow events
 
 | [init](#init)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `DefaultWorkflows:init()`                                                                    |
+| **Signature**                               | `DefaultWorkflows.init()`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Defines the default key bindings and initializes workflow event handlers for `entity`, `select`, and `url` mode                                                                     |
-| **Parameters**                              | <ul><li>`ki` - the ki object</li></ul> |
+| **Description**                             | Defines the initial set of default key bindings and creates the workflow event handlers for `entity`, `select`, and `url` mode                                                                     |
+| **Parameters**                              | <ul><li>None</li></ul> |
 | **Returns**                                 | <ul><li>A table containing the default `entity`, `select`, and `url` workflow events</li></ul>          |
 

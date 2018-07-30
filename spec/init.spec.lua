@@ -50,10 +50,9 @@ describe("init.lua", function()
         it("should expose public functions", function()
             local ki = require("init")
             local publicApi = {
+                "extendEntity",
                 "start",
                 "stop",
-                "showSelectionModal",
-                "createEntityEventHandler",
             }
 
             for _, functionName in pairs(publicApi) do

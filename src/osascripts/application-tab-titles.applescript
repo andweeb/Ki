@@ -17,7 +17,8 @@ tell application "{{application}}"
 		
 		if ok then
 			repeat with tabItem in tabList
-				set tabTitles to tabTitles & ("\"" & (name of tabItem) & "\"" as string)
+				set tabURL to URL of tabItem
+				set tabTitles to tabTitles & ("\"" & (name of tabItem) & " (" & tabURL & ")" & "\"" as string)
 			end repeat
 		end if
 		

@@ -1,7 +1,7 @@
 # [docs](index.md) » StatusDisplay
 ---
 
-A small menubar text display to show the current Ki mode
+Small menubar text display
 
 
 ## API Overview
@@ -14,8 +14,9 @@ A small menubar text display to show the current Ki mode
 
 | [show](#show)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `StatusDisplay:show(status, key)`                                                                    |
+| **Signature**                               | `StatusDisplay:show(status[, parenthetical])`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Creates a text display on center of the menu bar to indicate the current Ki mode                                                                     |
-| **Parameters**                              | <ul><li>`status` - a string value containing the current mode (i.e., "normal", "entity", etc.)</li><li>`key` - an optional string value of the key that triggered the state (i.e., "n", "N", etc.)</li></ul> |
+| **Description**                             | Shows a text display on center of the menu bar to indicate the current mode                                                                     |
+| **Parameters**                              | <ul><li>`status` - a string value containing the current mode (i.e., `"normal"`, `"entity"`, etc.)</li><li>`parenthetical` - an optional string value of some parenthetical in the text display</li></ul> |
+| **Returns**                                 | <ul><li>None</li></ul>          |
 

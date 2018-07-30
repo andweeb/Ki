@@ -16,6 +16,9 @@
 ## API Documentation
 | Module                                                             | Description           |
 | ------------------------------------------------------------------ | --------------------- |
+| [Cheatsheet](Cheatsheet.md)                          | Cheatsheet for keyboard shortcuts     |
 | [DefaultWorkflows](DefaultWorkflows.md)                          | Definitions of default workflow events     |
-| [Ki](Ki.md)                          | **Enable composable, modal commands to automate your macOS environment**     |
-| [StatusDisplay](StatusDisplay.md)                          | A small menubar text display to show the current Ki mode     |
+| [Entity](Entity.md)                          | Entity class that represents automatable desktop entities, i.e., applications, desktop spaces, Siri, etc.     |
+| [hs._asm.undocumented.spaces](hs._asm.undocumented.spaces.md)                          | These functions utilize private API's within the OS X internals, and are known to have unpredictable behavior under Mavericks and Yosemite when "Displays have separate Spaces" is checked under the Mission Control system preferences.     |
+| [Ki](Ki.md)                          | Composable, modal macOS automation inspired by the vi     |
+| [StatusDisplay](StatusDisplay.md)                          | Small menubar text display     |

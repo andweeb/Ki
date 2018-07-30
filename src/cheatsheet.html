@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style type="text/css">
+            {{stylesheet}}
+        </style>
+    </head>
+    <body>
+        <div class="cheatsheet">
+            <div class="content">
+                <div class="columns">
+                    {{#shortcutBlocks}}
+                    <div class="block">
+                        {{#shortcuts}}
+                        <div class="block-item {{#isTitle}}block-item-title{{/isTitle}}">
+                            <div class="shortcut-hotkey">{{hotkey}}</div><div class="shortcut-title">{{name}}</div>
+                        </div>
+                        {{/shortcuts}}
+                    </div>
+                    {{/shortcutBlocks}}
+                </div>
+            </div>
+            <hr>
+            <footer>
+                {{#icon}}
+                <img class="icon" src="{{icon}}"/>
+                {{/icon}}
+                <div class="title-section">
+                    <div class="title">{{title}}</div>
+                    <small class="subtitle">{{description}}</small>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

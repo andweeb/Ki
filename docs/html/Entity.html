@@ -1,0 +1,360 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Hammerspoon docs: Entity</title>
+    <style type="text/css">
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      th { background-color: #DDDDDD; vertical-align: top; padding: 3px; }
+      td { width: 100%; background-color: #EEEEEE; vertical-align: top; padding: 3px; }
+      table { width: 100% ; border: 1px solid #0; text-align: left; }
+      section > table table td { width: 0; }
+    </style>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="./index.html">docs</a> &raquo; Entity</h1>
+      <p>Entity class that represents automatable desktop entities, i.e., applications, desktop spaces, Siri, etc.</p>
+
+      </header>
+      <h3>API Overview</h3>
+      <ul>
+        <li>Methods - API calls which can only be made on an object returned by a constructor</li>
+          <ul>
+            <li><a href="#dispatchAction">dispatchAction</a></li>
+            <li><a href="#getApplication">getApplication</a></li>
+            <li><a href="#getMenuItemList">getMenuItemList</a></li>
+            <li><a href="#getSelectionItems">getSelectionItems</a></li>
+            <li><a href="#initialize">initialize</a></li>
+            <li><a href="#invokeEventHandler">invokeEventHandler</a></li>
+            <li><a href="#mergeShortcuts">mergeShortcuts</a></li>
+            <li><a href="#notifyError">notifyError</a></li>
+            <li><a href="#registerShortcuts">registerShortcuts</a></li>
+            <li><a href="#renderScriptTemplate">renderScriptTemplate</a></li>
+            <li><a href="#showSelectionModal">showSelectionModal</a></li>
+          </ul>
+      </ul>
+      <h3>API Documentation</h3>
+        <h4 class="documentation-section">Methods</h4>
+          <section id="dispatchAction">
+            <a name="//apple_ref/cpp/Method/dispatchAction" class="dashAnchor"></a>
+            <h5><a href="#dispatchAction">dispatchAction</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:dispatchAction(mode, shortcut) -&gt; boolean</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Dispatch an action from a triggered shortcut for an entity</p>
+<p>Parameters:</p>
+<ul>
+<li><code>mode</code> - The name of the current mode</li>
+<li><code>shortcut</code> - A shortcut object with an action to invoke on the entity</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getApplication">
+            <a name="//apple_ref/cpp/Method/getApplication" class="dashAnchor"></a>
+            <h5><a href="#getApplication">getApplication</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:getApplication() -&gt; hs.application object or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Gets the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object from the entity name</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>An <code>hs.application</code> object or <code>nil</code> if the application could not be found</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getMenuItemList">
+            <a name="//apple_ref/cpp/Method/getMenuItemList" class="dashAnchor"></a>
+            <h5><a href="#getMenuItemList">getMenuItemList</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity.getMenuItemList(app, menuItemPath) -&gt; table or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Gets a list of menu items from a hierarchical menu item path</p>
+<p>Parameters:</p>
+<ul>
+<li><code>app</code> - The target <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
+<li><code>menuItemPath</code> - A table representing the hierarchical path of the target menu item (e.g. <code>{ "File", "Share" }</code>)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <a href="https://www.hammerspoon.org/docs/hs.application.html#getMenuItems">menu items</a> or <code>nil</code></li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getSelectionItems">
+            <a name="//apple_ref/cpp/Method/getSelectionItems" class="dashAnchor"></a>
+            <h5><a href="#getSelectionItems">getSelectionItems</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:getSelectionItems(appName) -&gt; table of choices or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A placeholder method to return a list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects for the selection modal. Subclassed entities intended to be used with select mode must implement this method to correctly display items in the selection modal.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>appName</code> - The entity application name</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li><code>selectionItems</code> - A list of choices or <code>nil</code></li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="initialize">
+            <a name="//apple_ref/cpp/Method/initialize" class="dashAnchor"></a>
+            <h5><a href="#initialize">initialize</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:initialize(name, shortcuts, autoExitMode)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Initializes a new entity instance with its name and available shortcuts. By default, a <code>cheatsheet</code> object will be initialized on the entity object with the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless <code>autoExitMode</code> is explicitly set to <code>false</code>.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>name</code> - The entity name</li>
+<li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the entity</li>
+<li><code>autoExitMode</code> - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+</ul>
+<p>Each <code>shortcut</code> item should be a list with items at the following indices:</p>
+<ul>
+<li><code>1</code> - An optional table containing zero or more of the following keyboard modifiers: <code>"cmd"</code>, <code>"alt"</code>, <code>"shift"</code>, <code>"ctrl"</code>, <code>"fn"</code></li>
+<li><code>2</code> - The name of a keyboard key. String representations of keys can be found in <a href="https://www.hammerspoon.org/docs/hs.keycodes.html#map"><code>hs.keycodes.map</code></a>.</li>
+<li><code>3</code> - The event handler that defines the action for when the shortcut is triggered</li>
+<li><code>4</code> - A table containing the metadata for the shortcut, also a list with items at the following indices:<ul>
+<li><code>1</code> - The category name of the shortcut</li>
+<li><code>2</code> - A description of what the shortcut does</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="invokeEventHandler">
+            <a name="//apple_ref/cpp/Method/invokeEventHandler" class="dashAnchor"></a>
+            <h5><a href="#invokeEventHandler">invokeEventHandler</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:invokeEventHandler(app, mode, eventHandler)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Invokes an action with different parameters depending on the current Ki mode</p>
+<p>Parameters:</p>
+<ul>
+<li><code>app</code> - The target <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
+<li><code>mode</code> - The current mode name</li>
+<li><code>eventHandler</code> - The action event handler</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="mergeShortcuts">
+            <a name="//apple_ref/cpp/Method/mergeShortcuts" class="dashAnchor"></a>
+            <h5><a href="#mergeShortcuts">mergeShortcuts</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity.mergeShortcuts(fromList, toList) -&gt; table</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Merges lists of shortcuts based on their keybindings</p>
+<p>Parameters:</p>
+<ul>
+<li><code>fromList</code> - The list of shortcuts to apply onto the second list argument</li>
+<li><code>toList</code> - The target list of shortcuts to override those in the first list argument</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li><code>list</code> - The list of merged shortcut objects</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="notifyError">
+            <a name="//apple_ref/cpp/Method/notifyError" class="dashAnchor"></a>
+            <h5><a href="#notifyError">notifyError</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity.notifyError(message, details)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Displays error details in a notification and logs to the Hammerspoon console</p>
+<p>Parameters:</p>
+<ul>
+<li><code>message</code> - The main notification message</li>
+<li><code>details</code> - The textual body of the notification containing details of the error</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="registerShortcuts">
+            <a name="//apple_ref/cpp/Method/registerShortcuts" class="dashAnchor"></a>
+            <h5><a href="#registerShortcuts">registerShortcuts</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:registerShortcuts(shortcuts)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Registers the list of shortcuts applicable to the entity object</p>
+<p>Parameters:</p>
+<ul>
+<li><code>shortcuts</code> - The list of shortcuts for the entity</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="renderScriptTemplate">
+            <a name="//apple_ref/cpp/Method/renderScriptTemplate" class="dashAnchor"></a>
+            <h5><a href="#renderScriptTemplate">renderScriptTemplate</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity.renderScriptTemplate(scriptName[, viewModel]) -&gt; string</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Generates an applescript template string with a given view model object</p>
+<p>Parameters:</p>
+<ul>
+<li><code>scriptName</code> - The applescript file name</li>
+<li><code>viewModel</code> - An optional <a href="http://olivinelabs.com/lustache/">lustache</a> view model</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The rendered script string</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="showSelectionModal">
+            <a name="//apple_ref/cpp/Method/showSelectionModal" class="dashAnchor"></a>
+            <h5><a href="#showSelectionModal">showSelectionModal</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity.showSelectionModal(app, choices, selectEventHandler)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Shows a selection modal with a list of choices. Highlight items up and down with <kbd>⌃j</kbd> and <kbd>⌃k</kbd>, and close the modal with <kbd>Escape</kbd>.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>app</code> - The <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object for the entity or nil</li>
+<li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display on the chooser modal</li>
+<li><code>selectEventHandler</code> - The callback function invoked when a choice is selected from the modal</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+  </body>
+</html>

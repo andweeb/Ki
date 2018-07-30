@@ -4,768 +4,225 @@
 ---
 -- luacov: disable
 
-local obj = {}
-obj.__index = obj
-obj.__name = "default-events"
-
-if not _G.getSpoonPath then
-    function _G.getSpoonPath()
-        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-    end
-end
+local DefaultWorkflows = {}
+DefaultWorkflows.__index = DefaultWorkflows
+DefaultWorkflows.__name = "default-events"
 
 if not _G.requirePackage then
-    function _G.requirePackage(name)
+    function _G.requirePackage(name, isInternal)
         local luaVersion = _VERSION:match("%d+%.%d+")
-        local packagePath = _G.getSpoonPath().."/deps/share/lua/"..luaVersion.."/"..name..".lua"
+        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
+        local spoonPath = debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
+        local packagePath = spoonPath..location..name..".lua"
 
         return dofile(packagePath)
     end
 end
 
-local lustache = _G.requirePackage("lustache")
+local function startScreenSaver()
+    hs.osascript.applescript([[
+        tell application "System Events"
+            start current screen saver
+        end tell
+    ]])
 
-local function renderAppleScriptTemplate(scriptName, viewModel)
-    viewModel = viewModel or {}
-    local scriptPath = _G.getSpoonPath().."/osascripts/"..scriptName..".applescript"
-    local file = assert(io.open(scriptPath, "rb"))
-    local scriptTemplate = file:read("*all")
-
-    file:close()
-
-    return lustache:render(scriptTemplate, viewModel)
+    return true
 end
 
-local function getBrowserTabChoices(application)
-    local choices = {}
-    local script = renderAppleScriptTemplate("application-tab-titles", { application = application })
-    local isOk, tabList, rawTable = hs.osascript.applescript(script)
-
-    if not isOk then
-        hs.notify.show("Ki", "Error fetching browser tab information", rawTable.NSLocalizedFailureReason)
-
-        return {}
-    end
-
-    local windowIndex = 0
-
-    for windowId, titleList in pairs(tabList) do
-        windowIndex = windowIndex + 1
-        for tabIndex, title in pairs(titleList) do
-            table.insert(choices, {
-                text = title,
-                subText = "(Window "..windowIndex.." Tab #"..tabIndex..")",
-                tabIndex = tabIndex,
-                windowIndex = windowIndex,
-                windowId = windowId,
-            })
-        end
-    end
-
-    return choices
+local function toggleDock()
+    hs.osascript.applescript([[
+        tell application "System Events" to tell dock preferences to set autohide to not autohide
+    ]])
 end
 
-function obj:activityMonitorEntityEventHandler()
-    local appName = "Activity Monitor"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:calculatorEntityEventHandler()
-    local appName = "Calculator"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:calendarEntityEventHandler()
-    local appName = "Calendar"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app then app:activate() end
-
-        if app and none and action.keyName == "n" then
-            app:selectMenuItem("New Event")
-        elseif app and none and (action.keyName == "f" or action.keyName == "l") then
-            app:selectMenuItem("Find")
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none  and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:dictionaryEntityEventHandler()
-    local appName = "Dictionary"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:faceTimePlayerEntityEventHandler()
-    local appName = "FaceTime"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:finderEntityEventHandler()
-    local appName = "Finder"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:handleChromeSelection(app)
-    local choices = getBrowserTabChoices("Google Chrome")
-    local action = self.ki.history.action
-
-    self.ki:showSelectionModal(choices, function(choice)
-        if not choice then return end
-
-        local window = hs.window(tonumber(choice.windowId))
-
-        if next(action) then
-            local flags = action.flags
-            local keyName = action.keyName
-            local none = flags and flags:containExactly({})
-
-            if app and none and keyName == "space" then
-                local viewModel = {
-                    browser = "Google Chrome",
-                    command = "toggle-play",
-                    target = "tab "..choice.tabIndex.." of window id "..choice.windowId,
-                    ["is-chrome"] = true,
-                }
-                local script = renderAppleScriptTemplate("browser-media", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error toggling media", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and action.keyName == "r" then
-                local viewModel = { target = "tab "..choice.tabIndex.." of window id "..choice.windowId }
-                local script = renderAppleScriptTemplate("reload-chrome", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error refreshing active window", rawTable.NSLocalizedFailureReason)
-                end
-            end
-        else
-            _ = window:focus() and window:focusTab(choice.tabIndex)
-        end
-    end)
-end
-
-function obj:googleChromeEntityEventHandler(hasSelection)
-    local appName = "Google Chrome"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local function handleAction()
-            local none = action.flags and action.flags:containExactly({})
-            local shift = action.flags and action.flags:containExactly({ "shift" })
-
-            if app and none and action.keyName == "o" then
-                app:selectMenuItem("Open File...")
-            elseif app and none and action.keyName == "n" then
-                app:selectMenuItem("New Window")
-            elseif app and shift and action.keyName == "n" then
-                app:selectMenuItem("New Incognito Window")
-            elseif app and none and action.keyName == "t" then
-                app:selectMenuItem("New Tab")
-            elseif app and none and action.keyName == "f" then
-                app:activate()
-                hs.window.focusedWindow():toggleFullScreen()
-            elseif app and none and action.keyName == "i" then
-                app:selectMenuItem("Developer Tools")
-            elseif app and none and action.keyName == "space" then
-                local viewModel = {
-                    browser = "Google Chrome",
-                    command = "toggle-play",
-                    target = "front window's active tab",
-                    ["is-chrome"] = true,
-                }
-                local script = renderAppleScriptTemplate("browser-media", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error toggling media", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and action.keyName == "r" then
-                local viewModel = { target = "the active tab of its first window" }
-                local script = renderAppleScriptTemplate("reload-chrome", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error refreshing active window", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and action.keyName == "," then
-                app:selectMenuItem("Preferences...")
-            elseif app and none and action.keyName == "h" then
-                app:selectMenuItem("Hide "..appName)
-            elseif app and none and action.keyName == "q" then
-                app:selectMenuItem("Quit "..appName)
-            end
-        end
-
-        -- Handle action normally through selection modal
-        if (hasSelection) then
-            self:handleChromeSelection(app)
-        else
-            handleAction()
-            app:activate()
-        end
-    end)
-end
-
-function obj:iTunesEntityEventHandler()
-    local appName = "iTunes"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "space" then
-            _ = app:selectMenuItem("Play") or app:selectMenuItem("Pause")
-        elseif app and none and action.keyName == "p" then
-            app:selectMenuItem("Previous")
-        elseif app and none and action.keyName == "n" then
-            app:selectMenuItem("Next")
-        elseif app and none and action.keyName == "s" then
-            app:selectMenuItem("Stop")
-        elseif app and none and action.keyName == "l" then
-            app:selectMenuItem("Go to Current Song")
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:mailEntityEventHandler()
-    local appName = "Mail"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:mapsEntityEventHandler()
-    local appName = "Maps"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-local function getMessagesConversations()
-    local choices = {}
-    local isOk, conversations, rawTable =
-        hs.osascript.applescript(renderAppleScriptTemplate("messages-conversations"))
-
-    if not isOk then
-        hs.notify.show("Ki", "Error fetching Messages app conversations", rawTable.NSLocalizedFailureReason)
-
-        return {}
-    end
-
-    for index, conversation in pairs(conversations) do
-        local contactName = string.gmatch(conversation, "([^.]+)")()
-
-        table.insert(choices, {
-            text = contactName,
-            subText = string.sub(conversation, #contactName + 3),
-            index = index,
-        })
-    end
-
-    return choices
-end
-
-function obj:messagesEntityEventHandler(hasSelection)
-    local appName = "Messages"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        local function handleAction()
-            if app and not action.keyName then
-                app:activate()
-            elseif app and none and action.keyName == "n" then
-                app:activate()
-                app:selectMenuItem("New Message")
-            elseif app and none and (action.keyName == "l" or action.keyName == "f") then
-                app:activate()
-                app:selectMenuItem("Find...")
-            elseif app and none and action.keyName == "," then
-                app:selectMenuItem("Preferences...")
-            elseif app and none and action.keyName == "h" then
-                app:selectMenuItem("Hide "..appName)
-            elseif app and none and action.keyName == "q" then
-                app:selectMenuItem("Quit "..appName)
-            end
-        end
-
-        if (hasSelection) then
-            local choices = getMessagesConversations()
-
-            self.ki:showSelectionModal(choices, function(choice)
-                if not choice then return end
-
-                if app and not action.keyName then
-                    app:activate()
-
-                    local script = renderAppleScriptTemplate("select-messages-conversation", { index = choice.index })
-                    local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                    if not isOk then
-                        local message = "Error selecting the Messages app conversation"
-                        hs.notify.show("Ki", message, rawTable.NSLocalizedFailureReason)
-                    end
-                end
-            end)
-        else
-            hs.application.launchOrFocus(appName)
-            handleAction()
-        end
-
-    end)
-end
-
-function obj:notesEntityEventHandler()
-    local appName = "Notes"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-        local shift = action.flags and action.flags:containExactly({ "shift" })
-
-        if app then app:activate() end
-
-        if app and none and action.keyName == "n" then
-            app:selectMenuItem("New Note")
-        elseif app and none and action.keyName == "f" then
-            app:selectMenuItem("Show Folders")
-        elseif app and shift and action.keyName == "n" then
-            app:selectMenuItem("New Folder")
-        elseif app and none and action.keyName == "l" then
-            app:selectMenuItem("Search")
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:previewEntityEventHandler()
-    local appName = "Preview"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app then app:activate() end
-
-        if app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:handleSafariSelection(app)
-    local choices = getBrowserTabChoices("Safari")
-    local action = self.ki.history.action
-
-    self.ki:showSelectionModal(choices, function(choice)
-        if not choice then return end
-
-        local window = hs.window(tonumber(choice.windowId))
-
-        if next(action) then
-            local flags = action.flags
-            local keyName = action.keyName
-            local none = flags and flags:containExactly({})
-
-            if app and none and keyName == "space" then
-                local viewModel = {
-                    browser = "Safari",
-                    command = "toggle-play",
-                    target = "tab "..choice.tabIndex.." of window id "..choice.windowId,
-                    ["is-safari"] = true,
-                }
-                local script = renderAppleScriptTemplate("browser-media", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error toggling media", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and action.keyName == "r" then
-                local viewModel = { target = "tab "..choice.tabIndex.." of front window" }
-                local script = renderAppleScriptTemplate("reload-safari", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error refreshing active window", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and keyName == "m" then
-                local viewModel = {
-                    browser = "Safari",
-                    command = "toggle-mute",
-                    target = "tab "..choice.tabIndex.." of window id "..choice.windowId,
-                    ["is-safari"] = true,
-                }
-                local script = renderAppleScriptTemplate("browser-media", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error (un)muting video", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and keyName == "w" then
-                local viewModel = { target = "tab "..choice.tabIndex.." of window id "..choice.windowId }
-                local script = renderAppleScriptTemplate("close-safari", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error closing window", rawTable.NSLocalizedFailureReason)
-                end
-            end
-        else
-            _ = window:focus() and window:focusTab(choice.tabIndex)
-        end
-    end)
-end
-
-function obj:safariEntityEventHandler(hasSelection)
-    local appName = "Safari"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local function handleAction(lastEvent)
-            lastEvent = lastEvent or {}
-            local eventFlags = lastEvent.flags or action.flags
-            local none = eventFlags and eventFlags:containExactly({})
-            local shift = eventFlags and eventFlags:containExactly({ "shift" })
-            local keyName = lastEvent.keyName or action.keyName
-
-            if app and none and keyName == "o" then
-                app:selectMenuItem("Open File...")
-            elseif app and none and keyName == "n" then
-                app:selectMenuItem("New Window")
-            elseif app and shift and keyName == "n" then
-                app:selectMenuItem("New Private Window")
-            elseif app and none and keyName == "t" then
-                app:selectMenuItem("New Tab")
-            elseif app and none and keyName == "f" then
-                app:activate()
-                hs.window.focusedWindow():toggleFullScreen()
-            elseif app and none and keyName == "l" then
-                app:selectMenuItem("Open Location...")
-            elseif app and none and keyName == "i" then
-                app:selectMenuItem("Show Web Inspector")
-            elseif app and none and keyName == "space" then
-                local viewModel = {
-                    browser = "Safari",
-                    command = "toggle-play",
-                    target = "front document",
-                    ["is-safari"] = true,
-                }
-                local script = renderAppleScriptTemplate("browser-media", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error toggling media", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and action.keyName == "r" then
-                local script = renderAppleScriptTemplate("reload-safari", { target = "front document" })
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error refreshing active window", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and action.keyName == "m" then
-                local viewModel = {
-                    browser = "Safari",
-                    command = "toggle-mute",
-                    target = "front document",
-                    ["is-safari"] = true,
-                }
-                local script = renderAppleScriptTemplate("browser-media", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error (un)muting video", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and keyName == "w" then
-                local viewModel = { pane = "current tab of front window" }
-                local script = renderAppleScriptTemplate("close-safari", viewModel)
-                local isOk, _, rawTable = hs.osascript.applescript(script)
-
-                if not isOk then
-                    hs.notify.show("Ki", "Error closing Safari tab", rawTable.NSLocalizedFailureReason)
-                end
-            elseif app and none and keyName == "," then
-                app:selectMenuItem("Preferences...")
-            elseif app and none and keyName == "h" then
-                app:selectMenuItem("Hide "..appName)
-            elseif app and none and keyName == "q" then
-                app:selectMenuItem("Quit "..appName)
-            end
-        end
-
-        -- Handle action normally through selection modal
-        if (hasSelection) then
-            self:handleSafariSelection(app)
-        else
-            handleAction()
-            app:activate()
-        end
-    end)
-end
-
-function obj:siriEntityEventHandler()
-    local appName = "Siri"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            hs.application.open("Siri")
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:spotifyEntityEventHandler()
-    local appName = "Spotify"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "space" then
-            hs.spotify.playpause()
-        elseif app and none and action.keyName == "p" then
-            hs.spotify.previous()
-        elseif app and none and action.keyName == "n" then
-            hs.spotify.next()
-        elseif app and none and action.keyName == "s" then
-            hs.spotify.pause()
-        elseif app and none and action.keyName == "l" then
-            app:selectMenuItem("Search")
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:systemPreferencesEntityEventHandler()
-    local appName = "System Preferences"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:terminalEntityEventHandler()
-    local appName = "Terminal"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "," then
-            app:selectMenuItem("Preferences...")
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
-function obj:quickTimePlayerEntityEventHandler()
-    local appName = "QuickTime Player"
-
-    return self.ki:createEntityEventHandler(appName, function(app, action)
-        local none = action.flags and action.flags:containExactly({})
-
-        if app and not action.keyName then
-            app:activate()
-        elseif app and none and action.keyName == "h" then
-            app:selectMenuItem("Hide "..appName)
-        elseif app and none and action.keyName == "q" then
-            app:selectMenuItem("Quit "..appName)
-        end
-    end)
-end
-
---- DefaultWorkflows:init()
+--- DefaultWorkflows.init()
 --- Method
---- Defines the default key bindings and initializes workflow event handlers for `entity`, `select`, and `url` mode
+--- Defines the initial set of default key bindings and creates the workflow event handlers for `entity`, `select`, and `url` mode
 ---
 --- Parameters:
----  * `ki` - the ki object
+---  * None
 ---
 --- Returns:
 ---  * A table containing the default `entity`, `select`, and `url` workflow events
-function obj:init(ki)
-    self.ki = ki
+function DefaultWorkflows.init()
+    local ActivityMonitor = _G.requirePackage("entities/activity-monitor", true)
+    local AppStore = _G.requirePackage("entities/app-store", true)
+    local Calendar = _G.requirePackage("entities/calendar", true)
+    local Calculator = _G.requirePackage("entities/calculator", true)
+    local Dictionary = _G.requirePackage("entities/dictionary", true)
+    local FaceTime = _G.requirePackage("entities/facetime", true)
+    local Finder = _G.requirePackage("entities/finder", true)
+    local GoogleChrome = _G.requirePackage("entities/google-chrome", true)
+    local Home = _G.requirePackage("entities/home", true)
+    local iTunes = _G.requirePackage("entities/itunes", true)
+    local Maps = _G.requirePackage("entities/maps", true)
+    local Mail = _G.requirePackage("entities/mail", true)
+    local Messages = _G.requirePackage("entities/messages", true)
+    local News = _G.requirePackage("entities/news", true)
+    local Notes = _G.requirePackage("entities/notes", true)
+    local Preview = _G.requirePackage("entities/preview", true)
+    local QuickTimePlayer = _G.requirePackage("entities/quicktime-player", true)
+    local Reminders = _G.requirePackage("entities/reminders", true)
+    local Safari = _G.requirePackage("entities/Safari", true)
+    local Siri = _G.requirePackage("entities/siri", true)
+    local Spaces = _G.requirePackage("entities/spaces", true)
+    local Spotify = _G.requirePackage("entities/spotify", true)
+    local SystemPreferences = _G.requirePackage("entities/system-preferences", true)
+    local Terminal = _G.requirePackage("entities/terminal", true)
 
-    local function initEntityEvents(hasSelection)
-        return {
-            { nil, "c", function() self:calendarEntityEventHandler() end },
-            { nil, "c", function() self:calendarEntityEventHandler() end },
-            { nil, "d", function() self:dictionaryEntityEventHandler() end },
-            { nil, "f", function() self:finderEntityEventHandler() end },
-            { nil, "g", function() self:googleChromeEntityEventHandler(hasSelection) end },
-            { nil, "i", function() self:iTunesEntityEventHandler() end },
-            { nil, "m", function() self:messagesEntityEventHandler(hasSelection) end },
-            { nil, "n", function() self:notesEntityEventHandler() end },
-            { nil, "s", function() self:safariEntityEventHandler(hasSelection) end },
-            { nil, "t", function() self:terminalEntityEventHandler() end },
-            { nil, "q", function() self:quickTimePlayerEntityEventHandler() end },
-            { nil, ",", function() self:systemPreferencesEntityEventHandler() end },
-            { { "cmd" }, "s", function() self:siriEntityEventHandler() end },
-            { { "shift" }, "a", function() self:activityMonitorEntityEventHandler() end },
-            { { "shift" }, "c", function() self:calculatorEntityEventHandler() end },
-            { { "shift" }, "f", function() self:faceTimePlayerEntityEventHandler() end },
-            { { "shift" }, "m", function() self:mapsEntityEventHandler() end },
-            { { "shift" }, "s", function() self:spotifyEntityEventHandler() end },
-            { { "shift", "cmd" }, "m", function() self:mailEntityEventHandler() end },
-        }
+    local function urlEventHandler(url)
+        return function()
+            hs.urlevent.openURL(url)
+            return true
+        end
     end
 
     local urlEvents = {
-        { nil, "a", function() hs.urlevent.openURL("https://amazon.com") ki.state:exitMode() end },
-        { nil, "f", function() hs.urlevent.openURL("https://facebook.com") ki.state:exitMode() end },
-        { nil, "g", function() hs.urlevent.openURL("https://google.com") ki.state:exitMode() end },
-        { nil, 'h', function() hs.urlevent.openURL('https://news.ycombinator.com') ki.state:exitMode() end },
-        { nil, "l", function() hs.urlevent.openURL("https://linkedin.com") ki.state:exitMode() end },
-        { nil, "m", function() hs.urlevent.openURL("https://messenger.com") ki.state:exitMode() end },
-        { nil, "n", function() hs.urlevent.openURL("https://netflix.com") ki.state:exitMode() end },
-        { nil, "r", function() hs.urlevent.openURL("https://reddit.com") ki.state:exitMode() end },
-        { nil, "w", function() hs.urlevent.openURL("https://wikipedia.org") ki.state:exitMode() end },
-        { nil, "y", function() hs.urlevent.openURL("https://youtube.com") ki.state:exitMode() end },
-        { nil, "z", function() hs.urlevent.openURL("https://zillow.com") ki.state:exitMode() end },
-        { { "shift" }, "g", function() hs.urlevent.openURL("https://github.com") ki.state:exitMode() end },
-        { { "shift" }, "m", function() hs.urlevent.openURL("https://maps.google.com") ki.state:exitMode() end },
-        { { "shift" }, "w", function() hs.urlevent.openURL("https://weather.com") ki.state:exitMode() end },
-        { { "shift" }, "y", function() hs.urlevent.openURL("https://yelp.com") ki.state:exitMode() end },
-        { { "cmd", "shift" }, 'm', function() hs.urlevent.openURL('https://mail.google.com') ki.state:exitMode() end },
+        { nil, "a", urlEventHandler("https://amazon.com"), { "URL Events", "Amazon" } },
+        { nil, "f", urlEventHandler("https://facebook.com"), { "URL Events", "Facebook" } },
+        { nil, "g", urlEventHandler("https://google.com"), { "URL Events", "Google" } },
+        { nil, "h", urlEventHandler("https://news.ycombinator.com"), { "URL Events", "Hacker News" } },
+        { nil, "l", urlEventHandler("https://linkedin.com"), { "URL Events", "LinkedIn" } },
+        { nil, "m", urlEventHandler("https://messenger.com"), { "URL Events", "Facebook Messenger" } },
+        { nil, "n", urlEventHandler("https://netflix.com"), { "URL Events", "Netflix" } },
+        { nil, "r", urlEventHandler("https://reddit.com"), { "URL Events", "Reddit" } },
+        { nil, "w", urlEventHandler("https://wikipedia.org"), { "URL Events", "Wikipedia" } },
+        { nil, "y", urlEventHandler("https://youtube.com"), { "URL Events", "YouTube" } },
+        { nil, "z", urlEventHandler("https://zillow.com"), { "URL Events", "Zillow" } },
+        { { "shift" }, "g", urlEventHandler("https://github.com"), { "URL Events", "GitHub" } },
+        { { "shift" }, "m", urlEventHandler("https://maps.google.com"), { "URL Events", "Google Maps" } },
+        { { "shift" }, "w", urlEventHandler("https://weather.com"), { "URL Events", "Weather" } },
+        { { "shift" }, "y", urlEventHandler("https://yelp.com"), { "URL Events", "Yelp" } },
+        { { "cmd", "shift" }, "m", urlEventHandler("https://mail.google.com"), { "URL Events", "Gmail" } },
+    }
+
+    local entitySelectEvents = {
+        { nil, "g", GoogleChrome:new(), { "Select Events", "Select a Google Chrome tab or window" } },
+        { nil, "m", Messages:new(), { "Select Events", "Select a Messages conversation" } },
+        { nil, "n", Notes:new(), { "Select Events", "Select a Note" } },
+        { nil, "s", Safari:new(), { "Select Events", "Select a Safari tab or window" } },
+        { { "alt" }, "s", Spaces:new(), { "Select Events", "Select a Desktop Space" } },
+    }
+
+    local entityEvents = {
+        { nil, "a", AppStore:new(), { "Entities", "App Store" } },
+        { nil, "c", Calendar:new(), { "Entities", "Calendar" } },
+        { nil, "d", Dictionary:new(), { "Entities", "Dictionary" } },
+        { nil, "f", Finder:new(), { "Entities", "Finder" } },
+        { nil, "g", GoogleChrome:new(), { "Entities", "Google Chrome" } },
+        { nil, "h", Home:new(), { "Entities", "Home" } },
+        { nil, "i", iTunes:new(), { "Entities", "iTunes" } },
+        { nil, "m", Messages:new(), { "Entities", "Messages" } },
+        { nil, "n", Notes:new(), { "Entities", "Notes" } },
+        { nil, "p", Preview:new(), { "Entities", "Preview" } },
+        { nil, "q", QuickTimePlayer:new(), { "Entities", "QuickTime Player" } },
+        { nil, "r", Reminders:new(), { "Entities", "Reminders" } },
+        { nil, "s", Safari:new(), { "Entities", "Safari" } },
+        { nil, "t", Terminal:new(), { "Entities", "Terminal" } },
+        { nil, ",", SystemPreferences:new(), { "Entities", "System Preferences" } },
+        { { "alt" }, "s", Spaces:new(), { "Entities", "Desktop Spaces" } },
+        { { "alt", "cmd" }, "s", Siri:new(), { "Entities", "Siri" } },
+        { { "shift" }, "a", ActivityMonitor:new(), { "Entities", "Activity Monitor" } },
+        { { "shift" }, "c", Calculator:new(), { "Entities", "Calculator" } },
+        { { "shift" }, "f", FaceTime:new(), { "Entities", "FaceTime" } },
+        { { "shift" }, "m", Maps:new(), { "Entities", "Maps" } },
+        { { "shift" }, "n", News:new(), { "Entities", "News" } },
+        { { "shift" }, "s", Spotify:new(), { "Entities", "Spotify" } },
+        { { "shift", "cmd" }, "m", Mail:new(), { "Entities", "Mail" } },
+    }
+
+    local volumeEvents = {
+        {
+            nil, "j",
+            function()
+                local newVolume = hs.audiodevice.current().volume - 10
+                hs.audiodevice.defaultOutputDevice():setVolume(newVolume)
+            end,
+            { "Volume Control Mode", "Turn Volume Down" },
+        },
+        {
+            nil, "k",
+            function()
+                local newVolume = hs.audiodevice.current().volume + 10
+                hs.audiodevice.defaultOutputDevice():setVolume(newVolume)
+            end,
+            { "Volume Control Mode", "Turn Volume Up" },
+        },
+        {
+            nil, "m",
+            function()
+                local isMuted = hs.audiodevice.defaultOutputDevice():muted()
+                hs.audiodevice.defaultOutputDevice():setMuted(isMuted)
+                return true
+            end,
+            { "Volume Control Mode", "Set Volume to Zero" },
+        },
+        {
+            nil, "0",
+            function()
+                hs.audiodevice.defaultOutputDevice():setVolume(0)
+                return true
+            end,
+            { "Volume Control Mode", "Set Volume to Zero" },
+        },
+        {
+            nil, "1",
+            function()
+                hs.audiodevice.defaultOutputDevice():setVolume(100)
+                return true
+            end,
+            { "Volume Control Mode", "Set Volume to Max" },
+        },
+    }
+
+    local brightnessEvents = {
+        {
+            nil, "j",
+            function()
+                local newBrightness = hs.brightness.get() - 10
+                hs.brightness.set(newBrightness)
+            end,
+            { "Brightness Control Mode", "Turn Brightness Down" },
+        },
+        {
+            nil, "k",
+            function()
+                local newBrightness = hs.brightness.get() + 10
+                hs.brightness.set(newBrightness)
+            end,
+            { "Brightness Control Mode", "Turn Brightness Up" },
+        },
+        {
+            nil, "0",
+            function()
+                hs.brightness.set(0)
+                return true
+            end,
+            { "Brightness Control Mode", "Set Brightness to Zero" },
+        },
+        {
+            nil, "1",
+            function()
+                hs.brightness.set(100)
+                return true
+            end,
+            { "Brightness Control Mode", "Set Brightness to Max" },
+        },
+    }
+
+    local normalEvents = {
+        { nil, "d", toggleDock, { "Normal Mode", "Toggle Dock" } },
+        { nil, "s", startScreenSaver, { "Normal Mode", "Start Screen Saver" } },
     }
 
     return {
         url = urlEvents,
-        select = initEntityEvents(true),
-        entity = initEntityEvents(),
+        select = entitySelectEvents,
+        entity = entityEvents,
+        volume = volumeEvents,
+        brightness = brightnessEvents,
+        normal = normalEvents,
     }
 end
 
-return obj
+return DefaultWorkflows

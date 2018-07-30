@@ -5,6 +5,7 @@ return {
     runreport = true,
     exclude = {
         'luacov$',
+        'src.entities',
         'deps',
         'spec',
     },

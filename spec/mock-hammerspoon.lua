@@ -11,6 +11,7 @@ local mocks = {
         get = function()
             return nil
         end,
+        enableSpotlightForNameSearches = function() end,
         launchOrFocus = function()
             return nil
         end,
@@ -70,6 +71,11 @@ local mocks = {
                 keyDown = nil,
             },
         },
+    },
+    osascript = {
+        applescript = function()
+            return nil
+        end,
     },
     screen = {
         mainScreen = function()

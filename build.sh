@@ -12,7 +12,7 @@ LINK_TARGET="$HOME/.hammerspoon/Spoons/$SPOON"
 build() {
     # Clear out dist folder
     if [ ! -z "$DIST_DIR" ]; then
-        rm -rfv "${DIST_DIR:?}"/*
+        rm -rf "${DIST_DIR:?}"/*
         echo "build.sh: Cleared out content in dist folder"
     fi
     mkdir -p "$BUILD_DIR"
@@ -25,16 +25,17 @@ build() {
     echo "build.sh: Copied all project dependencies to deps folder"
 
     # Copy source files and generated docs from root directory to folder
-    (cd "$SRC_DIR" && for file in *.lua; do cp "$file" "$BUILD_DIR/$file"; done)
+    (cd "$SRC_DIR" && for file in *.{lua,html,css}; do cp "$file" "$BUILD_DIR/$file"; done)
+    cp -r "$WORKING_DIR/src/entities" "$BUILD_DIR/entities"
+    cp -r "$WORKING_DIR/src/osascripts" "$BUILD_DIR/osascripts"
     if [ -f "$WORKING_DIR/docs.json" ]; then
         cp "$WORKING_DIR/docs.json" "$BUILD_DIR/docs.json"
     fi
-    cp -r "$WORKING_DIR/src/osascripts" "$BUILD_DIR/osascripts"
     echo "build.sh: Copied all source files and docs to dist folder"
 
     # Remove pre-existing spoon link
     if [ -d "$LINK_TARGET" ]; then
-        rm -rv "$LINK_TARGET"
+        rm "$LINK_TARGET"
         echo "build.sh: Removed pre-existing Ki spoon"
     fi
 
