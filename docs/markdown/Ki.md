@@ -38,7 +38,7 @@ local shortcuts = {
 
 * **_workflow_** - a list of transition and workflow events that execute a specific task, cycling from `desktop` mode back to `desktop` mode
 
-* **_workflow event_** - a keydown event that's part of some workflow using the Hammerspoon API (i.e., event definitions in `default-workflows.lua`, or any event that is not a transition or state event)
+* **_workflow event_** - a keydown event that's part of some workflow using the Hammerspoon API (i.e., event definitions in `default-events.lua`, or any event that is not a transition or state event)
 
 ## API Overview
 * Variables - Configurable values

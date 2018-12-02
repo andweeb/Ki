@@ -37,7 +37,7 @@
 ---
 --- * **_workflow_** - a list of transition and workflow events that execute a specific task, cycling from `desktop` mode back to `desktop` mode
 ---
---- * **_workflow event_** - a keydown event that's part of some workflow using the Hammerspoon API (i.e., event definitions in `default-workflows.lua`, or any event that is not a transition or state event)
+--- * **_workflow event_** - a keydown event that's part of some workflow using the Hammerspoon API (i.e., event definitions in `default-events.lua`, or any event that is not a transition or state event)
 
 local Ki = {}
 Ki.__index = Ki
@@ -580,11 +580,11 @@ function Ki:start()
     })
 
     -- Initialize default workflow events
-    local defaultWorkflows = dofile(spoonPath.."/default-workflows.lua").init()
-    setmetatable(defaultWorkflows, self:_createEventsMetatable(true))
+    local defaultEvents = dofile(spoonPath.."/default-events.lua").init()
+    setmetatable(defaultEvents, self:_createEventsMetatable(true))
 
     -- Set transition and workflow events
-    local workflows = defaultWorkflows + self.workflows
+    local workflows = defaultEvents + self.workflows
     local transitions = self._defaultTransitions + self.transitions
     self.workflows = transitions + workflows
 
@@ -599,10 +599,13 @@ function Ki:start()
     -- Create Ki cheatsheet
     self.cheatsheet = _G.requirePackage("cheatsheet", true)
 
-    -- Add cheatsheet entity into entity events
+    -- Add show cheatsheet entity event into workflow entity events
     table.insert(self.workflows.entity, {
         { "shift" }, "/",
-        function() self.cheatsheet:show() return true end,
+        function()
+            self.cheatsheet:show()
+            return true
+        end,
         { "Entities", "Cheatsheet" },
     })
 

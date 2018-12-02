@@ -1,12 +1,12 @@
---- === DefaultWorkflows ===
+--- === DefaultEvents ===
 ---
---- Definitions of default workflow events
+--- Definitions of default workflow events for default ki modes
 ---
 -- luacov: disable
 
-local DefaultWorkflows = {}
-DefaultWorkflows.__index = DefaultWorkflows
-DefaultWorkflows.__name = "default-events"
+local DefaultEvents = {}
+DefaultEvents.__index = DefaultEvents
+DefaultEvents.__name = "default-events"
 
 if not _G.requirePackage then
     function _G.requirePackage(name, isInternal)
@@ -19,32 +19,17 @@ if not _G.requirePackage then
     end
 end
 
-local function startScreenSaver()
-    hs.osascript.applescript([[
-        tell application "System Events"
-            start current screen saver
-        end tell
-    ]])
-
-    return true
-end
-
-local function toggleDock()
-    hs.osascript.applescript([[
-        tell application "System Events" to tell dock preferences to set autohide to not autohide
-    ]])
-end
-
---- DefaultWorkflows.init()
+--- DefaultEvents.initEntityEvents()
 --- Method
---- Defines the initial set of default key bindings and creates the workflow event handlers for `entity`, `select`, and `url` mode
+--- Defines the initial set of actions with predefined keybindings for `entity` and `select` mode
 ---
 --- Parameters:
 ---  * None
 ---
 --- Returns:
----  * A table containing the default `entity`, `select`, and `url` workflow events
-function DefaultWorkflows.init()
+---  * A list of `entity` workflow events
+---  * A list of `select` workflow events
+function DefaultEvents.initEntityEvents()
     local ActivityMonitor = _G.requirePackage("entities/activity-monitor", true)
     local AppStore = _G.requirePackage("entities/app-store", true)
     local Calendar = _G.requirePackage("entities/calendar", true)
@@ -69,32 +54,6 @@ function DefaultWorkflows.init()
     local Spotify = _G.requirePackage("entities/spotify", true)
     local SystemPreferences = _G.requirePackage("entities/system-preferences", true)
     local Terminal = _G.requirePackage("entities/terminal", true)
-
-    local function urlEventHandler(url)
-        return function()
-            hs.urlevent.openURL(url)
-            return true
-        end
-    end
-
-    local urlEvents = {
-        { nil, "a", urlEventHandler("https://amazon.com"), { "URL Events", "Amazon" } },
-        { nil, "f", urlEventHandler("https://facebook.com"), { "URL Events", "Facebook" } },
-        { nil, "g", urlEventHandler("https://google.com"), { "URL Events", "Google" } },
-        { nil, "h", urlEventHandler("https://news.ycombinator.com"), { "URL Events", "Hacker News" } },
-        { nil, "l", urlEventHandler("https://linkedin.com"), { "URL Events", "LinkedIn" } },
-        { nil, "m", urlEventHandler("https://messenger.com"), { "URL Events", "Facebook Messenger" } },
-        { nil, "n", urlEventHandler("https://netflix.com"), { "URL Events", "Netflix" } },
-        { nil, "r", urlEventHandler("https://reddit.com"), { "URL Events", "Reddit" } },
-        { nil, "w", urlEventHandler("https://wikipedia.org"), { "URL Events", "Wikipedia" } },
-        { nil, "y", urlEventHandler("https://youtube.com"), { "URL Events", "YouTube" } },
-        { nil, "z", urlEventHandler("https://zillow.com"), { "URL Events", "Zillow" } },
-        { { "shift" }, "g", urlEventHandler("https://github.com"), { "URL Events", "GitHub" } },
-        { { "shift" }, "m", urlEventHandler("https://maps.google.com"), { "URL Events", "Google Maps" } },
-        { { "shift" }, "w", urlEventHandler("https://weather.com"), { "URL Events", "Weather" } },
-        { { "shift" }, "y", urlEventHandler("https://yelp.com"), { "URL Events", "Yelp" } },
-        { { "cmd", "shift" }, "m", urlEventHandler("https://mail.google.com"), { "URL Events", "Gmail" } },
-    }
 
     local entitySelectEvents = {
         { nil, "g", GoogleChrome:new(), { "Select Events", "Select a Google Chrome tab or window" } },
@@ -131,6 +90,40 @@ function DefaultWorkflows.init()
         { { "shift", "cmd" }, "m", Mail:new(), { "Entities", "Mail" } },
     }
 
+    return entityEvents, entitySelectEvents
+end
+
+function DefaultEvents.initUrlEvents()
+    local function urlEventHandler(url)
+        return function()
+            hs.urlevent.openURL(url)
+            return true
+        end
+    end
+
+    local urlEvents = {
+        { nil, "a", urlEventHandler("https://amazon.com"), { "URL Events", "Amazon" } },
+        { nil, "f", urlEventHandler("https://facebook.com"), { "URL Events", "Facebook" } },
+        { nil, "g", urlEventHandler("https://google.com"), { "URL Events", "Google" } },
+        { nil, "h", urlEventHandler("https://news.ycombinator.com"), { "URL Events", "Hacker News" } },
+        { nil, "l", urlEventHandler("https://linkedin.com"), { "URL Events", "LinkedIn" } },
+        { nil, "m", urlEventHandler("https://messenger.com"), { "URL Events", "Facebook Messenger" } },
+        { nil, "n", urlEventHandler("https://netflix.com"), { "URL Events", "Netflix" } },
+        { nil, "r", urlEventHandler("https://reddit.com"), { "URL Events", "Reddit" } },
+        { nil, "w", urlEventHandler("https://wikipedia.org"), { "URL Events", "Wikipedia" } },
+        { nil, "y", urlEventHandler("https://youtube.com"), { "URL Events", "YouTube" } },
+        { nil, "z", urlEventHandler("https://zillow.com"), { "URL Events", "Zillow" } },
+        { { "shift" }, "g", urlEventHandler("https://github.com"), { "URL Events", "GitHub" } },
+        { { "shift" }, "m", urlEventHandler("https://maps.google.com"), { "URL Events", "Google Maps" } },
+        { { "shift" }, "w", urlEventHandler("https://weather.com"), { "URL Events", "Weather" } },
+        { { "shift" }, "y", urlEventHandler("https://yelp.com"), { "URL Events", "Yelp" } },
+        { { "cmd", "shift" }, "m", urlEventHandler("https://mail.google.com"), { "URL Events", "Gmail" } },
+    }
+
+    return urlEvents
+end
+
+function DefaultEvents.initVolumeEvents()
     local volumeEvents = {
         {
             nil, "j",
@@ -175,6 +168,10 @@ function DefaultWorkflows.init()
         },
     }
 
+    return volumeEvents
+end
+
+function DefaultEvents.initBrightnessEvents()
     local brightnessEvents = {
         {
             nil, "j",
@@ -210,10 +207,49 @@ function DefaultWorkflows.init()
         },
     }
 
+    return brightnessEvents
+end
+
+function DefaultEvents.initNormalEvents()
+    local function startScreenSaver()
+        hs.osascript.applescript([[
+            tell application "System Events"
+                start current screen saver
+            end tell
+        ]])
+
+        return true
+    end
+
+    local function toggleDock()
+        hs.osascript.applescript([[
+            tell application "System Events" to tell dock preferences to set autohide to not autohide
+        ]])
+    end
+
     local normalEvents = {
         { nil, "d", toggleDock, { "Normal Mode", "Toggle Dock" } },
         { nil, "s", startScreenSaver, { "Normal Mode", "Start Screen Saver" } },
     }
+
+    return normalEvents
+end
+
+--- DefaultEvents.init()
+--- Method
+--- Defines the initial set of default key bindings and creates the workflow event handlers for default modes
+---
+--- Parameters:
+---  * None
+---
+--- Returns:
+---  * A table containing the default `url`, `entity`, `select`, `volume`, `brightness`, and `normal` workflow events
+function DefaultEvents.init()
+    local urlEvents = DefaultEvents.initUrlEvents()
+    local entityEvents, entitySelectEvents = DefaultEvents.initEntityEvents()
+    local volumeEvents = DefaultEvents.initVolumeEvents()
+    local brightnessEvents = DefaultEvents.initBrightnessEvents()
+    local normalEvents = DefaultEvents.initNormalEvents()
 
     return {
         url = urlEvents,
@@ -225,4 +261,4 @@ function DefaultWorkflows.init()
     }
 end
 
-return DefaultWorkflows
+return DefaultEvents
