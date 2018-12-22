@@ -1,15 +1,13 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Siri = Entity:subclass("Siri")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {}
 
-function Siri:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, nil, function() hs.application.open("Siri") end, { self.name, "Activate Siri" } },
-    }
-
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Siri", shortcuts)
+function actions.activateSiri()
+    hs.application.open("Siri")
 end
 
-return Siri
+local shortcuts = {
+    { nil, nil, actions.activateSiri, { "Siri", "Activate Siri" } },
+}
+
+return Application:new("Siri", shortcuts), shortcuts, actions

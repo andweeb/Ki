@@ -1,46 +1,40 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Spotify = Entity:subclass("Spotify")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {
+    search = Application.createMenuItemEvent("Search", { focusAfter = true }),
+    newPlaylist = Application.createMenuItemEvent("New Playlist", { focusAfter = true }),
+    newPlaylistFolder = Application.createMenuItemEvent("New Playlist Folder", { focusAfter = true }),
+}
 
-function Spotify.togglePlay()
+function actions.togglePlay()
     hs.spotify.playpause()
     return false
 end
 
-function Spotify.playPrevious()
+function actions.playPrevious()
     hs.spotify.previous()
     return false
 end
 
-function Spotify.playNext()
+function actions.playNext()
     hs.spotify.next()
     return false
 end
 
-function Spotify.stop()
+function actions.stop()
     hs.spotify.pause()
     return false
 end
 
-function Spotify.openLocation(app)
-    app:selectMenuItem("Search")
-end
+local shortcuts = {
+    { nil, "space", actions.togglePlay, { "Playback", "Toggle Play" } },
+    { nil, "p", actions.playPrevious, { "Playback", "Previous" } },
+    { nil, "n", actions.playNext, { "Playback", "Next" } },
+    { nil, "s", actions.stop, { "Playback", "Stop" } },
+    { nil, "l", actions.search, { "Edit", "Search" } },
+    { { "cmd" }, "n", actions.newPlaylist, { "File", "New Playlist" } },
+    { { "cmd" }, "f", actions.search, { "Edit", "Search" } },
+    { { "cmd", "shift" }, "n", actions.newPlaylistFolder, { "File", "New Playlist Folder" } },
+}
 
-function Spotify:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, "space", self.togglePlay, { "Playback", "Toggle Play" } },
-        { nil, "p", self.playPrevious, { "Playback", "Previous" } },
-        { nil, "n", self.playNext, { "Playback", "Next" } },
-        { nil, "s", self.stop, { "Playback", "Stop" } },
-        { nil, "l", self.openLocation, { "Edit", "Search" } },
-        { { "cmd" }, "n", self.playNext, { "File", "New Playlist" } },
-        { { "cmd" }, "f", self.openLocation, { "Edit", "Search" } },
-        { { "cmd", "shift" }, "n", self.playNext, { "File", "New Playlist Folder" } },
-    }
-
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Spotify", shortcuts)
-end
-
-return Spotify
+return Application:new("Spotify", shortcuts), shortcuts, actions

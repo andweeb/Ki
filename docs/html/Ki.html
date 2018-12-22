@@ -15,25 +15,24 @@
   <body>
     <header>
       <h1><a href="./index.html">docs</a> &raquo; Ki</h1>
-      <p>Composable, modal macOS automation inspired by the vi</p>
+      <p>Modal macOS automation inspired by the vi text editor</p>
 <p>Ki uses some particular terminology in its API and documentation:</p>
 <ul>
-<li><p><strong><em>event/shortcut</em></strong> - a shortcut object containing the event handler and its keybinding. The object structure matches the argument list for hotkeys bindings in Hammerspoon: modifier keys, key name, and event handler function or entity object. For example, the following table represents an keydown event on <code>⇧⌘m</code>:</p>
-<div class="highlight"><pre><span></span><span class="kd">local</span> <span class="n">shortcuts</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span><span class="p">,</span> <span class="s2">&quot;cmd&quot;</span> <span class="p">},</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="kr">function</span><span class="p">()</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pressed the `m` hotkey!&quot;</span><span class="p">)</span> <span class="kr">end</span> <span class="p">},</span>
-  <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">createEntity</span><span class="p">(</span><span class="s2">&quot;Safari&quot;</span><span class="p">)</span> <span class="p">},</span>
+<li><p><strong>event</strong> - a step in a desktop workflow, consisting of the event handler and assigned shortcut keybinding. The table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys, key name, and event handler. For example, the following events open applications on keydown events on <code>s</code> and <code>⇧⌘s</code>:</p>
+<div class="highlight"><pre><span></span><span class="kd">local</span> <span class="n">openSafari</span> <span class="o">=</span> <span class="kr">function</span><span class="p">()</span> <span class="n">hs</span><span class="p">.</span><span class="n">application</span><span class="p">.</span><span class="n">launchOrFocus</span><span class="p">(</span><span class="s2">&quot;Safari&quot;</span><span class="p">)</span> <span class="kr">end</span>
+<span class="kd">local</span> <span class="n">openSpotify</span> <span class="o">=</span> <span class="kr">function</span><span class="p">()</span> <span class="n">hs</span><span class="p">.</span><span class="n">application</span><span class="p">.</span><span class="n">launchOrFocus</span><span class="p">(</span><span class="s2">&quot;Spotify&quot;</span><span class="p">)</span> <span class="kr">end</span>
+<span class="kd">local</span> <span class="n">shortcuts</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">openSafari</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;Safari&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">openSpotify</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;Spotify&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
-<p>An entity object that implements a <code>dispatchAction</code> can be also used:</p>
-<div class="highlight"><pre><span></span><span class="kd">local</span> <span class="n">_</span><span class="p">,</span> <span class="n">WordApplicationEntity</span> <span class="o">=</span> <span class="n">spoon</span><span class="p">.</span><span class="n">Ki</span><span class="p">.</span><span class="n">createEntity</span><span class="p">(</span><span class="s2">&quot;Microsoft Word&quot;</span><span class="p">)</span>
-<span class="kd">local</span> <span class="n">_</span><span class="p">,</span> <span class="n">ExcelApplicationEntity</span> <span class="o">=</span> <span class="n">spoon</span><span class="p">.</span><span class="n">Ki</span><span class="p">.</span><span class="n">createEntity</span><span class="p">(</span><span class="s2">&quot;Microsoft Excel&quot;</span><span class="p">)</span>
-<span class="kd">local</span> <span class="n">shortcuts</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="n">ExcelApplicationEntity</span> <span class="p">},</span>
-  <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">WordApplicationEntity</span> <span class="p">},</span>
+<p>An <code>Entity</code> instance can be also used as an event handler:</p>
+<div class="highlight"><pre><span></span><span class="kd">local</span> <span class="n">shortcuts</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">createApplication</span><span class="p">(</span><span class="s2">&quot;Microsoft Excel&quot;</span><span class="p">),</span> <span class="p">{</span> <span class="s2">&quot;Microsoft Excel&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
 </li>
-<li><p><strong><em>state event</em></strong> - a table that defines a unidirectional link between two states in the finite state machine, or transitions between different modes. For example, the <code>enterEntityMode</code> state event allows the user to transition from <code>normal</code> mode to <code>entity</code> mode by calling <code>Ki.state:entityEntityMode</code>:</p>
+<li><p><strong>state event</strong> - a unidirectional link between two states in the <a href="https://github.com/unindented/lua-fsm#usage">finite state machine</a> (structured differently from workflow/transition events). The state events below allow the user to transition from <code>desktop</code> mode to <code>normal</code> mode to <code>entity</code> mode and exit back to <code>desktop</code> mode:</p>
 
 <pre><code>local stateEvents = {
    { name = "enterNormalMode", from = "desktop", to = "normal" },
@@ -41,14 +40,14 @@
    { name = "exitMode", from = "entity", to = "desktop" },
 }</code></pre>
 </li>
-<li><p><strong><em>transition event</em></strong> - a keydown event with a handler function that invokes a state change through the finite state machine. For example, the following transition events invoke fsm callbacks to allow the user to enter <code>entity</code> and <code>action</code> mode:</p>
+<li><p><strong>transition event</strong> - an event that represents a mode transition. Its event handler invokes some state change through the finite state machine. Assuming state events have been initialized correctly, the following transition events invoke methods on <code>Ki.state</code> to allow the user to enter <code>entity</code> and <code>action</code> mode:</p>
 
-<pre><code>{ {"cmd"}, ";", function() Ki.state:enterEntityMode() end },
-{ {"cmd"}, "'", function() Ki.state:enterActionMode() end },</code></pre>
+<pre><code>{ {"cmd"}, "e", function() Ki.state:enterEntityMode() end },
+{ {"cmd"}, "a", function() Ki.state:enterActionMode() end },</code></pre>
 </li>
-<li><p><strong><em>workflow</em></strong> - a list of transition and workflow events that execute a specific task, cycling from <code>desktop</code> mode back to <code>desktop</code> mode</p>
+<li><p><strong>workflow</strong> - a series of transition and workflow events that execute some desktop task, cycling from <code>desktop</code> mode back to <code>desktop</code> mode</p>
 </li>
-<li><p><strong><em>workflow event</em></strong> - a keydown event that's part of some workflow using the Hammerspoon API (i.e., event definitions in <code>default-events.lua</code>, or any event that is not a transition or state event)</p>
+<li><p><strong>workflow event</strong> - an event that carries out the automative aspect in a workflow</p>
 </li>
 </ul>
 
@@ -57,14 +56,17 @@
       <ul>
         <li>Variables - Configurable values</li>
           <ul>
+            <li><a href="#defaultEntities">defaultEntities</a></li>
+            <li><a href="#defaultEvents">defaultEvents</a></li>
             <li><a href="#state">state</a></li>
-            <li><a href="#states">states</a></li>
+            <li><a href="#stateEvents">stateEvents</a></li>
             <li><a href="#statusDisplay">statusDisplay</a></li>
             <li><a href="#transitions">transitions</a></li>
             <li><a href="#workflows">workflows</a></li>
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
+            <li><a href="#createApplication">createApplication</a></li>
             <li><a href="#createEntity">createEntity</a></li>
             <li><a href="#start">start</a></li>
             <li><a href="#stop">stop</a></li>
@@ -72,6 +74,44 @@
       </ul>
       <h3>API Documentation</h3>
         <h4 class="documentation-section">Variables</h4>
+          <section id="defaultEntities">
+            <a name="//apple_ref/cpp/Variable/defaultEntities" class="dashAnchor"></a>
+            <h5><a href="#defaultEntities">defaultEntities</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki.defaultEntities</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A table containing the default automatable desktop entity instances in Ki.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="defaultEvents">
+            <a name="//apple_ref/cpp/Variable/defaultEvents" class="dashAnchor"></a>
+            <h5><a href="#defaultEvents">defaultEvents</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki.defaultEvents</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A table containing the default events for all default modes in Ki.</p>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="state">
             <a name="//apple_ref/cpp/Variable/state" class="dashAnchor"></a>
             <h5><a href="#state">state</a></h5>
@@ -86,18 +126,18 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>The internal <a href="https://github.com/unindented/lua-fsm#usage">finite state machine</a> used to manage modes in Ki</p>
+                <td><p>The internal <a href="https://github.com/unindented/lua-fsm#usage">finite state machine</a> used to manage modes in Ki.</p>
 </td>
               </tr>
             </table>
           </section>
-          <section id="states">
-            <a name="//apple_ref/cpp/Variable/states" class="dashAnchor"></a>
-            <h5><a href="#states">states</a></h5>
+          <section id="stateEvents">
+            <a name="//apple_ref/cpp/Variable/stateEvents" class="dashAnchor"></a>
+            <h5><a href="#stateEvents">stateEvents</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki.states</code></td>
+                <td><code>Ki.stateEvents</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -105,13 +145,13 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A table containing the <a href="https://github.com/unindented/lua-fsm#usage">state events</a> for the finite state machine set to <code>Ki.state</code>. Custom state events can be set to <code>Ki.states</code> before calling <code>Ki.start()</code> to set up the FSM with custom transitions events.</p>
+                <td><p>A table containing the <a href="https://github.com/unindented/lua-fsm#usage">state events</a> for the finite state machine set to <code>Ki.state</code>. Custom state events can be set to <code>Ki.stateEvents</code> before calling <code>Ki.start()</code> to set up the FSM with custom transition events.</p>
 <p>The example state events below create methods on <code>Ki.state</code> to enter and exit entity mode from normal mode:</p>
 <ul>
 <li><code>{ name = "enterEntityMode", from = "normal", to = "entity" }</code></li>
 <li><code>{ name = "exitMode", from = "entity", to = "normal" }</code></li>
 </ul>
-<p><strong>Note</strong>: these events will only <em>create and expose</em> methods on <code>Ki.state</code>. For example, the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods will only be initialized with the example state events above. These methods will need to be called in transition events (<a href="#transitions"><code>Ki.transitions</code></a>) in order to actually trigger the transition from mode to mode.</p>
+<p><strong>Note</strong>: these events will only <em>initialize and expose</em> methods on <code>Ki.state</code>. For example, the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods will only be <em>initialized</em> with the example state events above. These methods will need to be called in transition events (<a href="#transitions"><code>Ki.transitions</code></a>) in order to actually trigger the transition from mode to mode.</p>
 </td>
               </tr>
             </table>
@@ -130,11 +170,11 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A table that defines the behavior for displaying the status on mode transitions. The <code>show</code> function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:</p>
+                <td><p>A table that defines the behavior for displaying the status of mode transitions. The <code>show</code> function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:</p>
 <ul>
 <li><code>show</code> - A function invoked when a mode transition event occurs, with the following arguments:<ul>
 <li><code>status</code> - A string value containing the current mode</li>
-<li><code>parenthetical</code> - An optional char value of the key that triggered the state (i.e., "n", "N", etc.)</li>
+<li><code>parenthetical</code> - Optional parenthesized text in the display</li>
 </ul>
 </li>
 </ul>
@@ -169,23 +209,30 @@
 <li>from <code>normal</code> mode, <kbd>⌘b</kbd> to enter <code>brightness</code> mode</li>
 <li><kbd>⎋</kbd> to exit back to <code>desktop</code> mode from any of the modes above</li>
 </ul>
-<p>The example transition events below allow transitions on specified keybindings to enter normal mode from desktop mode and exit back to desktop mode from normal mode:</p>
+<p>The example transition events in the snippet below allow the following transitions:</p>
+<ul>
+<li>from <code>desktop</code> mode, enter <code>normal</code> mode with <kbd>⌘⎋</kbd></li>
+<li><p>from <code>normal</code> mode, enter <code>desktop</code> mode with <kbd>⎋</kbd></p>
 
-<pre><code> -- Initialize state events to expose `enterNormalMode` and `exitMode` methods on `Ki.state`
- Ki.states = {
-     { name = "enterNormalMode", from = "desktop", to = "normal" },
-     { name = "exitMode", from = "normal", to = "desktop" },
- }
- local enterNormalMode = function() Ki.state:enterNormalMode() end
- local exitMode = function() Ki.state:exitMode() end
- Ki.transitions = {
-     desktop = {
-         { {"cmd"}, "escape", enterNormalMode, { "Desktop Mode", "Transition to Normal Mode" } },
-     },
-     normal = {
-         { nil, "escape", exitMode, { "Normal Mode", "Exit to Desktop Mode" } },
-     },
- }</code></pre>
+<pre><code>-- Initialize state events to expose `enterNormalMode` and `exitMode` methods on `Ki.state`
+Ki.stateEvents = {
+  { name = "enterNormalMode", from = "desktop", to = "normal" },
+  { name = "exitMode", from = "normal", to = "desktop" },
+}
+
+local enterNormalMode = function() Ki.state:enterNormalMode() end
+local exitMode = function() Ki.state:exitMode() end
+
+Ki.transitions = {
+  desktop = {
+      { {"cmd"}, "escape", enterNormalMode, { "Desktop Mode", "Transition to Normal Mode" } },
+  },
+  normal = {
+      { nil, "escape", exitMode, { "Normal Mode", "Exit to Desktop Mode" } },
+  },
+}</code></pre>
+</li>
+</ul>
 <p><strong>Note</strong>: <code>action</code> mode is unique in that its events are generated at runtime and automatically dispatched to the intended <code>entity</code> handler. That's why there are no explicit transition events to <code>entity</code> mode defined in this default transitions table.</p>
 </td>
               </tr>
@@ -205,7 +252,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A table containing lists of workflow events keyed by mode name. The following example creates two entity and url events:</p>
+                <td><p>A table containing lists of workflows keyed by mode name. The following example creates two entity and url events:</p>
 <div class="highlight"><pre><span></span><span class="kd">local</span> <span class="kr">function</span> <span class="nf">handleUrlEvent</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="n">hs</span><span class="p">.</span><span class="n">urlevent</span><span class="p">.</span><span class="n">openURL</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="n">spoon</span><span class="p">.</span><span class="n">Ki</span><span class="p">.</span><span class="n">state</span><span class="p">:</span><span class="n">exitMode</span><span class="p">()</span>
@@ -231,13 +278,13 @@
             </table>
           </section>
         <h4 class="documentation-section">Methods</h4>
-          <section id="createEntity">
-            <a name="//apple_ref/cpp/Method/createEntity" class="dashAnchor"></a>
-            <h5><a href="#createEntity">createEntity</a></h5>
+          <section id="createApplication">
+            <a name="//apple_ref/cpp/Method/createApplication" class="dashAnchor"></a>
+            <h5><a href="#createApplication">createApplication</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki.createEntity(subclassName) -&gt; base Entity class[, subclassed Entity class]</code></td>
+                <td><code>Ki.createApplication([subclassName]) -&gt; base Application class[, subclassed Application class]</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -245,15 +292,43 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Returns the both the base and custom subclassed <a href="Entity.html">entity class</a> for creating custom desktop entities</p>
+                <td><p>Returns both the base and (optionally) subclassed <a href="Application.html">application class</a> for creating custom application entity subclasses or instances</p>
 <p>Parameters:</p>
 <ul>
-<li>None</li>
+<li><code>subclassName</code> - optional name to subclass the <code>Application</code> class</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The base <code>Application</code> class</li>
+<li>An <code>Application</code> subclass or nil if <code>subclassName</code> is nil</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="createEntity">
+            <a name="//apple_ref/cpp/Method/createEntity" class="dashAnchor"></a>
+            <h5><a href="#createEntity">createEntity</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki.createEntity([subclassName]) -&gt; base Entity class[, subclassed Entity class]</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Returns both the base and (optionally) subclassed <a href="Entity.html">entity class</a> for creating custom entity subclasses or instances</p>
+<p>Parameters:</p>
+<ul>
+<li>subclassName - an optional name to return a subclassed entity</li>
 </ul>
 <p>Returns:</p>
 <ul>
 <li>The base <code>Entity</code> class</li>
-<li>A subclassed <code>ExtendedEntity</code> class if a <code>subclassName</code> is specified</li>
+<li>An <code>Entity</code> subclass or nil if <code>subclassName</code> is nil</li>
 </ul>
 </td>
               </tr>

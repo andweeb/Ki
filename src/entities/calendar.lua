@@ -1,19 +1,18 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Calendar = Entity:subclass("Calendar")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {
+    find = Application.createMenuItemEvent("Find", { focusAfter = true }),
+    newEvent = Application.createMenuItemEvent("New Event", { focusAfter = true }),
+    newCalendar = Application.createMenuItemEvent("New Calendar", { focusAfter = true }),
+    newCalendarSubscription = Application.createMenuItemEvent("New Calendar Subscription...", { focusAfter = true }),
+}
 
-function Calendar:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, "l", function(app) app:selectMenuItem("Find") end, { "Edit", "Find" } },
-        { nil, "n", function(app) app:selectMenuItem("New Event") end, { "File", "New Event" } },
-        { { "shift" }, "n", function(app) app:selectMenuItem("New Calendar") end, { "File", "New Calendar" } },
-        { { "shift" }, "s", function(app) app:selectMenuItem("New Calendar Subscription...") end, { "File", "New Calendar Subscription..." } },
-        { { "cmd" }, "f", function(app) app:selectMenuItem("Find") end, { "Edit", "Find" } },
-    }
+local shortcuts = {
+    { nil, "l", actions.find, { "Edit", "Find" } },
+    { nil, "n", actions.newEvent, { "File", "New Event" } },
+    { { "shift" }, "n", actions.newCalendar, { "File", "New Calendar" } },
+    { { "shift" }, "s", actions.newCalendarSubscription, { "File", "New Calendar Subscription..." } },
+    { { "cmd" }, "f", actions.find, { "Edit", "Find" } },
+}
 
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Calendar", shortcuts)
-end
-
-return Calendar
+return Application:new("Calendar", shortcuts), shortcuts, actions

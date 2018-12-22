@@ -15,27 +15,53 @@
   <body>
     <header>
       <h1><a href="./index.html">docs</a> &raquo; Entity</h1>
-      <p>Entity class that represents automatable desktop entities, i.e., applications, desktop spaces, Siri, etc.</p>
+      <p>Entity class that represents some generic automatable desktop entity</p>
 
       </header>
       <h3>API Overview</h3>
       <ul>
+        <li>Variables - Configurable values</li>
+          <ul>
+            <li><a href="#selectionModalShortcuts">selectionModalShortcuts</a></li>
+          </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
             <li><a href="#dispatchAction">dispatchAction</a></li>
-            <li><a href="#getApplication">getApplication</a></li>
-            <li><a href="#getMenuItemList">getMenuItemList</a></li>
+            <li><a href="#getEventHandler">getEventHandler</a></li>
             <li><a href="#getSelectionItems">getSelectionItems</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#invokeEventHandler">invokeEventHandler</a></li>
             <li><a href="#mergeShortcuts">mergeShortcuts</a></li>
             <li><a href="#notifyError">notifyError</a></li>
-            <li><a href="#registerShortcuts">registerShortcuts</a></li>
             <li><a href="#renderScriptTemplate">renderScriptTemplate</a></li>
             <li><a href="#showSelectionModal">showSelectionModal</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
+        <h4 class="documentation-section">Variables</h4>
+          <section id="selectionModalShortcuts">
+            <a name="//apple_ref/cpp/Variable/selectionModalShortcuts" class="dashAnchor"></a>
+            <h5><a href="#selectionModalShortcuts">selectionModalShortcuts</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity.selectionModalShortcuts</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A list of shortcuts that can be used when the selection modal is visible. The following shortcuts are available by default:</p>
+<ul>
+<li><kbd>^k</kbd> to navigate up an item</li>
+<li><kbd>^j</kbd> to navigate down an item</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
         <h4 class="documentation-section">Methods</h4>
           <section id="dispatchAction">
             <a name="//apple_ref/cpp/Method/dispatchAction" class="dashAnchor"></a>
@@ -51,11 +77,11 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Dispatch an action from a triggered shortcut for an entity</p>
+                <td><p>Dispatch an action from a shortcut within the context of the given mode</p>
 <p>Parameters:</p>
 <ul>
 <li><code>mode</code> - The name of the current mode</li>
-<li><code>shortcut</code> - A shortcut object with an action to invoke on the entity</li>
+<li><code>shortcut</code> - A shortcut object containing the keybindings and event handler for the entity</li>
 </ul>
 <p>Returns:</p>
 <ul>
@@ -65,13 +91,13 @@
               </tr>
             </table>
           </section>
-          <section id="getApplication">
-            <a name="//apple_ref/cpp/Method/getApplication" class="dashAnchor"></a>
-            <h5><a href="#getApplication">getApplication</a></h5>
+          <section id="getEventHandler">
+            <a name="//apple_ref/cpp/Method/getEventHandler" class="dashAnchor"></a>
+            <h5><a href="#getEventHandler">getEventHandler</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity:getApplication() -&gt; hs.application object or nil</code></td>
+                <td><code>Entity:getEventHandler(shortcuts, flags, keyName)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -79,42 +105,16 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Gets the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object from the entity name</p>
+                <td><p>Returns the event handler within the provided shortcuts with the given shortcut keybindings, or nil if not found</p>
 <p>Parameters:</p>
 <ul>
-<li>None</li>
+<li><code>shortcuts</code> - The list of shortcut objects</li>
+<li><code>flags</code> - A table containing the keyboard modifiers in the keyboard event (from <code>hs.eventtap.event:getFlags()</code>)</li>
+<li><code>keyName</code> - A string containing the name of a keyboard key (in <code>hs.keycodes.map</code>)</li>
 </ul>
 <p>Returns:</p>
 <ul>
-<li>An <code>hs.application</code> object or <code>nil</code> if the application could not be found</li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="getMenuItemList">
-            <a name="//apple_ref/cpp/Method/getMenuItemList" class="dashAnchor"></a>
-            <h5><a href="#getMenuItemList">getMenuItemList</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Entity.getMenuItemList(app, menuItemPath) -&gt; table or nil</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Gets a list of menu items from a hierarchical menu item path</p>
-<p>Parameters:</p>
-<ul>
-<li><code>app</code> - The target <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
-<li><code>menuItemPath</code> - A table representing the hierarchical path of the target menu item (e.g. <code>{ "File", "Share" }</code>)</li>
-</ul>
-<p>Returns:</p>
-<ul>
-<li>A list of <a href="https://www.hammerspoon.org/docs/hs.application.html#getMenuItems">menu items</a> or <code>nil</code></li>
+<li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
 </ul>
 </td>
               </tr>
@@ -126,7 +126,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity:getSelectionItems(appName) -&gt; table of choices or nil</code></td>
+                <td><code>Entity:getSelectionItems() -&gt; table of choices or nil</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -134,11 +134,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A placeholder method to return a list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects for the selection modal. Subclassed entities intended to be used with select mode must implement this method to correctly display items in the selection modal.</p>
-<p>Parameters:</p>
-<ul>
-<li><code>appName</code> - The entity application name</li>
-</ul>
+                <td><p>Returns a list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display in the selection modal. Entities intended to be used with select mode must implement this method to correctly display items in the selection modal.</p>
 <p>Returns:</p>
 <ul>
 <li><code>selectionItems</code> - A list of choices or <code>nil</code></li>
@@ -161,7 +157,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Initializes a new entity instance with its name and available shortcuts. By default, a <code>cheatsheet</code> object will be initialized on the entity object with the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless <code>autoExitMode</code> is explicitly set to <code>false</code>.</p>
+                <td><p>Initializes a new entity instance with its name and shortcuts. By default, a <code>cheatsheet</code> object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the <code>autoExitMode</code> parameter is explicitly set to <code>false</code>.</p>
 <p>Parameters:</p>
 <ul>
 <li><code>name</code> - The entity name</li>
@@ -193,7 +189,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity:invokeEventHandler(app, mode, eventHandler)</code></td>
+                <td><code>Entity:invokeEventHandler(mode, eventHandler, ...)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -201,10 +197,9 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Invokes an action with different parameters depending on the current Ki mode</p>
+                <td><p>Invokes an action with different parameters depending on the current mode</p>
 <p>Parameters:</p>
 <ul>
-<li><code>app</code> - The target <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
 <li><code>mode</code> - The current mode name</li>
 <li><code>eventHandler</code> - The action event handler</li>
 </ul>
@@ -234,7 +229,7 @@
 <p>Parameters:</p>
 <ul>
 <li><code>fromList</code> - The list of shortcuts to apply onto the second list argument</li>
-<li><code>toList</code> - The target list of shortcuts to override those in the first list argument</li>
+<li><code>toList</code> - The target list of shortcuts to override with those in the first list argument with conflicting keybindings</li>
 </ul>
 <p>Returns:</p>
 <ul>
@@ -272,33 +267,6 @@
               </tr>
             </table>
           </section>
-          <section id="registerShortcuts">
-            <a name="//apple_ref/cpp/Method/registerShortcuts" class="dashAnchor"></a>
-            <h5><a href="#registerShortcuts">registerShortcuts</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Entity:registerShortcuts(shortcuts)</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Registers the list of shortcuts applicable to the entity object</p>
-<p>Parameters:</p>
-<ul>
-<li><code>shortcuts</code> - The list of shortcuts for the entity</li>
-</ul>
-<p>Returns:</p>
-<ul>
-<li>None</li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
           <section id="renderScriptTemplate">
             <a name="//apple_ref/cpp/Method/renderScriptTemplate" class="dashAnchor"></a>
             <h5><a href="#renderScriptTemplate">renderScriptTemplate</a></h5>
@@ -313,7 +281,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Generates an applescript template string with a given view model object</p>
+                <td><p>Generates an applescript from templates located in <code>src/osascripts</code> with some view model object</p>
 <p>Parameters:</p>
 <ul>
 <li><code>scriptName</code> - The applescript file name</li>
@@ -333,7 +301,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity.showSelectionModal(app, choices, selectEventHandler)</code></td>
+                <td><code>Entity.showSelectionModal(choices, eventHandler, ...)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -341,12 +309,11 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Shows a selection modal with a list of choices. Highlight items up and down with <kbd>⌃j</kbd> and <kbd>⌃k</kbd>, and close the modal with <kbd>Escape</kbd>.</p>
+                <td><p>Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.</p>
 <p>Parameters:</p>
 <ul>
-<li><code>app</code> - The <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object for the entity or nil</li>
 <li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display on the chooser modal</li>
-<li><code>selectEventHandler</code> - The callback function invoked when a choice is selected from the modal</li>
+<li><code>eventHandler</code> - The callback function invoked when a choice is selected from the modal</li>
 </ul>
 <p>Returns:</p>
 <ul>

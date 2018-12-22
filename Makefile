@@ -57,9 +57,6 @@ spoon-deps:
 	luarocks install --tree deps fsm 1.1.0-1
 	luarocks install --tree deps lustache 1.3.1-0
 	luarocks install --tree deps middleclass 4.1.1-0
-	git clone --branch v0.5 https://github.com/andweeb/hs._asm.undocumented.spaces.git deps/spaces && \
-		cd deps/spaces && \
-		make install
 
 docs-deps:
 	pip install --user jinja2 mistune pygments

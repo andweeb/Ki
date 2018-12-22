@@ -1,14 +1,25 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Safari = Entity:subclass("Safari")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {
+    addBookmark = Application.createMenuItemEvent("Add Bookmark...", { focusBefore = true }),
+    openLocation = Application.createMenuItemEvent("Open Location...", { focusBefore = true }),
+    moveTabToNewWindow = Application.createMenuItemEvent("Move Tab to New Window", { focusBefore = true }),
+    mergeAllWindows = Application.createMenuItemEvent("Merge All Windows", { focusBefore = true }),
+    openNewWindow = Application.createMenuItemEvent("New Window", { focusAfter = true }),
+    openNewPrivateWindow = Application.createMenuItemEvent("New Private Window", { focusAfter = true }),
+    openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true }),
+    openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true }),
+    undoCloseTab = Application.createMenuItemEvent("Reopen Last Closed Tab", { focusAfter = true }),
+    showHistory = Application.createMenuItemEvent("Show All History", { focusAfter = true }),
+}
 
-function Safari.getSelectionItems()
+function Application.getSelectionItems()
     local choices = {}
-    local script = Safari.renderScriptTemplate("application-tab-titles", { application = "Safari" })
+    local script = Application.renderScriptTemplate("application-tab-titles", { application = "Safari" })
     local isOk, tabList, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Safari.notifyError("Error fetching browser tab information", rawTable.NSLocalizedFailureReason)
+        Application.notifyError("Error fetching browser tab information", rawTable.NSLocalizedFailureReason)
 
         return {}
     end
@@ -35,25 +46,13 @@ function Safari.getSelectionItems()
     return choices
 end
 
-function Safari.addBookmark(app, choice)
-    Safari.focus(_, choice)
-    app:selectMenuItem("Add Bookmark...")
-    return true
-end
-
-function Safari.showWebInspector(app, choice)
-    Safari.focus(_, choice)
+function actions.showWebInspector(app, choice)
+    Application.focus(app, choice)
     _ = app:selectMenuItem("Show Web Inspector") or app:selectMenuItem("Close Web Inspector")
     return true
 end
 
-function Safari.openLocation(app, choice)
-    Safari.focus(_, choice)
-    app:selectMenuItem("Open Location...")
-    return true
-end
-
-function Safari.toggleMute(_, choice)
+function actions.toggleMute(_, choice)
     local viewModel = {
         browser = "Safari",
         command = "toggle-mute",
@@ -62,59 +61,27 @@ function Safari.toggleMute(_, choice)
             or "front document",
         ["is-safari"] = true,
     }
-    local script = Safari.renderScriptTemplate("browser-media", viewModel)
+    local script = Application.renderScriptTemplate("browser-media", viewModel)
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Safari.notifyError("Error (un)muting video", rawTable.NSLocalizedFailureReason)
+        Application.notifyError("Error (un)muting video", rawTable.NSLocalizedFailureReason)
     end
 end
 
-function Safari.moveTabToNewWindow(app, choice)
-    Entity.focus(app, choice)
-    app:selectMenuItem("Move Tab to New Window")
-    return true
-end
-
-function Safari.mergeAllWindows(app)
-    Safari.focus(app)
-    app:selectMenuItem("Merge All Windows")
-    return true
-end
-
-function Safari.openNewWindow(app)
-    app:selectMenuItem("New Window")
-    return true
-end
-
-function Safari.openNewPrivateWindow(app)
-    app:selectMenuItem("New Private Window")
-    return true
-end
-
-function Safari.openFile(app)
-    app:selectMenuItem("Open File...")
-    return true
-end
-
-function Safari.reload(_, choice)
+function actions.reload(_, choice)
     local target = choice
         and "tab "..choice.tabIndex.." of front window"
         or "front document"
-    local script = Safari.renderScriptTemplate("reload-safari", { target = target })
+    local script = Application.renderScriptTemplate("reload-safari", { target = target })
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Safari.notifyError("Error reloading active window", rawTable.NSLocalizedFailureReason)
+        Application.notifyError("Error reloading active window", rawTable.NSLocalizedFailureReason)
     end
 end
 
-function Safari.openNewTab(app)
-    app:selectMenuItem("New Tab")
-    return true
-end
-
-function Safari.toggleMedia(_, choice)
+function actions.toggleMedia(_, choice)
     local viewModel = {
         browser = "Safari",
         command = "toggle-play",
@@ -123,57 +90,42 @@ function Safari.toggleMedia(_, choice)
             or "front document",
         ["is-safari"] = true,
     }
-    local script = Safari.renderScriptTemplate("browser-media", viewModel)
+    local script = Application.renderScriptTemplate("browser-media", viewModel)
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Safari.notifyError("Error toggling media", rawTable.NSLocalizedFailureReason)
+        Application.notifyError("Error toggling media", rawTable.NSLocalizedFailureReason)
     end
 end
 
-function Safari.undoCloseTab(app)
-    app:selectMenuItem("Reopen Last Closed Tab")
-end
-
-function Safari.close(_, choice)
+function actions.close(_, choice)
     local viewModel = choice
         and { target = "tab "..choice.tabIndex.." of window id "..choice.windowId }
         or { target = "current tab of front window" }
-    local script = Safari.renderScriptTemplate("close-safari", viewModel)
+    local script = Application.renderScriptTemplate("close-safari", viewModel)
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Safari.notifyError("Error closing Safari tab", rawTable.NSLocalizedFailureReason)
+        Application.notifyError("Error closing Safari tab", rawTable.NSLocalizedFailureReason)
     end
 end
 
-function Safari.showHistory(app, choice)
-    Safari.focus(_, choice)
-    app:selectMenuItem("Show All History")
-end
+local shortcuts = {
+    { nil, "d", actions.addBookmark, { "Bookmarks", "Add bookmark" } },
+    { nil, "i", actions.showWebInspector, { "Develop", "Toggle Web Inspector" } },
+    { nil, "l", actions.openLocation, { "File", "Open Location..." } },
+    { nil, "m", actions.toggleMute, { "Media", "Toggle Mute" } },
+    { nil, "n", actions.openNewWindow, { "File", "Open New Window" } },
+    { nil, "o", actions.openFile, { "File", "Open File" } },
+    { nil, "r", actions.reload, { "View", "Reload Page" } },
+    { nil, "t", actions.openNewTab, { "File", "Open New Tab" } },
+    { nil, "u", actions.undoCloseTab, { "File", "Undo Close Tab" } },
+    { nil, "w", actions.close, { "File", "Close Tab/Window" } },
+    { nil, "y", actions.showHistory, { "History", "Show History" } },
+    { nil, "space", actions.toggleMedia, { "Media", "Play/Pause Media" } },
+    { { "cmd" }, "m", actions.moveTabToNewWindow, { "Window", "Move Tab To New Window" } },
+    { { "cmd", "shift" }, "m", actions.mergeAllWindows, { "Window", "Merge All Windows" } },
+    { { "shift" }, "n", actions.openNewPrivateWindow, { "File", "Open New Private Window" } },
+}
 
-function Safari:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, "d", self.addBookmark, { "Bookmarks", "Add bookmark" } },
-        { nil, "i", self.showWebInspector, { "Develop", "Toggle Web Inspector" } },
-        { nil, "l", self.openLocation, { "File", "Open Location..." } },
-        { nil, "m", self.toggleMute, { "Media", "Toggle Mute" } },
-        { { "cmd" }, "m", self.moveTabToNewWindow, { "Window", "Move Tab To New Window" } },
-        { { "cmd", "shift" }, "m", self.mergeAllWindows, { "Window", "Merge All Windows" } },
-        { nil, "n", self.openNewWindow, { "File", "Open New Window" } },
-        { { "shift" }, "n", self.openNewPrivateWindow, { "File", "Open New Private Window" } },
-        { nil, "o", self.openFile, { "File", "Open File" } },
-        { nil, "r", self.reload, { "View", "Reload Page" } },
-        { nil, "t", self.openNewTab, { "File", "Open New Tab" } },
-        { nil, "u", self.undoCloseTab, { "File", "Undo Close Tab" } },
-        { nil, "w", self.close, { "File", "Close Tab/Window" } },
-        { nil, "y", self.showHistory, { "History", "Show History" } },
-        { nil, "space", self.toggleMedia, { "Media", "Play/Pause Media" } },
-    }
-
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Safari", shortcuts)
-end
-
-return Safari
+return Application:new("Safari", shortcuts), shortcuts, actions

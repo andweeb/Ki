@@ -1,6 +1,6 @@
 --- === Cheatsheet ===
 ---
---- Cheatsheet for keyboard shortcuts
+--- Cheatsheet modal for keyboard shortcuts
 ---
 
 local Cheatsheet = {}
@@ -26,9 +26,6 @@ end
 
 local lustache = _G.requirePackage("lustache")
 
-local SHORTCUT_MODKEY_INDEX = 1
-local SHORTCUT_HOTKEY_INDEX = 2
-local SHORTCUT_METADATA_INDEX = 4
 local MODIFIER_GLYPHS = {
     cmd = "⌘",
     alt = "⌥",
@@ -59,9 +56,9 @@ function Cheatsheet.createShortcutBlocks(shortcutList)
     local shortcutCategories = {}
 
     for _, shortcut in pairs(shortcutList) do
-        local shortcutModifierKeys = shortcut[SHORTCUT_MODKEY_INDEX] or {}
-        local shortcutKey = shortcut[SHORTCUT_HOTKEY_INDEX] or ""
-        local shortcutMetadata = shortcut[SHORTCUT_METADATA_INDEX]
+        local shortcutModifierKeys = shortcut[_G.SHORTCUT_MODKEY_INDEX] or {}
+        local shortcutKey = shortcut[_G.SHORTCUT_HOTKEY_INDEX] or ""
+        local shortcutMetadata = shortcut[_G.SHORTCUT_METADATA_INDEX]
 
         if shortcutMetadata and #shortcutMetadata > 0 and shortcutMetadata[1] then
             local category = shortcutMetadata[1]
@@ -148,7 +145,7 @@ end
 
 --- Cheatsheet:show()
 --- Method
---- Show the cheatsheet modal. Hit <kbd>Escape</kbd> to close.
+--- Show the cheatsheet modal. Hit Escape <kbd>⎋</kbd> to close.
 ---
 --- Parameters:
 ---  * None
@@ -215,7 +212,7 @@ end
 --- Initialize the cheatsheet object
 ---
 --- Parameters:
----  * `name` - The name of the cheatsheet subject. An icon image will be rendered in the modal view for application names.
+---  * `name` - The subject of the cheatsheet. An icon image will be rendered in the modal view for application names.
 ---  * `description` - The description subtext to be rendered under the cheatsheet name
 ---  * `shortcuts` - A table containing the list of shortcuts to display in the cheatsheet
 ---  * `view` - An optional [`hs.webview`](https://www.hammerspoon.org/docs/hs.webview.html) instance to set custom styles for the cheatsheet. A titled, closable utility view will be configured with dark mode by default.
@@ -230,9 +227,9 @@ end
 ---
 --- For example, the following Safari entity shortcuts will be rendered in the cheatsheet in the "File" category:
 --- ```lua
---- { nil, "t", <function>, { "File", "Open New Tab" } },
---- { nil, "n", <function>, { "File", "Open New Window" } },
---- { { "shift" }, "n", <function>, { "File", "Open New Private Window" } },
+--- { nil, "t", <function|Entity>, { "File", "Open New Tab" } },
+--- { nil, "n", <function|Entity>, { "File", "Open New Window" } },
+--- { { "shift" }, "n", <function|Entity>, { "File", "Open New Private Window" } },
 --- ```
 ---
 --- Returns:

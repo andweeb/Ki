@@ -1,0 +1,200 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Hammerspoon docs: Defaults</title>
+    <style type="text/css">
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      th { background-color: #DDDDDD; vertical-align: top; padding: 3px; }
+      td { width: 100%; background-color: #EEEEEE; vertical-align: top; padding: 3px; }
+      table { width: 100% ; border: 1px solid #0; text-align: left; }
+      section > table table td { width: 0; }
+    </style>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="./index.html">docs</a> &raquo; Defaults</h1>
+      <p>Definitions of default behavior in Ki</p>
+
+      </header>
+      <h3>API Overview</h3>
+      <ul>
+        <li>Methods - API calls which can only be made on an object returned by a constructor</li>
+          <ul>
+            <li><a href="#create">create</a></li>
+            <li><a href="#createBrightnessEvents">createBrightnessEvents</a></li>
+            <li><a href="#createEntityEvents">createEntityEvents</a></li>
+            <li><a href="#createNormalEvents">createNormalEvents</a></li>
+            <li><a href="#createUrlEvents">createUrlEvents</a></li>
+            <li><a href="#createVolumeEvents">createVolumeEvents</a></li>
+          </ul>
+      </ul>
+      <h3>API Documentation</h3>
+        <h4 class="documentation-section">Methods</h4>
+          <section id="create">
+            <a name="//apple_ref/cpp/Method/create" class="dashAnchor"></a>
+            <h5><a href="#create">create</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Defaults.create(Ki) -&gt; events, entities</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Creates the default Ki events and entities</p>
+<p>Parameters:</p>
+<ul>
+<li>Ki - the Ki object</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A table containing events for <code>url</code>, <code>select</code>, <code>entity</code>, <code>volume</code>, <code>brightness</code>, and <code>normal</code> modes</li>
+<li>A table containing all default desktop entity objects</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="createBrightnessEvents">
+            <a name="//apple_ref/cpp/Method/createBrightnessEvents" class="dashAnchor"></a>
+            <h5><a href="#createBrightnessEvents">createBrightnessEvents</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Defaults.createBrightnessEvents()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Defines the initial set of actions with predefined keybindings for <code>brightness</code> mode</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <code>brightness</code> workflow events</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="createEntityEvents">
+            <a name="//apple_ref/cpp/Method/createEntityEvents" class="dashAnchor"></a>
+            <h5><a href="#createEntityEvents">createEntityEvents</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Defaults.createEntityEvents()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Defines the initial set of actions with predefined keybindings for <code>entity</code> and <code>select</code> mode</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <code>entity</code> workflow events</li>
+<li>A list of <code>select</code> workflow events</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="createNormalEvents">
+            <a name="//apple_ref/cpp/Method/createNormalEvents" class="dashAnchor"></a>
+            <h5><a href="#createNormalEvents">createNormalEvents</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Defaults.createNormalEvents()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Defines the initial set of actions with predefined keybindings for <code>normal</code> mode</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <code>normal</code> workflow events</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="createUrlEvents">
+            <a name="//apple_ref/cpp/Method/createUrlEvents" class="dashAnchor"></a>
+            <h5><a href="#createUrlEvents">createUrlEvents</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Defaults.createUrlEvents()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Defines the initial set of actions with predefined keybindings for <code>url</code> mode</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <code>url</code> workflow events</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="createVolumeEvents">
+            <a name="//apple_ref/cpp/Method/createVolumeEvents" class="dashAnchor"></a>
+            <h5><a href="#createVolumeEvents">createVolumeEvents</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Defaults.createVolumeEvents()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Defines the initial set of actions with predefined keybindings for <code>volume</code> mode</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <code>volume</code> workflow events</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+  </body>
+</html>

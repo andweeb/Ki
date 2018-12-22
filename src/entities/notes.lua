@@ -1,14 +1,18 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Notes = Entity:subclass("Notes")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {
+    search = Application.createMenuItemEvent("Search", { focusAfter = true }),
+    newNote = Application.createMenuItemEvent("New Note", { focusAfter = true }),
+    newFolder = Application.createMenuItemEvent("New Folder", { focusAfter = true }),
+}
 
-function Notes.getSelectionItems()
+function Application.getSelectionItems()
     local choices = {}
     local isOk, notes, rawTable =
-    hs.osascript.applescript(Notes.renderScriptTemplate("notes"))
+        hs.osascript.applescript(Application.renderScriptTemplate("notes"))
 
     if not isOk then
-        Notes.notifyError("Error fetching Notes", rawTable.NSLocalizedFailureReason)
+        Application.notifyError("Error fetching Notes", rawTable.NSLocalizedFailureReason)
 
         return {}
     end
@@ -28,7 +32,7 @@ function Notes.getSelectionItems()
     return choices
 end
 
-function Notes.focus(app, choice)
+function actions.focus(choice, app)
     app:activate()
 
     if choice then
@@ -37,45 +41,28 @@ function Notes.focus(app, choice)
         ]])
 
         if not isOk then
-            Notes.notifyError("Error selecting the note", rawTable.NSLocalizedFailureReason)
+            Application.notifyError("Error selecting the note", rawTable.NSLocalizedFailureReason)
         end
     end
 end
 
-function Notes.toggleFolderView(app)
-    Notes.focus(app)
+function actions.toggleFolderView(app)
+    actions.focus(nil, app)
     _ = app:selectMenuItem("Show Folders") or app:selectMenuItem("Hide Folders")
 end
 
-function Notes.search(app)
-    app:selectMenuItem("Search")
-end
-
-function Notes.newNote(app)
-    app:selectMenuItem("New Note")
-end
-
-function Notes.newFolder(app)
-    app:selectMenuItem("New Folder")
-end
-
-function Notes.toggleAttachmentsBrowser(app)
+function actions.toggleAttachmentsBrowser(app)
     _ = app:selectMenuItem("Show Attachments Browser") or app:selectMenuItem("Hide Attachments Browser")
 end
 
-function Notes:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, "\\", self.toggleFolderView, { "View", "Show Folders" } },
-        { nil, "l", self.search, { "Edit", "Find..." } },
-        { nil, "n", self.newNote, { "File", "New Note" } },
-        { nil, "1", self.toggleAttachmentsBrowser, { "File", "Toggle Attachments Browser" } },
-        { { "cmd" }, "f", self.search, { "Edit", "Find..." } },
-        { { "shift" }, "n", self.newFolder, { "File", "New Folder" } },
-    }
+local shortcuts = {
+    { nil, nil, actions.focus, { "Notes", "Activate/Focus" } },
+    { nil, "\\", actions.toggleFolderView, { "View", "Show Folders" } },
+    { nil, "l", actions.search, { "Edit", "Find..." } },
+    { nil, "n", actions.newNote, { "File", "New Note" } },
+    { nil, "1", actions.toggleAttachmentsBrowser, { "File", "Toggle Attachments Browser" } },
+    { { "cmd" }, "f", actions.search, { "Edit", "Find..." } },
+    { { "shift" }, "n", actions.newFolder, { "File", "New Folder" } },
+}
 
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Notes", shortcuts)
-end
-
-return Notes
+return Application:new("Notes", shortcuts)

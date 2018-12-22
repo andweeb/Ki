@@ -1,38 +1,26 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Terminal = Entity:subclass("Terminal")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {
+    find = Application.createMenuItemEvent("Find...", { focusBefore = true }),
+    newWindow = Application.createMenuItemEvent("New Window with Profile .+$", {
+        focusBefore = true,
+        isRegex = true,
+    }),
+    newTab = Application.createMenuItemEvent("New Tab with Profile .+$", {
+        focusBefore = true,
+        isRegex = true,
+    }),
+    close = Application.createMenuItemEvent({ "Close Tab", "Close Window" }, {
+        isToggleable = true,
+        focusBefore = true,
+    }),
+}
 
-function Terminal.find(app)
-    Terminal.focus(app)
-    app:selectMenuItem("Find...")
-end
+local shortcuts = {
+    { nil, "n", actions.newWindow, { "Shell", "New Window" } },
+    { nil, "t", actions.newTab, { "Shell", "New Tab" } },
+    { nil, "w", actions.close, { "Shell", "Close Tab or Window" } },
+    { { "cmd" }, "f", actions.find, { "Edit", "Find..." } },
+}
 
-function Terminal.newWindow(app)
-    Terminal.focus(app)
-    app:selectMenuItem("New Window with Profile .+$", true)
-end
-
-function Terminal.newTab(app)
-    Terminal.focus(app)
-    app:selectMenuItem("New Tab with Profile .+$", true)
-end
-
-function Terminal.close(app)
-    Terminal.focus(app)
-    _ = app:selectMenuItem("Close Tab") or app:selectMenuItem("Close Window")
-end
-
-function Terminal:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, "n", self.newWindow, { "Shell", "New Window" } },
-        { nil, "t", self.newTab, { "Shell", "New Tab" } },
-        { nil, "w", self.close, { "Shell", "Close Tab or Window" } },
-        { { "cmd" }, "f", self.find, { "Edit", "Find..." } },
-    }
-
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Terminal", shortcuts)
-end
-
-return Terminal
+return Application:new("Terminal", shortcuts), shortcuts, actions

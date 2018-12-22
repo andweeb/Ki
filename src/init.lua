@@ -1,26 +1,25 @@
 --- === Ki ===
 ---
---- Composable, modal macOS automation inspired by the vi
+--- Modal macOS automation inspired by the vi text editor
 ---
 --- Ki uses some particular terminology in its API and documentation:
---- * **_event/shortcut_** - a shortcut object containing the event handler and its keybinding. The object structure matches the argument list for hotkeys bindings in Hammerspoon: modifier keys, key name, and event handler function or entity object. For example, the following table represents an keydown event on `⇧⌘m`:
+--- * **event** - a step in a desktop workflow, consisting of the event handler and assigned shortcut keybinding. The table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys, key name, and event handler. For example, the following events open applications on keydown events on `s` and `⇧⌘s`:
 --- ```lua
+--- local openSafari = function() hs.application.launchOrFocus("Safari") end
+--- local openSpotify = function() hs.application.launchOrFocus("Spotify") end
 --- local shortcuts = {
----     { { "shift", "cmd" }, "m", function() print("Pressed the `m` hotkey!") end },
----     { { "shift" }, "s", Ki.createEntity("Safari") },
+---     { nil, "s", openSafari, { "Safari", "Activate/Focus" } },
+---     { { "shift" }, "s", openSpotify, { "Spotify", "Activate/Focus" } },
 --- }
 --- ```
---- An entity object that implements a `dispatchAction` can be also used:
+--- An `Entity` instance can be also used as an event handler:
 --- ```lua
---- local _, WordApplicationEntity = spoon.Ki.createEntity("Microsoft Word")
---- local _, ExcelApplicationEntity = spoon.Ki.createEntity("Microsoft Excel")
 --- local shortcuts = {
----     { nil, "e", ExcelApplicationEntity },
----     { nil, "w", WordApplicationEntity },
+---     { nil, "e", Ki.createApplication("Microsoft Excel"), { "Microsoft Excel", "Activate/Focus" } },
 --- }
 --- ```
 ---
---- * **_state event_** - a table that defines a unidirectional link between two states in the finite state machine, or transitions between different modes. For example, the `enterEntityMode` state event allows the user to transition from `normal` mode to `entity` mode by calling `Ki.state:entityEntityMode`:
+--- * **state event** - a unidirectional link between two states in the [finite state machine](https://github.com/unindented/lua-fsm#usage) (structured differently from workflow/transition events). The state events below allow the user to transition from `desktop` mode to `normal` mode to `entity` mode and exit back to `desktop` mode:
 ---  ```
 ---  local stateEvents = {
 ---      { name = "enterNormalMode", from = "desktop", to = "normal" },
@@ -29,15 +28,15 @@
 ---  }
 ---  ```
 ---
---- * **_transition event_** - a keydown event with a handler function that invokes a state change through the finite state machine. For example, the following transition events invoke fsm callbacks to allow the user to enter `entity` and `action` mode:
+--- * **transition event** - an event that represents a mode transition. Its event handler invokes some state change through the finite state machine. Assuming state events have been initialized correctly, the following transition events invoke methods on `Ki.state` to allow the user to enter `entity` and `action` mode:
 ---  ```
----  { {"cmd"}, ";", function() Ki.state:enterEntityMode() end },
----  { {"cmd"}, "'", function() Ki.state:enterActionMode() end },
+---  { {"cmd"}, "e", function() Ki.state:enterEntityMode() end },
+---  { {"cmd"}, "a", function() Ki.state:enterActionMode() end },
 ---  ```
 ---
---- * **_workflow_** - a list of transition and workflow events that execute a specific task, cycling from `desktop` mode back to `desktop` mode
+--- * **workflow** - a series of transition and workflow events that execute some desktop task, cycling from `desktop` mode back to `desktop` mode
 ---
---- * **_workflow event_** - a keydown event that's part of some workflow using the Hammerspoon API (i.e., event definitions in `default-events.lua`, or any event that is not a transition or state event)
+--- * **workflow event** - an event that carries out the automative aspect in a workflow
 
 local Ki = {}
 Ki.__index = Ki
@@ -71,18 +70,32 @@ if not _G.requirePackage then
 end
 -- luacov: enable
 
+_G.SHORTCUT_MODKEY_INDEX = 1
+_G.SHORTCUT_HOTKEY_INDEX = 2
+_G.SHORTCUT_EVENT_HANDLER_INDEX = 3
+_G.SHORTCUT_METADATA_INDEX = 4
+
 local fsm = _G.requirePackage("fsm")
 local util = _G.requirePackage("util", true)
+local Defaults = _G.requirePackage("defaults", true)
+local defaultEvents, defaultEntities = Defaults.create(Ki)
 
-local SHORTCUT_MODKEY_INDEX = 1
-local SHORTCUT_HOTKEY_INDEX = 2
-local SHORTCUT_EVENT_HANDLER_INDEX = 3
-
+-- Allow Spotlight to be used to find alternate names for applications
 hs.application.enableSpotlightForNameSearches(true)
+
+--- Ki.defaultEvents
+--- Variable
+--- A table containing the default events for all default modes in Ki.
+Ki.defaultEvents = defaultEvents
+
+--- Ki.defaultEntities
+--- Variable
+--- A table containing the default automatable desktop entity instances in Ki.
+Ki.defaultEntities = defaultEntities
 
 --- Ki.state
 --- Variable
---- The internal [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki
+--- The internal [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki.
 Ki.state = {}
 
 -- Create a metatable defined with state events operations
@@ -106,8 +119,8 @@ function Ki._mergeEvents(mode, lhs, rhs, overrideLHS)
 
     -- Map lhs keynames to modifier keys
     for index, lhsEvent in pairs(lhs) do
-        local modifiers = lhsEvent[SHORTCUT_MODKEY_INDEX] or {}
-        local keyName = lhsEvent[SHORTCUT_HOTKEY_INDEX]
+        local modifiers = lhsEvent[_G.SHORTCUT_MODKEY_INDEX] or {}
+        local keyName = lhsEvent[_G.SHORTCUT_HOTKEY_INDEX]
 
         lhsHotkeys[keyName] = {
             index = index,
@@ -118,8 +131,8 @@ function Ki._mergeEvents(mode, lhs, rhs, overrideLHS)
     -- Merge events from rhs to lhs
     for _, rhsEvent in pairs(rhs) do
         -- Determine if event exists in lhs events
-        local rhsEventModifiers = rhsEvent[SHORTCUT_MODKEY_INDEX] or {}
-        local eventKeyName = rhsEvent[SHORTCUT_HOTKEY_INDEX]
+        local rhsEventModifiers = rhsEvent[_G.SHORTCUT_MODKEY_INDEX] or {}
+        local eventKeyName = rhsEvent[_G.SHORTCUT_HOTKEY_INDEX]
         local eventModifiers = lhsHotkeys[eventKeyName] and lhsHotkeys[eventKeyName].modifiers or nil
         local hasHotkeyConflict = util.areListsEqual(eventModifiers, rhsEventModifiers)
 
@@ -170,6 +183,9 @@ function Ki:_createEventsMetatable(overrideLHS)
     }
 end
 
+-- Allow default events to be overridden
+setmetatable(Ki.defaultEvents, Ki:_createEventsMetatable(true))
+
 --- Ki.transitions
 --- Variable
 --- A table containing the definitions of transition events.
@@ -184,15 +200,20 @@ end
 ---  * from `normal` mode, <kbd>⌘b</kbd> to enter `brightness` mode
 ---  * <kbd>⎋</kbd> to exit back to `desktop` mode from any of the modes above
 ---
---- The example transition events below allow transitions on specified keybindings to enter normal mode from desktop mode and exit back to desktop mode from normal mode:
+--- The example transition events in the snippet below allow the following transitions:
+---  * from `desktop` mode, enter `normal` mode with <kbd>⌘⎋</kbd>
+---  * from `normal` mode, enter `desktop` mode with <kbd>⎋</kbd>
+---
 ---  ```
 ---  -- Initialize state events to expose `enterNormalMode` and `exitMode` methods on `Ki.state`
----  Ki.states = {
+---  Ki.stateEvents = {
 ---      { name = "enterNormalMode", from = "desktop", to = "normal" },
 ---      { name = "exitMode", from = "normal", to = "desktop" },
 ---  }
+---
 ---  local enterNormalMode = function() Ki.state:enterNormalMode() end
 ---  local exitMode = function() Ki.state:exitMode() end
+---
 ---  Ki.transitions = {
 ---      desktop = {
 ---          { {"cmd"}, "escape", enterNormalMode, { "Desktop Mode", "Transition to Normal Mode" } },
@@ -309,17 +330,17 @@ Ki._defaultTransitions = {
 }
 setmetatable(Ki._defaultTransitions, Ki:_createEventsMetatable())
 
---- Ki.states
+--- Ki.stateEvents
 --- Variable
---- A table containing the [state events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to `Ki.state`. Custom state events can be set to `Ki.states` before calling `Ki.start()` to set up the FSM with custom transitions events.
+--- A table containing the [state events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to `Ki.state`. Custom state events can be set to `Ki.stateEvents` before calling `Ki.start()` to set up the FSM with custom transition events.
 ---
 --- The example state events below create methods on `Ki.state` to enter and exit entity mode from normal mode:
 --- * `{ name = "enterEntityMode", from = "normal", to = "entity" }`
 --- * `{ name = "exitMode", from = "entity", to = "normal" }`
 ---
---- **Note**: these events will only _create and expose_ methods on `Ki.state`. For example, the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods will only be initialized with the example state events above. These methods will need to be called in transition events ([`Ki.transitions`](#transitions)) in order to actually trigger the transition from mode to mode.
-Ki.states = {}
-Ki._defaultStates = {
+--- **Note**: these events will only _initialize and expose_ methods on `Ki.state`. For example, the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods will only be _initialized_ with the example state events above. These methods will need to be called in transition events ([`Ki.transitions`](#transitions)) in order to actually trigger the transition from mode to mode.
+Ki.stateEvents = {}
+Ki._defaultStateEvents = {
     { name = "enterNormalMode", from = "desktop", to = "normal" },
     { name = "enterEntityMode", from = "normal", to = "entity" },
     { name = "enterEntityMode", from = "action", to = "entity" },
@@ -337,11 +358,11 @@ Ki._defaultStates = {
     { name = "exitMode", from = "volume", to = "desktop" },
     { name = "exitMode", from = "brightness", to = "desktop" },
 }
-setmetatable(Ki._defaultStates, Ki._createStatesMetatable())
+setmetatable(Ki._defaultStateEvents, Ki._createStatesMetatable())
 
 --- Ki.workflows
 --- Variable
---- A table containing lists of workflow events keyed by mode name. The following example creates two entity and url events:
+--- A table containing lists of workflows keyed by mode name. The following example creates two entity and url events:
 --- ```lua
 --- local function handleUrlEvent(url)
 ---     hs.urlevent.openURL(url)
@@ -365,21 +386,38 @@ setmetatable(Ki._defaultStates, Ki._createStatesMetatable())
 --- ```
 Ki.workflows = {}
 
---- Ki.createEntity(subclassName) -> base Entity class[, subclassed Entity class]
+--- Ki.createEntity([subclassName]) -> base Entity class[, subclassed Entity class]
 --- Method
---- Returns the both the base and custom subclassed [entity class](Entity.html) for creating custom desktop entities
+--- Returns both the base and (optionally) subclassed [entity class](Entity.html) for creating custom entity subclasses or instances
 ---
 --- Parameters:
----  * None
+---  * subclassName - an optional name to return a subclassed entity
 ---
 --- Returns:
 ---   * The base `Entity` class
----   * A subclassed `ExtendedEntity` class if a `subclassName` is specified
+---   * An `Entity` subclass or nil if `subclassName` is nil
 function Ki.createEntity(subclassName)
     local Entity = _G.requirePackage("entity", true)
-    local ExtendedEntity = subclassName and Entity:subclass(subclassName) or nil
+    local SubclassedEntity = subclassName and Entity:subclass(subclassName) or nil
 
-    return Entity, ExtendedEntity
+    return Entity, SubclassedEntity
+end
+
+--- Ki.createApplication([subclassName]) -> base Application class[, subclassed Application class]
+--- Method
+--- Returns both the base and (optionally) subclassed [application class](Application.html) for creating custom application entity subclasses or instances
+---
+--- Parameters:
+---  * `subclassName` - optional name to subclass the `Application` class
+---
+--- Returns:
+---   * The base `Application` class
+---   * An `Application` subclass or nil if `subclassName` is nil
+function Ki.createApplication(subclassName)
+    local Application = _G.requirePackage("application", true)
+    local SubclassedApplication = subclassName and Application:subclass(subclassName) or nil
+
+    return Application, SubclassedApplication
 end
 
 -- TODO
@@ -398,10 +436,10 @@ end
 
 --- Ki.statusDisplay
 --- Variable
---- A table that defines the behavior for displaying the status on mode transitions. The `show` function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:
+--- A table that defines the behavior for displaying the status of mode transitions. The `show` function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:
 ---  * `show` - A function invoked when a mode transition event occurs, with the following arguments:
 ---    * `status` - A string value containing the current mode
----    * `parenthetical` - An optional char value of the key that triggered the state (i.e., "n", "N", etc.)
+---    * `parenthetical` - Optional parenthesized text in the display
 ---
 --- Defaults to a simple text display in the center of the menu bar of the focused screen.
 Ki.statusDisplay = nil
@@ -493,25 +531,25 @@ end
 function Ki:_handleKeyDown(event)
     local mode = self.state.current
     local workflowEvents = self.workflows[mode]
-    local trigger = nil
+    local handler = nil
 
     local flags = event:getFlags()
     local keyName = hs.keycodes.map[event:getKeyCode()]
 
     -- Determine event handler
     for _, workflowEvent in pairs(workflowEvents) do
-        local eventModifiers = workflowEvent[SHORTCUT_MODKEY_INDEX] or {}
-        local eventKeyName = workflowEvent[SHORTCUT_HOTKEY_INDEX]
-        local eventTrigger = workflowEvent[SHORTCUT_EVENT_HANDLER_INDEX]
+        local eventModifiers = workflowEvent[_G.SHORTCUT_MODKEY_INDEX] or {}
+        local eventKeyName = workflowEvent[_G.SHORTCUT_HOTKEY_INDEX]
+        local eventTrigger = workflowEvent[_G.SHORTCUT_EVENT_HANDLER_INDEX]
 
         if flags:containExactly(eventModifiers) and keyName == eventKeyName then
-            trigger = eventTrigger
+            handler = eventTrigger
         end
     end
 
-    -- Create action triggers at runtime to automatically enter entity mode with the intended event
-    if mode == "action" and not trigger then
-        trigger = function(actionFlags, actionKeyName)
+    -- Create action handlers at runtime to automatically enter entity mode with the intended event
+    if mode == "action" and not handler then
+        handler = function(actionFlags, actionKeyName)
             local action = {
                 flags = actionFlags,
                 keyName = actionKeyName,
@@ -522,22 +560,26 @@ function Ki:_handleKeyDown(event)
         end
     end
 
-    -- Avoid propagating existing trigger or non-existent trigger in a non-normal mode
-    if trigger then
-        if type(trigger) == "table" and trigger.dispatchAction then
-            local shouldAutoExit = trigger:dispatchAction(mode, Ki.history.action)
+    -- Avoid propagating existing handler or non-existent handler in a non-normal mode
+    if handler then
+        if type(handler) == "table" and handler.dispatchAction then
+            local shouldAutoExit = handler:dispatchAction(mode, Ki.history.action)
 
             if shouldAutoExit then
                 self.state:exitMode()
             end
-        elseif type(trigger) == "function" then
-            local shouldAutoExit = trigger(flags, keyName)
+        elseif type(handler) == "function" then
+            local shouldAutoExit = handler(flags, keyName)
 
             if shouldAutoExit then
                 self.state:exitMode()
             end
         else
-            hs.showError("Unknown")
+            local hotkeyText = self._renderHotkeyText(flags, keyName)
+            local details =
+                "The event handler may be misconfigured for the shortcut "..hotkeyText.." in "..mode.." mode."
+
+            self.createEntity().notifyError("Unexpected event handler", details)
         end
 
         return true
@@ -572,19 +614,15 @@ function Ki:start()
     -- Set default status display if not provided
     self.statusDisplay = self.statusDisplay or dofile(spoonPath.."/status-display.lua")
 
-    -- Recreate the internal finite state machine if custom states are provided
+    -- Recreate the internal finite state machine if custom state events are provided
     self.state = fsm.create({
         initial = "desktop",
-        events = self._defaultStates + self.states,
+        events = self._defaultStateEvents + self.stateEvents,
         callbacks = self:_createFsmCallbacks()
     })
 
-    -- Initialize default workflow events
-    local defaultEvents = dofile(spoonPath.."/default-events.lua").init()
-    setmetatable(defaultEvents, self:_createEventsMetatable(true))
-
     -- Set transition and workflow events
-    local workflows = defaultEvents + self.workflows
+    local workflows = self.defaultEvents + self.workflows
     local transitions = self._defaultTransitions + self.transitions
     self.workflows = transitions + workflows
 
@@ -599,14 +637,14 @@ function Ki:start()
     -- Create Ki cheatsheet
     self.cheatsheet = _G.requirePackage("cheatsheet", true)
 
+    local function showCheatsheet()
+        self.cheatsheet:show()
+        return true
+    end
+
     -- Add show cheatsheet entity event into workflow entity events
     table.insert(self.workflows.entity, {
-        { "shift" }, "/",
-        function()
-            self.cheatsheet:show()
-            return true
-        end,
-        { "Entities", "Cheatsheet" },
+        { "shift" }, "/", showCheatsheet, { "Entities", "Cheatsheet" },
     })
 
     -- Initialize cheat sheet with both default and/or custom transition and workflow events

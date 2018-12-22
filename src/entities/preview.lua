@@ -1,20 +1,14 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Preview = Entity:subclass("Preview")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {
+    find = Application.createMenuItemEvent({ "Find", "Find..." }, { focusAfter = true }),
+    open = Application.createMenuItemEvent("Open...", { focusAfter = true }),
+    close = Application.createMenuItemEvent("Close Window", { focusBefore = true }),
+}
 
-function Preview.find(app)
-    app:selectMenuItem({ "Find", "Find..." })
-    return true
-end
-
-function Preview.open(app)
-    app:selectMenuItem("Open...")
-    return true
-end
-
-function Preview.openRecent(app)
+function actions.openRecent(app)
     local menuItem = { "File", "Open Recent" }
-    local menuItemList = Preview.getMenuItemList(app, menuItem)
+    local menuItemList = Application.getMenuItemList(app, menuItem)
     local recentFileChoices = {}
 
     for _, item in pairs(menuItemList) do
@@ -25,23 +19,20 @@ function Preview.openRecent(app)
         end
     end
 
-    Preview.showSelectionModal(app, recentFileChoices, function(_, choice)
+    local function selectMenuItemAndFocus(choice)
         table.insert(menuItem, choice.text)
         app:selectMenuItem(menuItem)
-        Preview.focus(app)
-    end)
+        Application.focus(app)
+    end
+
+    Application.showSelectionModal(recentFileChoices, selectMenuItemAndFocus, app)
 end
 
-function Preview:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, "o", self.open, { "File", "Open..." } },
-        { { "cmd" }, "f", self.find, { "Edit", "Find..." } },
-        { { "shift" }, "o", self.openRecent, { "File", "Open Recent" } },
-    }
+local shortcuts = {
+    { nil, "o", actions.open, { "File", "Open..." } },
+    { nil, "w", actions.close, { "File", "Close Window" } },
+    { { "cmd" }, "f", actions.find, { "Edit", "Find..." } },
+    { { "shift" }, "o", actions.openRecent, { "File", "Open Recent" } },
+}
 
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Preview", shortcuts)
-end
-
-return Preview
+return Application:new("Preview", shortcuts), shortcuts, actions

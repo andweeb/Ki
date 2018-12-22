@@ -1,0 +1,222 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Hammerspoon docs: Application</title>
+    <style type="text/css">
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      th { background-color: #DDDDDD; vertical-align: top; padding: 3px; }
+      td { width: 100%; background-color: #EEEEEE; vertical-align: top; padding: 3px; }
+      table { width: 100% ; border: 1px solid #0; text-align: left; }
+      section > table table td { width: 0; }
+    </style>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="./index.html">docs</a> &raquo; Application</h1>
+      <p>Application class that subclasses <a href="Entity.html">Entity</a> to represent some automatable desktop application</p>
+
+      </header>
+      <h3>API Overview</h3>
+      <ul>
+        <li>Methods - API calls which can only be made on an object returned by a constructor</li>
+          <ul>
+            <li><a href="#createMenuItemEvent">createMenuItemEvent</a></li>
+            <li><a href="#dispatchAction">dispatchAction</a></li>
+            <li><a href="#getApplication">getApplication</a></li>
+            <li><a href="#getMenuItemList">getMenuItemList</a></li>
+            <li><a href="#initialize">initialize</a></li>
+            <li><a href="#invokeEventHandler">invokeEventHandler</a></li>
+          </ul>
+      </ul>
+      <h3>API Documentation</h3>
+        <h4 class="documentation-section">Methods</h4>
+          <section id="createMenuItemEvent">
+            <a name="//apple_ref/cpp/Method/createMenuItemEvent" class="dashAnchor"></a>
+            <h5><a href="#createMenuItemEvent">createMenuItemEvent</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application.createMenuItemEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Convenience method to create an event handler that selects a menu item, with optionally specified behavior on how the menu item selection occurs</p>
+<p>Parameters:</p>
+<ul>
+<li><code>menuItem</code> - the menu item to select, specified as either a string or a table</li>
+<li><code>options</code> - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:<ul>
+<li><code>isRegex</code> - a boolean denoting whether there is a regular expression within the menu item name(s)</li>
+<li><code>isToggleable</code> - a boolean denoting whether the menu item parameter is passed in as a list of two items to toggle between, i.e., <code>{ "Play", "Pause" }</code></li>
+<li><code>focusBefore</code> - an optional boolean denoting whether to focus the application before the menu item is selected</li>
+<li><code>focusAfter</code> - an optional boolean denoting whether to focus the application after the menu item is selected</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="dispatchAction">
+            <a name="//apple_ref/cpp/Method/dispatchAction" class="dashAnchor"></a>
+            <h5><a href="#dispatchAction">dispatchAction</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application:dispatchAction(mode, shortcut) -&gt; boolean</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Dispatch an action from a triggered shortcut for an entity</p>
+<p>Parameters:</p>
+<ul>
+<li><code>mode</code> - The name of the current mode</li>
+<li><code>shortcut</code> - A shortcut object with an action to invoke on the entity</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getApplication">
+            <a name="//apple_ref/cpp/Method/getApplication" class="dashAnchor"></a>
+            <h5><a href="#getApplication">getApplication</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application:getApplication() -&gt; hs.application object or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Gets the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object from the entity name</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>An <code>hs.application</code> object or <code>nil</code> if the application could not be found</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getMenuItemList">
+            <a name="//apple_ref/cpp/Method/getMenuItemList" class="dashAnchor"></a>
+            <h5><a href="#getMenuItemList">getMenuItemList</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application.getMenuItemList(app, menuItemPath) -&gt; table or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Gets a list of menu items from a hierarchical menu item path</p>
+<p>Parameters:</p>
+<ul>
+<li><code>app</code> - The target <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
+<li><code>menuItemPath</code> - A table representing the hierarchical path of the target menu item (e.g. <code>{ "File", "Share" }</code>)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <a href="https://www.hammerspoon.org/docs/hs.application.html#getMenuItems">menu items</a> or <code>nil</code></li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="initialize">
+            <a name="//apple_ref/cpp/Method/initialize" class="dashAnchor"></a>
+            <h5><a href="#initialize">initialize</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application:initialize(name, shortcuts, autoExitMode)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Initializes a new application instance with its name and shortcuts. By default, common shortcuts are automatically registered, and the initialized <a href="Entity.html">entity</a> defaults, such as the cheatsheet.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>name</code> - The entity name</li>
+<li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the entity</li>
+<li><code>autoExitMode</code> - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+</ul>
+<p>Each <code>shortcut</code> item should be a list with items at the following indices:</p>
+<ul>
+<li><code>1</code> - An optional table containing zero or more of the following keyboard modifiers: <code>"cmd"</code>, <code>"alt"</code>, <code>"shift"</code>, <code>"ctrl"</code>, <code>"fn"</code></li>
+<li><code>2</code> - The name of a keyboard key. String representations of keys can be found in <a href="https://www.hammerspoon.org/docs/hs.keycodes.html#map"><code>hs.keycodes.map</code></a>.</li>
+<li><code>3</code> - The event handler that defines the action for when the shortcut is triggered</li>
+<li><code>4</code> - A table containing the metadata for the shortcut, also a list with items at the following indices:<ul>
+<li><code>1</code> - The category name of the shortcut</li>
+<li><code>2</code> - A description of what the shortcut does</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="invokeEventHandler">
+            <a name="//apple_ref/cpp/Method/invokeEventHandler" class="dashAnchor"></a>
+            <h5><a href="#invokeEventHandler">invokeEventHandler</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application:invokeEventHandler(app, mode, eventHandler)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Invokes an action with different parameters depending on the current Ki mode</p>
+<p>Parameters:</p>
+<ul>
+<li><code>app</code> - The target <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
+<li><code>mode</code> - The current mode name</li>
+<li><code>eventHandler</code> - The action event handler</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+  </body>
+</html>

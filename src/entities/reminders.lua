@@ -1,38 +1,17 @@
 local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Entity = dofile(spoonPath.."/entity.lua")
-local Reminders = Entity:subclass("Reminders")
+local Application = dofile(spoonPath.."/application.lua")
+local actions = {
+    find = Application.createMenuItemEvent("Find", { focusBefore = true }),
+    newReminder = Application.createMenuItemEvent("New Reminder", { focusBefore = true }),
+    newReminderList = Application.createMenuItemEvent("New List", { focusBefore = true }),
+    goToToday = Application.createMenuItemEvent("Go to Today", { focusBefore = true }),
+}
 
-function Reminders.find(app)
-    Reminders.focus(app)
-    app:selectMenuItem("Find")
-end
+local shortcuts = {
+    { nil, "n", actions.newReminder, { "File", "New Reminder" } },
+    { nil, "t", actions.goToToday, { "View", "Go to Today" } },
+    { { "cmd" }, "f", actions.find, { "Edit", "Find" } },
+    { { "shift" }, "n", actions.newReminderList, { "File", "New List" } },
+}
 
-function Reminders.newReminder(app)
-    Reminders.focus(app)
-    app:selectMenuItem("New Reminder")
-end
-
-function Reminders.newReminderList(app)
-    Reminders.focus(app)
-    app:selectMenuItem("New List")
-end
-
-function Reminders.goToToday(app)
-    Reminders.focus(app)
-    app:selectMenuItem("Go to Today")
-end
-
-function Reminders:initialize(shortcuts)
-    local defaultShortcuts = {
-        { nil, "n", self.newReminder, { "File", "New Reminder" } },
-        { nil, "t", self.goToToday, { "View", "Go to Today" } },
-        { { "cmd" }, "f", self.find, { "Edit", "Find" } },
-        { { "shift" }, "n", self.newReminderList, { "File", "New List" } },
-    }
-
-    shortcuts = Entity.mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, "Reminders", shortcuts)
-end
-
-return Reminders
+return Application:new("Reminders", shortcuts), shortcuts, actions
