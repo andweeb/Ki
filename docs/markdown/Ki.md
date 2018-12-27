@@ -41,22 +41,28 @@ local shortcuts = {
 
 ## API Overview
 * Variables - Configurable values
+ * [Application](#Application)
  * [defaultEntities](#defaultEntities)
  * [defaultEvents](#defaultEvents)
+ * [Entity](#Entity)
  * [state](#state)
  * [stateEvents](#stateEvents)
  * [statusDisplay](#statusDisplay)
  * [transitions](#transitions)
  * [workflows](#workflows)
 * Methods - API calls which can only be made on an object returned by a constructor
- * [createApplication](#createApplication)
- * [createEntity](#createEntity)
  * [start](#start)
  * [stop](#stop)
 
 ## API Documentation
 
 ### Variables
+
+| [Application](#Application)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.Application`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that subclasses [Entity](Entity.html) to represent some automatable desktop application. Class methods and properties are documented [here](Application.html).                                                                     |
 
 | [defaultEntities](#defaultEntities)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -69,6 +75,12 @@ local shortcuts = {
 | **Signature**                               | `Ki.defaultEvents`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing the default events for all default modes in Ki.                                                                     |
+
+| [Entity](#Entity)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.Entity`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some generic automatable desktop entity. Class methods and properties are documented [here](Entity.html).                                                                     |
 
 | [state](#state)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -101,22 +113,6 @@ local shortcuts = {
 | **Description**                             | A table containing lists of workflows keyed by mode name. The following example creates two entity and url events:                                                                     |
 
 ### Methods
-
-| [createApplication](#createApplication)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.createApplication([subclassName]) -> base Application class[, subclassed Application class]`                                                                    |
-| **Type**                                    | Method                                                                     |
-| **Description**                             | Returns both the base and (optionally) subclassed [application class](Application.html) for creating custom application entity subclasses or instances                                                                     |
-| **Parameters**                              | <ul><li>`subclassName` - optional name to subclass the `Application` class</li></ul> |
-| **Returns**                                 | <ul><li> The base `Application` class</li><li> An `Application` subclass or nil if `subclassName` is nil</li></ul>          |
-
-| [createEntity](#createEntity)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.createEntity([subclassName]) -> base Entity class[, subclassed Entity class]`                                                                    |
-| **Type**                                    | Method                                                                     |
-| **Description**                             | Returns both the base and (optionally) subclassed [entity class](Entity.html) for creating custom entity subclasses or instances                                                                     |
-| **Parameters**                              | <ul><li>subclassName - an optional name to return a subclassed entity</li></ul> |
-| **Returns**                                 | <ul><li> The base `Entity` class</li><li> An `Entity` subclass or nil if `subclassName` is nil</li></ul>          |
 
 | [start](#start)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

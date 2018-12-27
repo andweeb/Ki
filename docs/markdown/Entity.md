@@ -6,13 +6,13 @@ Entity class that represents some generic automatable desktop entity
 
 ## API Overview
 * Variables - Configurable values
+ * [behaviors](#behaviors)
  * [selectionModalShortcuts](#selectionModalShortcuts)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [dispatchAction](#dispatchAction)
  * [getEventHandler](#getEventHandler)
  * [getSelectionItems](#getSelectionItems)
  * [initialize](#initialize)
- * [invokeEventHandler](#invokeEventHandler)
  * [mergeShortcuts](#mergeShortcuts)
  * [notifyError](#notifyError)
  * [renderScriptTemplate](#renderScriptTemplate)
@@ -21,6 +21,12 @@ Entity class that represents some generic automatable desktop entity
 ## API Documentation
 
 ### Variables
+
+| [behaviors](#behaviors)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity.behaviors`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A table keyed by mode name to define (optional) entity behavior contextual to the mode at the time of an event. The table values are functions that take in the following arguments to invoke the event handler in some mode-specific way:                                                                     |
 
 | [selectionModalShortcuts](#selectionModalShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -60,14 +66,6 @@ Entity class that represents some generic automatable desktop entity
 | **Description**                             | Initializes a new entity instance with its name and shortcuts. By default, a `cheatsheet` object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the `autoExitMode` parameter is explicitly set to `false`.                                                                     |
 | **Parameters**                              | <ul><li>`name` - The entity name</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the entity</li><li>`autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
-
-| [invokeEventHandler](#invokeEventHandler)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity:invokeEventHandler(mode, eventHandler, ...)`                                                                    |
-| **Type**                                    | Method                                                                     |
-| **Description**                             | Invokes an action with different parameters depending on the current mode                                                                     |
-| **Parameters**                              | <ul><li>`mode` - The current mode name</li><li>`eventHandler` - The action event handler</li></ul> |
-| **Returns**                                 | <ul><li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul>          |
 
 | [mergeShortcuts](#mergeShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

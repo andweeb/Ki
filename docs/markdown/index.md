@@ -18,7 +18,7 @@
 | ------------------------------------------------------------------ | --------------------- |
 | [Application](Application.md)                          | Application class that subclasses [Entity](Entity.html) to represent some automatable desktop application     |
 | [Cheatsheet](Cheatsheet.md)                          | Cheatsheet modal for keyboard shortcuts     |
-| [Defaults](Defaults.md)                          | Definitions of default behavior in Ki     |
+| [Defaults](Defaults.md)                          | Definitions of default events and entities     |
 | [Entity](Entity.md)                          | Entity class that represents some generic automatable desktop entity     |
 | [Ki](Ki.md)                          | Modal macOS automation inspired by the vi text editor     |
 | [StatusDisplay](StatusDisplay.md)                          | Small menubar text display     |

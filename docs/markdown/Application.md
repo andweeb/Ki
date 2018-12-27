@@ -5,15 +5,25 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 
 
 ## API Overview
+* Variables - Configurable values
+ * [behaviors](#behaviors)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [createMenuItemEvent](#createMenuItemEvent)
- * [dispatchAction](#dispatchAction)
+ * [focus](#focus)
  * [getApplication](#getApplication)
  * [getMenuItemList](#getMenuItemList)
  * [initialize](#initialize)
- * [invokeEventHandler](#invokeEventHandler)
+ * [toggleFullScreen](#toggleFullScreen)
 
 ## API Documentation
+
+### Variables
+
+| [behaviors](#behaviors)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Application.behaviors`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | Application [behaviors](Entity.html#behaviors) defined to invoke event handlers with `hs.application`.                                                                     |
 
 ### Methods
 
@@ -25,13 +35,13 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | **Parameters**                              | <ul><li>`menuItem` - the menu item to select, specified as either a string or a table</li><li>`options` - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:</li><li>   `isRegex` - a boolean denoting whether there is a regular expression within the menu item name(s)</li><li>   `isToggleable` - a boolean denoting whether the menu item parameter is passed in as a list of two items to toggle between, i.e., `{ "Play", "Pause" }`</li><li>   `focusBefore` - an optional boolean denoting whether to focus the application before the menu item is selected</li><li>   `focusAfter` - an optional boolean denoting whether to focus the application after the menu item is selected</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
-| [dispatchAction](#dispatchAction)         |                                                                                     |
+| [focus](#focus)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Application:dispatchAction(mode, shortcut) -> boolean`                                                                    |
+| **Signature**                               | `Application:focus(app[, choice])`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Dispatch an action from a triggered shortcut for an entity                                                                     |
-| **Parameters**                              | <ul><li>`mode` - The name of the current mode</li><li>`shortcut` - A shortcut object with an action to invoke on the entity</li></ul> |
-| **Returns**                                 | <ul><li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul>          |
+| **Description**                             | Focuses the application                                                                     |
+| **Parameters**                              | <ul><li>`app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object</li><li>`choice` - an optional choice object</li></ul> |
+| **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [getApplication](#getApplication)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -57,11 +67,11 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | **Parameters**                              | <ul><li>`name` - The entity name</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the entity</li><li>`autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
-| [invokeEventHandler](#invokeEventHandler)         |                                                                                     |
+| [toggleFullScreen](#toggleFullScreen)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Application:invokeEventHandler(app, mode, eventHandler)`                                                                    |
+| **Signature**                               | `Application:toggleFullScreen(app)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Invokes an action with different parameters depending on the current Ki mode                                                                     |
-| **Parameters**                              | <ul><li>`app` - The target [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object</li><li>`mode` - The current mode name</li><li>`eventHandler` - The action event handler</li></ul> |
-| **Returns**                                 | <ul><li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul>          |
+| **Description**                             | Toggles the full screen state of the focused application window                                                                     |
+| **Parameters**                              | <ul><li>`app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object</li></ul> |
+| **Returns**                                 | <ul><li> None</li></ul>          |
 

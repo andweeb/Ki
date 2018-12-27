@@ -20,17 +20,41 @@
       </header>
       <h3>API Overview</h3>
       <ul>
+        <li>Variables - Configurable values</li>
+          <ul>
+            <li><a href="#behaviors">behaviors</a></li>
+          </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
             <li><a href="#createMenuItemEvent">createMenuItemEvent</a></li>
-            <li><a href="#dispatchAction">dispatchAction</a></li>
+            <li><a href="#focus">focus</a></li>
             <li><a href="#getApplication">getApplication</a></li>
             <li><a href="#getMenuItemList">getMenuItemList</a></li>
             <li><a href="#initialize">initialize</a></li>
-            <li><a href="#invokeEventHandler">invokeEventHandler</a></li>
+            <li><a href="#toggleFullScreen">toggleFullScreen</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
+        <h4 class="documentation-section">Variables</h4>
+          <section id="behaviors">
+            <a name="//apple_ref/cpp/Variable/behaviors" class="dashAnchor"></a>
+            <h5><a href="#behaviors">behaviors</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application.behaviors</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Application <a href="Entity.html#behaviors">behaviors</a> defined to invoke event handlers with <code>hs.application</code>.</p>
+</td>
+              </tr>
+            </table>
+          </section>
         <h4 class="documentation-section">Methods</h4>
           <section id="createMenuItemEvent">
             <a name="//apple_ref/cpp/Method/createMenuItemEvent" class="dashAnchor"></a>
@@ -66,13 +90,13 @@
               </tr>
             </table>
           </section>
-          <section id="dispatchAction">
-            <a name="//apple_ref/cpp/Method/dispatchAction" class="dashAnchor"></a>
-            <h5><a href="#dispatchAction">dispatchAction</a></h5>
+          <section id="focus">
+            <a name="//apple_ref/cpp/Method/focus" class="dashAnchor"></a>
+            <h5><a href="#focus">focus</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Application:dispatchAction(mode, shortcut) -&gt; boolean</code></td>
+                <td><code>Application:focus(app[, choice])</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -80,15 +104,15 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Dispatch an action from a triggered shortcut for an entity</p>
+                <td><p>Focuses the application</p>
 <p>Parameters:</p>
 <ul>
-<li><code>mode</code> - The name of the current mode</li>
-<li><code>shortcut</code> - A shortcut object with an action to invoke on the entity</li>
+<li><code>app</code> - the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
+<li><code>choice</code> - an optional choice object</li>
 </ul>
 <p>Returns:</p>
 <ul>
-<li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+<li>None</li>
 </ul>
 </td>
               </tr>
@@ -189,13 +213,13 @@
               </tr>
             </table>
           </section>
-          <section id="invokeEventHandler">
-            <a name="//apple_ref/cpp/Method/invokeEventHandler" class="dashAnchor"></a>
-            <h5><a href="#invokeEventHandler">invokeEventHandler</a></h5>
+          <section id="toggleFullScreen">
+            <a name="//apple_ref/cpp/Method/toggleFullScreen" class="dashAnchor"></a>
+            <h5><a href="#toggleFullScreen">toggleFullScreen</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Application:invokeEventHandler(app, mode, eventHandler)</code></td>
+                <td><code>Application:toggleFullScreen(app)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -203,16 +227,14 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Invokes an action with different parameters depending on the current Ki mode</p>
+                <td><p>Toggles the full screen state of the focused application window</p>
 <p>Parameters:</p>
 <ul>
-<li><code>app</code> - The target <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
-<li><code>mode</code> - The current mode name</li>
-<li><code>eventHandler</code> - The action event handler</li>
+<li><code>app</code> - the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
 </ul>
 <p>Returns:</p>
 <ul>
-<li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
+<li>None</li>
 </ul>
 </td>
               </tr>

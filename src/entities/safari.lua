@@ -9,7 +9,7 @@ local actions = {
     openNewPrivateWindow = Application.createMenuItemEvent("New Private Window", { focusAfter = true }),
     openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true }),
     openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true }),
-    undoCloseTab = Application.createMenuItemEvent("Reopen Last Closed Tab", { focusAfter = true }),
+    undoCloseTab = Application.createMenuItemEvent("Reopen Last Closed Tab", { focusBefore = true }),
     showHistory = Application.createMenuItemEvent("Show All History", { focusAfter = true }),
 }
 

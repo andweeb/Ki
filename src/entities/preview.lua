@@ -25,7 +25,7 @@ function actions.openRecent(app)
         Application.focus(app)
     end
 
-    Application.showSelectionModal(recentFileChoices, selectMenuItemAndFocus, app)
+    Application.showSelectionModal(recentFileChoices, selectMenuItemAndFocus)
 end
 
 local shortcuts = {

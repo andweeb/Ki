@@ -56,8 +56,10 @@
       <ul>
         <li>Variables - Configurable values</li>
           <ul>
+            <li><a href="#Application">Application</a></li>
             <li><a href="#defaultEntities">defaultEntities</a></li>
             <li><a href="#defaultEvents">defaultEvents</a></li>
+            <li><a href="#Entity">Entity</a></li>
             <li><a href="#state">state</a></li>
             <li><a href="#stateEvents">stateEvents</a></li>
             <li><a href="#statusDisplay">statusDisplay</a></li>
@@ -66,14 +68,31 @@
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
-            <li><a href="#createApplication">createApplication</a></li>
-            <li><a href="#createEntity">createEntity</a></li>
             <li><a href="#start">start</a></li>
             <li><a href="#stop">stop</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
         <h4 class="documentation-section">Variables</h4>
+          <section id="Application">
+            <a name="//apple_ref/cpp/Variable/Application" class="dashAnchor"></a>
+            <h5><a href="#Application">Application</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki.Application</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A <a href="https://github.com/kikito/middleclass/wiki">middleclass</a> class that subclasses <a href="Entity.html">Entity</a> to represent some automatable desktop application. Class methods and properties are documented <a href="Application.html">here</a>.</p>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="defaultEntities">
             <a name="//apple_ref/cpp/Variable/defaultEntities" class="dashAnchor"></a>
             <h5><a href="#defaultEntities">defaultEntities</a></h5>
@@ -108,6 +127,25 @@
               <tr>
                 <th>Description</th>
                 <td><p>A table containing the default events for all default modes in Ki.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="Entity">
+            <a name="//apple_ref/cpp/Variable/Entity" class="dashAnchor"></a>
+            <h5><a href="#Entity">Entity</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki.Entity</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A <a href="https://github.com/kikito/middleclass/wiki">middleclass</a> class that represents some generic automatable desktop entity. Class methods and properties are documented <a href="Entity.html">here</a>.</p>
 </td>
               </tr>
             </table>
@@ -278,62 +316,6 @@ Ki.transitions = {
             </table>
           </section>
         <h4 class="documentation-section">Methods</h4>
-          <section id="createApplication">
-            <a name="//apple_ref/cpp/Method/createApplication" class="dashAnchor"></a>
-            <h5><a href="#createApplication">createApplication</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Ki.createApplication([subclassName]) -&gt; base Application class[, subclassed Application class]</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Returns both the base and (optionally) subclassed <a href="Application.html">application class</a> for creating custom application entity subclasses or instances</p>
-<p>Parameters:</p>
-<ul>
-<li><code>subclassName</code> - optional name to subclass the <code>Application</code> class</li>
-</ul>
-<p>Returns:</p>
-<ul>
-<li>The base <code>Application</code> class</li>
-<li>An <code>Application</code> subclass or nil if <code>subclassName</code> is nil</li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="createEntity">
-            <a name="//apple_ref/cpp/Method/createEntity" class="dashAnchor"></a>
-            <h5><a href="#createEntity">createEntity</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Ki.createEntity([subclassName]) -&gt; base Entity class[, subclassed Entity class]</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Returns both the base and (optionally) subclassed <a href="Entity.html">entity class</a> for creating custom entity subclasses or instances</p>
-<p>Parameters:</p>
-<ul>
-<li>subclassName - an optional name to return a subclassed entity</li>
-</ul>
-<p>Returns:</p>
-<ul>
-<li>The base <code>Entity</code> class</li>
-<li>An <code>Entity</code> subclass or nil if <code>subclassName</code> is nil</li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
           <section id="start">
             <a name="//apple_ref/cpp/Method/start" class="dashAnchor"></a>
             <h5><a href="#start">start</a></h5>

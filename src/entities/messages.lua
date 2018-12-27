@@ -29,7 +29,7 @@ function Application.getSelectionItems()
     return choices
 end
 
-function actions.focus(choice, app)
+function actions.focus(app, choice)
     app:activate()
 
     if choice then

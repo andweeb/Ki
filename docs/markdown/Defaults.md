@@ -1,7 +1,7 @@
 # [docs](index.md) » Defaults
 ---
 
-Definitions of default behavior in Ki
+Definitions of default events and entities
 
 
 ## API Overview

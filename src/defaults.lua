@@ -1,12 +1,12 @@
 --- === Defaults ===
 ---
---- Definitions of default behavior in Ki
+--- Definitions of default events and entities
 ---
 -- luacov: disable
 
 local Defaults = {}
 Defaults.__index = Defaults
-Defaults.__name = "default-events"
+Defaults.__name = "default"
 
 Defaults.events = {}
 Defaults.entities = {}

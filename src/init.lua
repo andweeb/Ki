@@ -93,6 +93,16 @@ Ki.defaultEvents = defaultEvents
 --- A table containing the default automatable desktop entity instances in Ki.
 Ki.defaultEntities = defaultEntities
 
+--- Ki.Entity
+--- Variable
+--- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some generic automatable desktop entity. Class methods and properties are documented [here](Entity.html).
+Ki.Entity = _G.requirePackage("entity", true)
+
+--- Ki.Application
+--- Variable
+--- A [middleclass](https://github.com/kikito/middleclass/wiki) class that subclasses [Entity](Entity.html) to represent some automatable desktop application. Class methods and properties are documented [here](Application.html).
+Ki.Application = _G.requirePackage("application", true)
+
 --- Ki.state
 --- Variable
 --- The internal [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki.
@@ -385,40 +395,6 @@ setmetatable(Ki._defaultStateEvents, Ki._createStatesMetatable())
 --- }
 --- ```
 Ki.workflows = {}
-
---- Ki.createEntity([subclassName]) -> base Entity class[, subclassed Entity class]
---- Method
---- Returns both the base and (optionally) subclassed [entity class](Entity.html) for creating custom entity subclasses or instances
----
---- Parameters:
----  * subclassName - an optional name to return a subclassed entity
----
---- Returns:
----   * The base `Entity` class
----   * An `Entity` subclass or nil if `subclassName` is nil
-function Ki.createEntity(subclassName)
-    local Entity = _G.requirePackage("entity", true)
-    local SubclassedEntity = subclassName and Entity:subclass(subclassName) or nil
-
-    return Entity, SubclassedEntity
-end
-
---- Ki.createApplication([subclassName]) -> base Application class[, subclassed Application class]
---- Method
---- Returns both the base and (optionally) subclassed [application class](Application.html) for creating custom application entity subclasses or instances
----
---- Parameters:
----  * `subclassName` - optional name to subclass the `Application` class
----
---- Returns:
----   * The base `Application` class
----   * An `Application` subclass or nil if `subclassName` is nil
-function Ki.createApplication(subclassName)
-    local Application = _G.requirePackage("application", true)
-    local SubclassedApplication = subclassName and Application:subclass(subclassName) or nil
-
-    return Application, SubclassedApplication
-end
 
 -- TODO
 -- Ki:triggerWorkflow(event)

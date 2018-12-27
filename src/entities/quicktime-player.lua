@@ -20,9 +20,11 @@ function actions.openRecent(app)
         end
     end
 
-    Application.showSelectionModal(app, recentFileChoices, function(_, choice)
-        table.insert(menuItem, choice.text)
-        app:selectMenuItem(menuItem)
+    Application.showSelectionModal(recentFileChoices, function(choice)
+        if choice then
+            table.insert(menuItem, choice.text)
+            app:selectMenuItem(menuItem)
+        end
     end)
 end
 

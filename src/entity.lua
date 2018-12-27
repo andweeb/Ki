@@ -29,6 +29,34 @@ local cheatsheet = _G.requirePackage("cheatsheet", true)
 
 local Entity = class("Entity")
 
+--- Entity.behaviors
+--- Variable
+--- A table keyed by mode name to define (optional) entity behavior contextual to the mode at the time of an event. The table values are functions that take in the following arguments to invoke the event handler in some mode-specific way:
+---  * `self` - the entity (or subclassed entity) instance
+---  * `eventHandler` - the event handler to be invoked within the function
+---  * `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)
+---  * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
+---
+--- The table is defined with an `__add` metamethod to overwrite the default entity behaviors.
+Entity.behaviors = {
+    default = function(self, eventHandler)
+        local _, autoExit = eventHandler()
+
+        return autoExit == nil and self.autoExitMode or autoExit
+    end,
+}
+
+-- Allow behaviors to be overwritten
+setmetatable(Entity.behaviors, {
+    __add = function(lhs, rhs)
+        for mode, behavior in pairs(rhs) do
+            lhs[mode] = behavior
+        end
+
+        return lhs
+    end,
+})
+
 --- Entity.notifyError(message, details)
 --- Method
 --- Displays error details in a notification and logs to the Hammerspoon console
@@ -165,15 +193,12 @@ Entity.selectionModalShortcuts = {
 ---
 --- Returns:
 ---  * None
-function Entity.showSelectionModal(choices, eventHandler, ...)
-    local args = {...}
+function Entity.showSelectionModal(choices, callback)
     local selectionListener = nil
     local modal = hs.chooser.new(function(choice)
         -- Stop selection listener and invoke the event handler
         selectionListener:stop()
-        if choice then
-            eventHandler(choice, table.unpack(args))
-        end
+        callback(choice)
     end)
 
     modal:choices(choices)
@@ -195,32 +220,6 @@ function Entity.showSelectionModal(choices, eventHandler, ...)
     -- Start row selection listener and show the modal
     selectionListener:start()
     modal:show()
-end
-
---- Entity:invokeEventHandler(mode, eventHandler, ...)
---- Method
---- Invokes an action with different parameters depending on the current mode
----
---- Parameters:
----  * `mode` - The current mode name
----  * `eventHandler` - The action event handler
----
---- Returns:
----  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
-function Entity:invokeEventHandler(mode, eventHandler, ...)
-    if mode == "select" then
-        local choices = self:getSelectionItems()
-
-        if choices and #choices then
-            self.showSelectionModal(choices, eventHandler, ...)
-        end
-
-        return true
-    else
-        local _, autoExit = eventHandler(...)
-
-        return autoExit == nil and self.autoExitMode or autoExit
-    end
 end
 
 --- Entity:getEventHandler(shortcuts, flags, keyName)
@@ -263,10 +262,12 @@ end
 function Entity:dispatchAction(mode, shortcut)
     local flags = shortcut.flags
     local keyName = shortcut.keyName
-    local registeredHandler = self.getEventHandler(self.shortcuts, flags, keyName)
+    local eventHandler = self.getEventHandler(self.shortcuts, flags, keyName)
 
-    if registeredHandler then
-        return self:invokeEventHandler(mode, registeredHandler)
+    if eventHandler then
+        local behaviorFunc = self.behaviors[mode] or self.behaviors.default
+
+        return behaviorFunc(self, eventHandler, flags, keyName)
     else
         return self.autoExitMode
     end

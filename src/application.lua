@@ -24,6 +24,48 @@ end
 local Entity = _G.requirePackage("Entity", true)
 local Application = Entity:subclass("Application")
 
+--- Application.behaviors
+--- Variable
+--- Application [behaviors](Entity.html#behaviors) defined to invoke event handlers with `hs.application`.
+Application.behaviors = Entity.behaviors + {
+    select = function(self, eventHandler)
+        local app = self.name and self:getApplication() or nil
+
+        if not app then
+            return self.autoExitMode
+        end
+
+        local choices = self:getSelectionItems()
+
+        if choices and #choices then
+            local function onSelection(choice)
+                if choice then
+                    eventHandler(app, choice)
+                end
+            end
+
+            self.showSelectionModal(choices, onSelection)
+        end
+
+        return true
+    end,
+    default = function(self, eventHandler)
+        local app = self.name and self:getApplication() or nil
+
+        if not app then
+            return self.autoExitMode
+        end
+
+        local autoFocus, autoExit = eventHandler(app)
+
+        if app and autoFocus == true then
+            self.focus(app)
+        end
+
+        return autoExit == nil and self.autoExitMode or autoExit
+    end,
+}
+
 --- Application.createMenuItemEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])
 --- Method
 --- Convenience method to create an event handler that selects a menu item, with optionally specified behavior on how the menu item selection occurs
@@ -147,6 +189,16 @@ function Application:getApplication()
     return app
 end
 
+--- Application:focus(app[, choice])
+--- Method
+--- Focuses the application
+---
+--- Parameters:
+---  * `app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object
+---  * `choice` - an optional choice object
+---
+--- Returns:
+---   * None
 function Application.focus(app, choice)
     if choice then
         local window = hs.window(tonumber(choice.windowId))
@@ -156,70 +208,18 @@ function Application.focus(app, choice)
     end
 end
 
+--- Application:toggleFullScreen(app)
+--- Method
+--- Toggles the full screen state of the focused application window
+---
+--- Parameters:
+---  * `app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object
+---
+--- Returns:
+---   * None
 function Application.toggleFullScreen(app)
     app:focusedWindow():toggleFullScreen()
     return true
-end
-
---- Application:invokeEventHandler(app, mode, eventHandler)
---- Method
---- Invokes an action with different parameters depending on the current Ki mode
----
---- Parameters:
----  * `app` - The target [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object
----  * `mode` - The current mode name
----  * `eventHandler` - The action event handler
----
---- Returns:
----  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
-function Application:invokeEventHandler(mode, eventHandler, app)
-    if mode == "select" then
-        local choices = self:getSelectionItems()
-
-        if choices and #choices then
-            self.showSelectionModal(choices, eventHandler, app)
-        end
-
-        return true
-    else
-        local autoFocus, autoExit = eventHandler(app)
-
-        if app and autoFocus == true then
-            self.focus(app)
-        end
-
-        return autoExit == nil and self.autoExitMode or autoExit
-    end
-end
-
---- Application:dispatchAction(mode, shortcut) -> boolean
---- Method
---- Dispatch an action from a triggered shortcut for an entity
----
---- Parameters:
----  * `mode` - The name of the current mode
----  * `shortcut` - A shortcut object with an action to invoke on the entity
----
---- Returns:
----  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
-function Application:dispatchAction(mode, shortcut)
-    local flags = shortcut.flags
-    local keyName = shortcut.keyName
-    local app = self.name
-        and self:getApplication()
-        or nil
-
-    if not app then
-        return self.autoExitMode
-    end
-
-    local registeredHandler = self.getEventHandler(self.shortcuts, flags, keyName)
-
-    if registeredHandler then
-        return self:invokeEventHandler(mode, registeredHandler, app)
-    else
-        return self.autoExitMode
-    end
 end
 
 return Application

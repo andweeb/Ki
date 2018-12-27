@@ -23,12 +23,14 @@ function actions.openRecent(app)
     end
 
     local function selectMenuItemAndFocus(choice)
-        table.insert(menuItem, choice.text)
-        app:selectMenuItem(menuItem)
-        Application.focus(app)
+        if choice then
+            table.insert(menuItem, choice.text)
+            app:selectMenuItem(menuItem)
+            Application.focus(app)
+        end
     end
 
-    Application.showSelectionModal(recentFileChoices, selectMenuItemAndFocus, app)
+    Application.showSelectionModal(recentFileChoices, selectMenuItemAndFocus)
 end
 
 local shortcuts = {
