@@ -299,15 +299,6 @@ Ki._defaultTransitions = {
             function(...) Ki.state:exitMode(table.unpack({...})) end,
             { "Action Mode", "Exit to Normal Mode" },
         },
-        {
-            nil, ".",
-            function()
-                local workflow = Ki.history.commands[#Ki.history.commands]
-                Ki.state:exitMode()
-                Ki:triggerWorkflow(workflow)
-            end,
-            { "Action Mode", "Repeat the last command" },
-        },
     },
     select = {
         {
@@ -396,20 +387,6 @@ setmetatable(Ki._defaultStateEvents, Ki._createStatesMetatable())
 --- ```
 Ki.workflows = {}
 
--- TODO
--- Ki:triggerWorkflow(event)
--- Method
--- A function that triggers a workflow (a series of events)
---
--- Parameters:
---  * `event` - A list of items describing an event with the following order:
---   * `app` - The `hs.application` object of the provided application name
---   * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
---   * `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)
-function Ki:triggerWorkflow(workflow)
-    print(self, hs.inspect(workflow))
-end
-
 --- Ki.statusDisplay
 --- Variable
 --- A table that defines the behavior for displaying the status of mode transitions. The `show` function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:
@@ -420,37 +397,10 @@ end
 --- Defaults to a simple text display in the center of the menu bar of the focused screen.
 Ki.statusDisplay = nil
 
--- A table that stores the `action`, `commands`, and `workflow` history of all state transitions. The `action` and `workflow` fields are cleared out and the `commands` stores the series of events (which make up the workflow) when the Ki mode transitions back to the initial state.
+-- A table that stores the workflow history.
 Ki.history = {
     action = {},
-    commands = {},
-    workflow = {
-        events = {},
-        triggers = {},
-    },
 }
-
-function Ki.history:recordCommand(workflowEvents)
-    -- TODO: Replace command history data structure with optimized fifo implementation for better item management
-    if #self.commands > 100 then
-        local lastCommand = self.commands[#self.commands]
-        self.commands = { lastCommand }
-    end
-
-    table.insert(self.commands, workflowEvents)
-end
-
-function Ki.history:recordEvent(event)
-    table.insert(self.workflow.events, event)
-end
-
-function Ki.history:resetCurrentWorkflow()
-    self.action = {}
-    self.workflow = {
-        events = {},
-        triggers = {},
-    }
-end
 
 function Ki._renderHotkeyText(modifiers, keyName)
     local modKeyText = ""
@@ -476,27 +426,19 @@ function Ki:_createFsmCallbacks()
     local callbacks = {}
 
     -- Add generic state change callback for all events to record and reset workflow event history
-    callbacks.on_enter_state = function(_, eventName, _, nextState, stateMachine, flags, keyName, action)
+    callbacks.on_enter_state = function(_, eventName, _, nextState, stateMachine, _, _, action)
         if not self.listener or not self.listener:isEnabled() then
             return
         end
 
-        local event = {
-            flags = flags,
-            action = action,
-            keyName = keyName,
-            eventName = eventName,
-        }
         local actionHotkey = action and self._renderHotkeyText(action.flags, action.keyName)
-        local parenthetical = eventName == "enterSelectMode" and next(Ki.history.action) and "with action" or actionHotkey
+        local parenthetical = eventName == "enterSelectMode" and next(self.history.action) and "with action" or actionHotkey
 
         -- Show the status display with the current mode and record the event to the workflow history
         self.statusDisplay:show(stateMachine.current, parenthetical)
-        self.history:recordEvent(event)
 
         if nextState == "desktop" then
-            self.history:recordCommand(self.history.workflow.events)
-            self.history:resetCurrentWorkflow()
+            self.history.action = {}
         end
     end
 
