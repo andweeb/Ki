@@ -3,9 +3,9 @@
 # Working directory variable
 wd := $(shell git rev-parse --show-toplevel)
 
-# Monitor file changes at filepath $(1) and trigger function $(2)
+# Monitor file changes at filepath $(1) and evaluate expression $(2) on events
 define monitor-file-changes
-	fswatch -orv $(1) | xargs -n1 $(call $(2))
+	fswatch -rv $(1) | xargs -I {} sh -c '$(call $(2))'
 endef
 
 # Run lua linter on src and spec files
@@ -13,11 +13,9 @@ define lint-command
 	luacheck src/*.lua spec/*.lua
 endef
 
-# Run busted unit tests and write coverage report with optional $(tag) argument
+# Run busted unit tests and write coverage report with optional tag argument
 define test-command
-	-busted -c -t "$(tag)"
-	luacov-console
-	luacov-console -s
+	busted -c -t "$(tag)"; luacov-console; luacov-console -s;
 endef
 
 # Generate html and markup docs and copy styles to output directory
@@ -43,9 +41,10 @@ watch-lint:
 	$(call monitor-file-changes,$(wd)/src,lint-command)
 
 test: clean-spoon clean-test
-	-busted -c -t "$(tag)"
-	luacov-console
-	luacov-console -s
+	$(call test-command)
+
+watch-test:
+	$(call monitor-file-changes,$(wd)/spec,test-command)
 
 docs: clean-docs
 	$(call generate-docs-command)
@@ -63,6 +62,7 @@ docs-deps:
 
 test-deps:
 	luarocks install busted
+	luarocks install luacov
 	luarocks install luacov-console
 
 deps: spoon-deps docs-deps test-deps
