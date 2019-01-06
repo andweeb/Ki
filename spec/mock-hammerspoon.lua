@@ -39,6 +39,20 @@ local mocks = {
             return nil
         end
     },
+    drawing = {
+        windowLevels = {
+            modalPanel = nil,
+        },
+    },
+    image = {
+        imageFromAppBundle = function()
+            return {
+                encodeAsURLString = function()
+                    return nil
+                end
+            }
+        end
+    },
     keycodes = { map = {} },
     event = {
         getKeyCode = function()
@@ -72,6 +86,11 @@ local mocks = {
             },
         },
     },
+    notify = {
+        show = function()
+            return nil
+        end,
+    },
     osascript = {
         applescript = function()
             return nil
@@ -80,6 +99,9 @@ local mocks = {
     screen = {
         mainScreen = function()
             return {
+                fullFrame = function()
+                    return { x = 0, y = 0, h = 0, w = 0 }
+                end,
                 frame = function()
                     return { x = 0, y = 0, h = 0, w = 0 }
                 end,
@@ -94,7 +116,7 @@ local mocks = {
             return {
                 volume = function()
                     return {
-                        play = function ()
+                        play = function()
                             return nil
                         end,
                     }
@@ -107,6 +129,22 @@ local mocks = {
             return nil
         end,
     },
+    webview = {
+        new = function()
+            return {
+                windowStyle = function() return nil end,
+                level = function() return nil end,
+                darkMode = function() return nil end,
+                shadow = function() return nil end,
+            }
+        end,
+    },
+    window = function()
+        return {
+            focus = function() return nil end,
+            focusTab = function() return nil end,
+        }
+    end,
 }
 
 -- Init function that returns the `hs` mock object initializer and its default mocked fields

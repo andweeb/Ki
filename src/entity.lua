@@ -5,13 +5,13 @@
 
 local luaVersion = _VERSION:match("%d+%.%d+")
 
+-- luacov: disable
 if not _G.getSpoonPath then
     function _G.getSpoonPath()
         return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
     end
 end
 
--- luacov: disable
 if not _G.requirePackage then
     function _G.requirePackage(name, isInternal)
         local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
@@ -169,9 +169,11 @@ end
 ---
 --- Returns:
 ---   * `selectionItems` - A list of choices or `nil`
+-- luacov: disable
 function Entity:getSelectionItems() -- luacheck: ignore
     return nil
 end
+-- luacov: enable
 
 --- Entity.selectionModalShortcuts
 --- Variable

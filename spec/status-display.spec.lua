@@ -1,25 +1,70 @@
-local mockHs = require("spec.mock-hammerspoon")()
+local say = require("say")
 local assertions = require("spec.assertions")
+local hammerspoonMocker = require("spec.mock-hammerspoon")
 
-assertions:init(require("say"), assert)
+assertions:init(say, assert)
 
-describe("status-display.lua", function()
-    describe("show status display", function()
-        setup(function()
-            _G.hs = mock(mockHs())
-        end)
+-- Status display `createTextElement` method test suite
+local function createTextElementTests()
+    local tests = {
+        {
+            name = "creates text element in default mode",
+            args = { "text" },
+            inDarkMode = false,
+            expectedTextColor = { red = 0, blue = 0, green = 0 },
+        },
+        {
+            name = "creates text element in dark mode",
+            args = { "text" },
+            inDarkMode = true,
+            expectedTextColor = { red = 0.8, blue = 0.8, green = 0.8 },
+        },
+    }
 
-        teardown(function()
-            _G.hs = nil
-        end)
+    -- Run `createTextElement` method test cases
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local mockHs = hammerspoonMocker()
+            local newTextStyleSpy = spy.new(function() end)
+            local mockStyledText = { new = newTextStyleSpy }
+            local mockOsascript = {
+                applescript = function()
+                    return _, test.inDarkMode
+                end
+            }
 
-        it("should expose public functions", function()
+            _G.hs = mock(mockHs({
+                osascript = mockOsascript,
+                styledtext = mockStyledText,
+            }))
+
             local statusDisplay = require("status-display")
+            statusDisplay:createTextElement(table.unpack(test.args))
 
-            assert.are.equal(type(statusDisplay), "table")
-            assert.are.equal(type(statusDisplay.show), "function")
+            assert.spy(newTextStyleSpy).called_with(test.args[1], {
+                color = test.expectedTextColor,
+                font = { name = "Menlo", size = 10 },
+                paragraphStyle = { alignment = "center" },
+            })
         end)
+    end
+end
 
+describe("status-display.lua (#statusdisplay)", function()
+    before_each(function()
+        -- Setup each test with a fake Hammerspoon environment and mocked external dependencies
+        package.loaded["status-display"] = nil
+        _G.hs = mock(hammerspoonMocker()())
+    end)
+
+    after_each(function()
+        _G.hs = nil
+        _G.requirePackage = nil
+    end)
+
+    describe("`createTextElement` method", function() createTextElementTests() end)
+
+    describe("`show` method", function()
         it("should clear pre-existing canvases", function()
             local statusDisplay = require("status-display")
             local mockDisplay = { delete = function() end }
@@ -35,6 +80,7 @@ describe("status-display.lua", function()
         end)
 
         it("should render displays", function()
+            local mockHs = hammerspoonMocker()
             local statusDisplay = require("status-display")
             local mockDisplay = { delete = function() end }
             local testStatus = "test"
@@ -73,7 +119,8 @@ describe("status-display.lua", function()
             assert.are.equal(type(statusDisplay.displays), "table")
         end)
 
-        it("should fade out the normal mode status display", function()
+        it("should fade out the desktop mode status display", function()
+            local mockHs = hammerspoonMocker()
             local statusDisplay = require('status-display')
             local mockDisplay = { delete = spy.new(function() end) }
             local fadeTimeout = statusDisplay.DEFAULT_FADE_TIMEOUT
@@ -94,7 +141,7 @@ describe("status-display.lua", function()
                 }
             }))
 
-            statusDisplay:show("normal")
+            statusDisplay:show("desktop")
 
             assert.spy(mockDisplay.delete).was.called()
             assert.spy(mockDisplay.delete).was.called_with(mockDisplay, fadeTimeout)

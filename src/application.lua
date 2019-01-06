@@ -28,27 +28,6 @@ local Application = Entity:subclass("Application")
 --- Variable
 --- Application [behaviors](Entity.html#behaviors) defined to invoke event handlers with `hs.application`.
 Application.behaviors = Entity.behaviors + {
-    select = function(self, eventHandler)
-        local app = self.name and self:getApplication() or nil
-
-        if not app then
-            return self.autoExitMode
-        end
-
-        local choices = self:getSelectionItems()
-
-        if choices and #choices then
-            local function onSelection(choice)
-                if choice then
-                    eventHandler(app, choice)
-                end
-            end
-
-            self.showSelectionModal(choices, onSelection)
-        end
-
-        return true
-    end,
     default = function(self, eventHandler)
         local app = self.name and self:getApplication() or nil
 
@@ -63,6 +42,27 @@ Application.behaviors = Entity.behaviors + {
         end
 
         return autoExit == nil and self.autoExitMode or autoExit
+    end,
+    select = function(self, eventHandler)
+        local app = self.name and self:getApplication() or nil
+
+        if not app then
+            return self.autoExitMode
+        end
+
+        local choices = self:getSelectionItems()
+
+        if choices and #choices > 0 then
+            local function onSelection(choice)
+                if choice then
+                    eventHandler(app, choice)
+                end
+            end
+
+            self.showSelectionModal(choices, onSelection)
+        end
+
+        return true
     end,
 }
 
@@ -89,7 +89,8 @@ function Application.createMenuItemEvent(menuItem, options)
         end
 
         if options.isToggleable then
-            _ = app:selectMenuItem(menuItem[1], options.isRegex) or app:selectMenuItem(menuItem[2], options.isRegex)
+            _ = app:selectMenuItem(menuItem[1], options.isRegex)
+                or app:selectMenuItem(menuItem[2], options.isRegex)
         else
             app:selectMenuItem(menuItem, options.isRegex)
         end
@@ -216,7 +217,7 @@ end
 ---  * `app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object
 ---
 --- Returns:
----   * None
+---   * `true`
 function Application.toggleFullScreen(app)
     app:focusedWindow():toggleFullScreen()
     return true

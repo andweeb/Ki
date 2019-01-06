@@ -1,5 +1,4 @@
-local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Application = dofile(spoonPath.."/application.lua")
+local Application = dofile(_G.spoonPath.."/application.lua")
 local actions = {
     find = Application.createMenuItemEvent({ "Find", "Find..." }, { focusAfter = true }),
     open = Application.createMenuItemEvent("Open...", { focusAfter = true }),
@@ -12,7 +11,7 @@ function actions.openRecent(app)
     local recentFileChoices = {}
 
     for _, item in pairs(menuItemList) do
-        if item.AXTitle then
+        if item.AXTitle and #item.AXTitle > 0 then
             table.insert(recentFileChoices, {
                 text = item.AXTitle,
             })

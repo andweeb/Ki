@@ -4,9 +4,11 @@ return {
     reportfile = 'luacov.report.out',
     runreport = true,
     exclude = {
-        'luacov$',
-        'src.entities',
         'deps',
+        'dist',
+        'luacov$',
         'spec',
+        'src.defaults',
+        'src.entities',
     },
 }

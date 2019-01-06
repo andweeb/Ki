@@ -9,6 +9,7 @@ Cheatsheet.__name = "Cheatsheet"
 
 local luaVersion = _VERSION:match("%d+%.%d+")
 
+-- luacov: disable
 if not _G.getSpoonPath then
     function _G.getSpoonPath()
         return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
@@ -23,6 +24,7 @@ if not _G.requirePackage then
         return dofile(packagePath)
     end
 end
+-- luacov: enable
 
 local lustache = _G.requirePackage("lustache")
 
@@ -51,7 +53,7 @@ local KEY_GLYPHS = {
 }
 
 -- Generate a view model of shortcuts partitioned into categories
-function Cheatsheet.createShortcutBlocks(shortcutList)
+function Cheatsheet._createShortcutBlocks(shortcutList)
     local shortcutBlocks = {}
     local shortcutCategories = {}
 
@@ -178,7 +180,7 @@ function Cheatsheet:show()
         stylesheet = css,
         icon = appIconUri,
         description = self.description,
-        shortcutBlocks = self.createShortcutBlocks(self.shortcuts),
+        shortcutBlocks = self._createShortcutBlocks(self.shortcuts),
     }
 
     self.view:windowTitle(title)

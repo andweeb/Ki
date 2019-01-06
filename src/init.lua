@@ -55,15 +55,15 @@ if not _G.getSpoonPath then
     end
 end
 
-local spoonPath = _G.getSpoonPath()
-package.cpath = spoonPath.."/deps/lib/lua/"..luaVersion.."/?.so;"..package.cpath
-package.path = spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
+_G.spoonPath = _G.getSpoonPath()
+package.cpath = _G.spoonPath.."/deps/lib/lua/"..luaVersion.."/?.so;"..package.cpath
+package.path = _G.spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
 
 -- luacov: disable
 if not _G.requirePackage then
     function _G.requirePackage(name, isInternal)
         local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
-        local packagePath = spoonPath..location..name..".lua"
+        local packagePath = _G.spoonPath..location..name..".lua"
 
         return dofile(packagePath)
     end
@@ -506,7 +506,7 @@ function Ki:_handleKeyDown(event)
         return true
     end
 
-    -- Propagate event in normal mode
+    -- Propagate event when there is no handler in desktop mode
 end
 
 -- Primary init function to initialize the primary event handler
@@ -530,7 +530,7 @@ end
 ---   * An [`hs.eventtap`](https://www.hammerspoon.org/docs/hs.eventtap.html) object
 function Ki:start()
     -- Set default status display if not provided
-    self.statusDisplay = self.statusDisplay or dofile(spoonPath.."/status-display.lua")
+    self.statusDisplay = self.statusDisplay or dofile(_G.spoonPath.."/status-display.lua")
 
     -- Recreate the internal finite state machine if custom state events are provided
     self.state = fsm.create({

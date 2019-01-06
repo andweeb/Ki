@@ -56,6 +56,22 @@ assertions.has_value = {
     end,
 }
 
+assertions.is_greater_than = {
+    positive = "Expected %s \nto be greater than %s",
+    negative = "Expected %s \nto not be greater than %s",
+    assertion = function(_, arguments)
+        return arguments[1] > arguments[2]
+    end
+}
+
+assertions.is_less_than = {
+    positive = "Expected %s \nto be less than %s",
+    negative = "Expected %s \nto not be less than %s",
+    assertion = function(_, arguments)
+        return arguments[1] < arguments[2]
+    end
+}
+
 function assertions:init(say, assert)
     for name, data in pairs(self) do
         if type(data) ~= "function" then

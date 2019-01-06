@@ -21,6 +21,15 @@ local function requirePackageMocker(mocks)
                 return {}
             end
         }
+        local mockMiddleclass = function()
+            return {
+                subclass = function()
+                    return {
+                        new = function() end
+                    }
+                end,
+            }
+        end
 
         if isInternal then
             return mock(dofile("src/"..name..".lua"))
@@ -29,55 +38,43 @@ local function requirePackageMocker(mocks)
                 return mocks.fsm or mock(mockFsm)
             elseif name == "lustache" then
                 return mocks.lustache or mock(mockLustache)
+            elseif name == "middleclass" then
+                return mocks.middleclass or mock(mockMiddleclass)
             end
         end
     end
 end
 
-describe("init.lua", function()
-    before_each(function ()
-        -- Setup each test with a fake Hammerspoon environment and mocked external dependencies
-        _G.hs = mock(hammerspoonMocker()())
-        _G.requirePackage = requirePackageMocker()
+-- Ki `init` method test suite
+local function initKiTests()
+    it("initializes the primary keydown event listener", function()
+        local Ki = require("init")
+
+        Ki:init()
+
+        assert.has_property(Ki, "listener")
     end)
 
-    after_each(function ()
-        _G.hs = nil
-        _G.requirePackage = nil
+    it("handles keydown events", function()
+        local Ki = require("init")
+        local mockHs, hsMocks = hammerspoonMocker()
+        local keyDownHandlerSpy = spy.new(function() end)
+        local eventCallback = nil
+
+        Ki._handleKeyDown = keyDownHandlerSpy
+        hsMocks.eventtap.new = function(_, callback) eventCallback = callback end
+        _G.hs = mock(mockHs({ eventtap = hsMocks.eventtap }))
+
+        Ki:init()
+
+        eventCallback()
+
+        assert.spy(keyDownHandlerSpy).was.called()
     end)
+end
 
-    describe("initialize ki", function()
-        it("should expose public functions", function()
-            local ki = require("init")
-            local publicApi = {
-                "extendEntity",
-                "start",
-                "stop",
-            }
-
-            for _, functionName in pairs(publicApi) do
-                assert.has_property(ki, functionName)
-                assert.are.equal(type(ki[functionName]), "function")
-            end
-        end)
-
-        it("should initialize without errors", function()
-            local ki = require("init")
-
-            assert.has_no.errors(function() ki:init() end)
-        end)
-
-        it("should initialize finite state machine", function()
-            local ki = require("init")
-
-            ki:init()
-
-            assert.has_property(ki, "state")
-            assert.has_property(ki, "states")
-            assert.has_property(ki, "listener")
-        end)
-    end)
-
+-- Ki `start` method test suite
+local function startKiTests()
     describe("start", function()
         it("should set a default status display", function()
             local ki = require("init")
@@ -129,343 +126,269 @@ describe("init.lua", function()
             assert.has_value(ki.workflows.entity, testEvents.entity[2])
         end)
     end)
+end
 
-    describe("ki event configuration and creation", function()
-        it("should create new entity workflow events using a helper function", function()
-            local ki = require("init")
-            local mockHs, hsMocks = hammerspoonMocker()
-            local eventHandler = spy.new(function() end)
+-- Ki `stop` method test suite
+local function stopKiTests()
+    it("stops the primary keydown event listener", function()
+        local Ki = require("init")
+        local stopListenerSpy = spy.new(function() end)
 
-            hsMocks.appfinder.appFromName = spy.new(function() end)
-            _G.hs = mock(mockHs({ appfinder = hsMocks.appfinder }))
+        Ki.listener = { stop = stopListenerSpy }
+        Ki:stop()
 
-            ki.state = { exitMode = spy.new(function() end) }
-            ki:createEntityEventHandler("test", eventHandler)
-
-            assert.spy(eventHandler).was.called()
-            assert.spy(ki.state.exitMode).was.called()
-        end)
-
-        it("should create the events metatable", function()
-            local ki = require("init")
-            local metatable = ki:_createEventsMetatable()
-            local defaultEvents = { entity = {} }
-            local customEvents = { entity = {} }
-
-            metatable.__add = spy.new(function() end)
-            setmetatable(defaultEvents, metatable)
-
-            _ = defaultEvents + customEvents
-
-            assert.spy(metatable.__add).was.called()
-        end)
-
-        it("should show errors on unexpected mode names when adding events", function()
-            local ki = require("init")
-            local metatable = ki:_createEventsMetatable()
-            local defaultEvents = { entity = {} }
-            local customEvents = { unexpected = {} }
-            local mockHs, hsMocks = hammerspoonMocker()
-
-            hsMocks.showError = spy.new(function() end)
-            _G.hs = mock(mockHs({ showError = hsMocks.showError }))
-
-            setmetatable(defaultEvents, metatable)
-
-            _ = defaultEvents + customEvents
-
-            assert.spy(hsMocks.showError).was.called()
-        end)
-
-        it("should call function to merge events when adding events", function()
-            local ki = require("init")
-            local metatable = ki:_createEventsMetatable()
-            local defaultEvents = { entity = {} }
-            local customEvents = { entity = {} }
-
-            ki._mergeEvents = spy.new(function() end)
-            setmetatable(defaultEvents, metatable)
-
-            _ = defaultEvents + customEvents
-
-            assert.spy(ki._mergeEvents).was.called()
-        end)
-
-        it("should merge events with conflicting hotkeys", function()
-            local ki = require("init")
-            local lhsEvent = { { nil, "t", "should be overwritten" } }
-            local rhsEvent = { { nil, "t", "should overwrite the old value" } }
-
-            ki._mergeEvents("entity", lhsEvent, rhsEvent, true)
-
-            assert.are.equal(lhsEvent[3], rhsEvent[3])
-        end)
+        assert.spy(stopListenerSpy).was.called()
     end)
+end
 
-    describe("ki state event callbacks", function()
-        it("should create a generic state change callback", function()
-            local ki = require("init")
-            local callbacks = ki:_createFsmCallbacks()
+-- Ki `mergeEvents` method test suite
+local function mergeEventsTests()
+    local tests = {
+        {
+            name = "appends new events",
+            args = {
+                "mode",
+                {},
+                { { nil, "a", {} } },
+                _,
+            },
+            expectedResult = { { nil, "a", {} } },
+        },
+        {
+            name = "shows error on shortcut conflicts",
+            args = {
+                "mode",
+                { { { "ctrl" }, "a", {} } },
+                { { { "ctrl" }, "a", {} } },
+                false,
+            },
+            expectedResult = { { { "ctrl" }, "a", {} } },
+            showsError = true,
+        },
+        {
+            name = "overrides events on shortcut conflicts",
+            args = {
+                "mode",
+                { { { "ctrl" }, "a", { "target" } } },
+                { { { "ctrl" }, "a", { "override" } } },
+                true,
+            },
+            expectedResult = { { { "ctrl" }, "a", { "override" } } },
+        },
+    }
 
-            assert.has_property(callbacks, "on_enter_state")
-        end)
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local Ki = require("init")
+            local showErrorSpy = spy.new(function() end)
+            local mockHs = hammerspoonMocker()
+            local result = test.args[2]
 
-        it("should render action hotkey text on enter state", function()
-            local ki = require("init")
-            local callbacks = ki:_createFsmCallbacks()
-            local eventName = "test event name"
-            local keyName = "test key name"
-            local flags = "test flags"
-            local fsm = { current = "test" }
-            local action = {
-                flags = { ctrl = true },
-                keyName = "t",
-            }
+            _G.hs = mock(mockHs({ showError = showErrorSpy }))
 
-            ki:init()
-            ki.listener = { isEnabled = function() return true end }
-            ki.statusDisplay = { show = function() end };
+            Ki._mergeEvents(table.unpack(test.args))
 
-            local showSpy = spy.on(ki.statusDisplay, "show")
-
-            callbacks.on_enter_state(_, eventName, _, fsm.current, fsm, flags, keyName, action)
-
-            assert.spy(showSpy).was.called()
-        end)
-
-        it("should clear out the event history on state change to the initial state", function()
-            local ki = require("init")
-            local callbacks = ki:_createFsmCallbacks()
-            local eventName = "test event name"
-            local keyName = "test key name"
-            local flags = "test flags"
-            local fsm = { current = "normal" }
-
-            ki:init()
-            ki.listener = { isEnabled = function() return true end }
-            ki.statusDisplay = { show = function() end };
-            ki.history.workflow.events = {
-                {
-                    flags = "previous flags",
-                    keyName = "previous key name",
-                    eventName = "previous event name",
-                },
-            }
-
-            callbacks.on_enter_state(_, eventName, _, fsm.current, fsm, flags, keyName)
-
-            assert.are.same(ki.history.workflow.events, {})
-        end)
-    end)
-
-    describe("ki selection modal", function()
-        it("should show selection modal", function()
-            local ki = require("init")
-            local mockHs, hsMocks = hammerspoonMocker()
-            local showListenerSpy = spy.new(function() end)
-
-            hsMocks.chooser.new = function()
-                return {
-                    show = showListenerSpy,
-                    choices = function() end,
-                    bgDark = function() end,
-                }
+            if test.showsError then
+                assert.spy(showErrorSpy).was.called()
             end
-            _G.hs = mock(mockHs({ chooser = hsMocks.chooser }))
 
-            ki:showSelectionModal()
-
-            assert.spy(showListenerSpy).was.called()
+            assert.are.same(test.expectedResult, result)
         end)
+    end
+end
 
-        it("should select a choice", function()
-            local ki = require("init")
-            local choice = "test choice"
-            local mockHs, hsMocks = hammerspoonMocker()
-            local selectSpy = spy.new(function() end)
-            local mockCallback = nil
+-- Ki `_renderHotkeyText` method test suite
+local function renderHotkeyTextTests()
+    local tests = {
+        {
+            name = "renders hotkey text",
+            args = { {}, "a" },
+            expectedResult = "a",
+        },
+        {
+            name = "renders modifier key text",
+            args = { { cmd = true }, "a" },
+            expectedResult = "⌘a",
+        },
+    }
 
-            ki.history.workflow.events = {{ }}
-            hsMocks.chooser.new = function(callback)
-                mockCallback = callback
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local Ki = require("init")
+            local result = Ki._renderHotkeyText(table.unpack(test.args))
+
+            assert.are.same(test.expectedResult, result)
+        end)
+    end
+end
+
+-- Ki `_renderHotkeyText` method test suite
+local function handleKeyDownTests()
+    local mockEvent = function(flags, key)
+        flags = flags or {}
+        return {
+            getFlags = function()
                 return {
-                    show = function() end,
-                    choices = function() end,
-                    bgDark = function() end,
+                    table.unpack(flags),
+                    containExactly = function()
+                        return #flags > 0
+                    end,
                 }
-            end
-            _G.hs = mock(mockHs({ chooser = hsMocks.chooser }))
-
-            ki:showSelectionModal({}, selectSpy)
-            mockCallback(choice)
-
-            assert.spy(selectSpy).was_called_with(choice)
-        end)
-
-        insulate("should enable keyboard shortcuts for the selection modal", function()
-            local function mockSelectionHs(selectedIndex, shortcutKeyName)
-                local mockHs, hsMocks = hammerspoonMocker()
-                local mockEvent = {
-                    getFlags = function()
+            end,
+            getKeyCode = function()
+                return key
+            end,
+        }
+    end
+    local mockSound = function(mockPlaySound)
+        return {
+            getByName = function()
+                return {
+                    volume = function()
                         return {
-                            containExactly = function()
-                                return true
-                            end
+                            play = mockPlaySound
                         }
                     end,
-                    getKeyCode = function()
-                        return shortcutKeyName
-                    end,
-                };
-                local mockChooser = {
-                    show = function() end,
-                    choices = function() end,
-                    bgDark = function() end,
-                    selectedRow = function()
-                        return selectedIndex
-                    end,
                 }
+            end,
+        }
+    end
 
-                hsMocks.eventtap.new = function(_, handler)
-                    return {
-                        -- Trigger callback by mocking `start()`
-                        start = function()
-                            handler(mockEvent)
-                        end,
-                    }
-                end
-                hsMocks.chooser.new = function()
-                    return mockChooser
-                end
-                spy.on(mockChooser, "selectedRow")
-
-                return mockChooser, mockHs({
-                    eventtap = hsMocks.eventtap,
-                    chooser = hsMocks.chooser,
-                    keycodes = {
-                        map = {
-                            [shortcutKeyName] = shortcutKeyName,
-                        },
+    local tests = {
+        {
+            name = "returns nil on non-existent event handler in desktop mode",
+            mode = "desktop",
+            workflows = { desktop = {} },
+            event = mockEvent({}, ""),
+            expectedResult = nil,
+        },
+        {
+            name = "plays sound on non-existent event handler for a non-desktop mode",
+            mode = "test",
+            workflows = { test = {} },
+            event = mockEvent({}, ""),
+            shouldPlaySound = true,
+            expectedResult = true,
+        },
+        {
+            name = "notifies error on misconfigured event handler",
+            mode = "test",
+            workflows = {
+                test = {
+                    { { "ctrl" }, "a", { "invalid", "event handler" } },
+                },
+            },
+            event = mockEvent({ "ctrl" }, "a"),
+            shouldNotifyError = true,
+            expectedResult = true,
+        },
+        {
+            name = "dispatches action through entity object",
+            mode = "test",
+            workflows = {
+                test = {
+                    { { "ctrl" }, "a", { dispatchAction = spy.new(function() end) } },
+                },
+            },
+            event = mockEvent({ "ctrl" }, "a"),
+            expectedResult = true,
+            expectedEventHandlerSpy = function(workflows)
+                return workflows.test[1][3].dispatchAction
+            end,
+        },
+        {
+            name = "dispatches action through entity object and exits mode",
+            mode = "test",
+            workflows = {
+                test = {
+                    {
+                        { "ctrl" },
+                        "a",
+                        { dispatchAction = spy.new(function() return true end) },
                     },
-                })
-            end
+                },
+            },
+            event = mockEvent({ "ctrl" }, "a"),
+            shouldExitMode = true,
+            expectedResult = true,
+            expectedEventHandlerSpy = function(workflows)
+                return workflows.test[1][3].dispatchAction
+            end,
+        },
+    }
 
-            it("should select the lower row with a shortcut", function()
-                local ki = require("init")
-                local mockChooser, mockHs = mockSelectionHs(1, "j")
-
-                _G.hs = mock(mockHs)
-
-                ki:showSelectionModal({}, function() end)
-
-                assert.spy(mockChooser.selectedRow).was_called(_, 2)
-            end)
-
-            it("should select the upper row with a shortcut", function()
-                local ki = require("init")
-                local mockChooser, mockHs = mockSelectionHs(1, "k")
-
-                _G.hs = mock(mockHs)
-
-                ki:showSelectionModal({}, function() end)
-
-                assert.spy(mockChooser.selectedRow).was_called(_, 0)
-            end)
-        end)
-
-    end)
-
-    describe("ki event handler", function()
-        it("should transition event in action mode to entity mode", function()
-            local _, hsMocks = hammerspoonMocker()
-            local enterEntityMode = spy.new(function() end)
-            local ki = require("init")
-
-            ki.workflows = { action = {} }
-            ki.state = { current = "action", enterEntityMode = enterEntityMode }
-
-            ki:_handleKeyDown(hsMocks.event)
-
-            assert.spy(enterEntityMode).was.called()
-        end)
-
-        it("should play a sound when an unregistered event is triggered", function()
-            local ki = require("init")
-            local mockHs, hsMocks = hammerspoonMocker()
-            local play = spy.new(function() end)
-
-            hsMocks.sound = {
-                getByName = function()
-                    return {
-                        volume = function()
-                            return {
-                                play = play,
-                            }
-                        end,
-                    }
-                end,
-            }
-
-            _G.hs = mock(mockHs({ sound = hsMocks.sound }))
-
-            ki.workflows = { entity = {} }
-            ki.state = { current = "entity" }
-
-            ki:_handleKeyDown(hsMocks.event)
-
-            assert.spy(play).was.called()
-        end)
-
-        it("should register keydown events", function()
-            local mockHs, hsMocks = hammerspoonMocker()
-            local keyName = "keycode"
-
-            -- Mock keycodes to return an expected keycode name
-            hsMocks.keycodes.map = { [keyName] = keyName }
-            hsMocks.event.getKeyCode = function()
-                return keyName
-            end
-
-            _G.hs = mock(mockHs({ keycodes = hsMocks.keycodes }))
-
-            local ki = require("init")
-            local testState = "entity"
-            local triggerSpy = spy.new(function() end)
-
-            ki:init()
-            ki:start()
-            ki.state.current = testState
-            ki.workflows = {
-                [testState] = {
-                    { nil, keyName, triggerSpy },
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local Ki = require("init")
+            local mockHs = hammerspoonMocker()
+            local mockKeycodes = {
+                map = {
+                    [test.event.getKeyCode()] = test.event.getKeyCode(),
                 },
             }
+            local mockNotifyError = spy.new(function() end)
+            local mockPlaySound = spy.new(function() end)
+            local mockExitMode = spy.new(function() end)
 
-            ki:_handleKeyDown(hsMocks.event)
+            Ki.workflows = test.workflows
+            Ki.state = {
+                current = test.mode,
+                exitMode = mockExitMode,
+            }
+            Ki.createEntity = function()
+                return { notifyError = mockNotifyError }
+            end
+            _G.hs = mock(mockHs({
+                keycodes = mockKeycodes,
+                sound = mockSound(mockPlaySound),
+            }))
 
-            assert.spy(triggerSpy).was.called()
-        end)
-    end)
+            local result = Ki:_handleKeyDown(test.event)
 
-    describe("stop", function()
-        it("should stop the ki event listener", function()
-            local mockHs, hsMocks = hammerspoonMocker()
-            local stopListenerSpy = spy.new(function() end)
-            local ki = require("init")
-
-            hsMocks.eventtap.new = function()
-                return {
-                    stop = stopListenerSpy,
-                }
+            if test.shouldNotifyError then
+                assert.spy(mockNotifyError).was.called()
+            end
+            if test.shouldPlaySound then
+                assert.spy(mockPlaySound).was.called()
+            end
+            if test.expectedEventHandlerSpy then
+                assert.spy(test.expectedEventHandlerSpy(Ki.workflows)).was.called()
+            end
+            if test.shouldExitMode then
+                assert.spy(mockExitMode).was.called()
             end
 
-            -- Mock eventtap listener stop function
-            _G.hs = mock(mockHs({ eventtap = hsMocks.eventtap }))
-
-            ki:init()
-            ki:stop()
-
-            assert.spy(stopListenerSpy).was.called()
+            assert.are.same(test.expectedResult, result)
         end)
+    end
+end
+
+describe("init.lua (#init)", function()
+    local typeFunc = _G.type
+
+    -- Set global shortcut indices
+    _G.SHORTCUT_MODKEY_INDEX = 1
+    _G.SHORTCUT_HOTKEY_INDEX = 2
+    _G.SHORTCUT_EVENT_HANDLER_INDEX = 3
+    _G.SHORTCUT_METADATA_INDEX = 4
+
+    before_each(function ()
+        -- Setup each test with a fake Hammerspoon environment and mocked external dependencies
+        package.loaded.init = nil
+        _G.hs = mock(hammerspoonMocker()())
+        _G.requirePackage = requirePackageMocker()
     end)
+
+    after_each(function ()
+        _G.hs = nil
+        _G.requirePackage = nil
+        _G.type = typeFunc
+    end)
+
+    describe("`init` method", initKiTests())
+    describe("`start` method", startKiTests())
+    describe("`stop` method", stopKiTests())
+    describe("`_mergeEvents` method", mergeEventsTests())
+    describe("`_renderHotkeyText` method", renderHotkeyTextTests())
+    describe("`_handleKeyDown` method", handleKeyDownTests())
 end)

@@ -1,5 +1,4 @@
-local spoonPath = debug.getinfo(3, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-local Application = dofile(spoonPath.."/application.lua")
+local Application = dofile(_G.spoonPath.."/application.lua")
 local actions = {
     newWindow = Application.createMenuItemEvent("New Window", { focusAfter = true }),
     newTab = Application.createMenuItemEvent("New Tab", { focusAfter = true }),
