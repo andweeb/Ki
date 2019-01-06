@@ -1,6 +1,6 @@
 --- === Ki ===
 ---
---- Modal macOS automation inspired by the vi text editor
+--- Modal macOS automation
 ---
 --- Ki uses some particular terminology in its API and documentation:
 --- * **event** - a step in a desktop workflow, consisting of the event handler and assigned shortcut keybinding. The table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys, key name, and event handler. For example, the following events open applications on keydown events on `s` and `⇧⌘s`:

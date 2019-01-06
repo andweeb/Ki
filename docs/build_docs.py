@@ -36,21 +36,13 @@ TYPE_DESC = {
         "Deprecated": "API features which will be removed in an future "
                       "release"}
 LINKS = [
-        {"name": "Website", "url": "http://www.hammerspoon.org/"},
-        {"name": "GitHub page",
+        {"name": "Ki GitHub page",
+         "url": "https://github.com/andweeb/ki"},
+        {"name": "Hammerspoon Website", "url": "http://www.hammerspoon.org/"},
+        {"name": "Hammerspoon GitHub page",
          "url": "https://github.com/Hammerspoon/hammerspoon"},
-        {"name": "Getting Started Guide",
+        {"name": "Hammerspoon Getting Started Guide",
          "url": "http://www.hammerspoon.org/go/"},
-        {"name": "Spoon Plugin Documentation",
-         "url": "https://github.com/Hammerspoon/hammerspoon/blob/master/SPOONS.md"},
-        {"name": "Official Spoon repository",
-         "url": "http://www.hammerspoon.org/Spoons"},
-        {"name": "IRC channel",
-         "url": "irc://chat.freenode.net/#hammerspoon"},
-        {"name": "Mailing list",
-         "url": "https://groups.google.com/forum/#!forum/hammerspoon/"},
-        {"name": "LuaSkin API docs",
-         "url": "http://www.hammerspoon.org/docs/LuaSkin/"}
         ]
 
 ARGUMENTS = None

@@ -73,5 +73,5 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Toggles the full screen state of the focused application window                                                                     |
 | **Parameters**                              | <ul><li>`app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object</li></ul> |
-| **Returns**                                 | <ul><li> None</li></ul>          |
+| **Returns**                                 | <ul><li> `true`</li></ul>          |
 

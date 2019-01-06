@@ -1,7 +1,7 @@
 # [docs](index.md) » Cheatsheet
 ---
 
-Cheatsheet modal for keyboard shortcuts
+Cheatsheet modal used to display keyboard shortcuts
 
 
 ## API Overview

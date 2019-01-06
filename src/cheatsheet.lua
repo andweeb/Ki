@@ -1,6 +1,6 @@
 --- === Cheatsheet ===
 ---
---- Cheatsheet modal for keyboard shortcuts
+--- Cheatsheet modal used to display keyboard shortcuts
 ---
 
 local Cheatsheet = {}

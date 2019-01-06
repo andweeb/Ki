@@ -8,6 +8,11 @@ define monitor-file-changes
 	fswatch -rv $(1) | xargs -I {} sh -c '$(call $(2))'
 endef
 
+# Build the Ki spoon
+define build-command
+	$(wd)/build.sh
+endef
+
 # Run lua linter on src and spec files
 define lint-command
 	luacheck src/*.lua spec/*.lua
@@ -20,19 +25,23 @@ endef
 
 # Generate html and markup docs and copy styles to output directory
 define generate-docs-command
-	$(wd)/docs/build_docs.py \
+	$(wd)/docs/build_docs.py -i "Ki" \
 		--output_dir $(wd)/docs \
 		--templates $(wd)/docs/templates/ \
 		--html --markdown --standalone --validate . && \
 		cp $(wd)/docs/templates/docs.css $(wd)/docs/html/docs.css
 endef
 
-spoon-build:
-	$(wd)/build.sh
-
-spoon: spoon-build
+spoon:
+	$(call build-command)
 	cp -r $(wd)/dist/build $(wd)/dist/Ki.spoon
 	zip -r dist/Ki.spoon.zip $(wd)/dist/Ki.spoon
+
+dev:
+	$(call build-command)
+
+watch-dev:
+	$(call monitor-file-changes,$(wd)/src,build-command)
 
 lint:
 	$(call lint-command)
@@ -52,10 +61,13 @@ docs: clean-docs
 watch-docs:
 	$(call monitor-file-changes,$(wd)/src,generate-docs-command)
 
-spoon-deps:
+deps:
 	luarocks install --tree deps fsm 1.1.0-1
 	luarocks install --tree deps lustache 1.3.1-0
 	luarocks install --tree deps middleclass 4.1.1-0
+
+lint-deps:
+	luarocks install luacheck
 
 docs-deps:
 	pip install --user jinja2 mistune pygments
@@ -65,7 +77,7 @@ test-deps:
 	luarocks install luacov
 	luarocks install luacov-console
 
-deps: spoon-deps docs-deps test-deps
+dev-deps: lint-deps docs-deps test-deps
 
 clean-spoon:
 	rm -rfv $(wd)/dist/build
