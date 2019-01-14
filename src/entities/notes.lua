@@ -1,5 +1,13 @@
 local Application = dofile(_G.spoonPath.."/application.lua")
 local actions = {
+    toggleFolderView = Application.createMenuItemEvent({ "Show Folders", "Hide Folders" }, {
+        isToggleable = true,
+        focusBefore = true,
+    }),
+    toggleAttachmentsBrowser = Application.createMenuItemEvent({
+        "Show Attachments Browser",
+        "Hide Attachments Browser"
+    }, { isToggleable = true }),
     search = Application.createMenuItemEvent("Search", { focusAfter = true }),
     newNote = Application.createMenuItemEvent("New Note", { focusAfter = true }),
     newFolder = Application.createMenuItemEvent("New Folder", { focusAfter = true }),
@@ -43,15 +51,6 @@ function actions.focus(app, choice)
             Application.notifyError("Error selecting the note", rawTable.NSLocalizedFailureReason)
         end
     end
-end
-
-function actions.toggleFolderView(app)
-    actions.focus(nil, app)
-    _ = app:selectMenuItem("Show Folders") or app:selectMenuItem("Hide Folders")
-end
-
-function actions.toggleAttachmentsBrowser(app)
-    _ = app:selectMenuItem("Show Attachments Browser") or app:selectMenuItem("Hide Attachments Browser")
 end
 
 local shortcuts = {

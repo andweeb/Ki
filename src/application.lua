@@ -66,6 +66,35 @@ Application.behaviors = Entity.behaviors + {
     end,
 }
 
+--- Application:getSelectionItems()
+--- Method
+--- Returns choice objects containing application window information.
+---
+--- Parameters:
+---  * None
+---
+--- Returns:
+---   * A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects
+function Application:getSelectionItems()
+    local app = self:getApplication()
+    local windows = app:allWindows()
+    local choices = {}
+
+    for index, window in pairs(windows) do
+        local state = window:isFullScreen() and "(full screen)"
+            or window:isMinimized() and "(minimized)"
+            or ""
+
+        table.insert(choices, {
+            text = window:title(),
+            subText = "Window "..index.." "..state,
+            windowId = window:id(),
+        })
+    end
+
+    return choices
+end
+
 --- Application.createMenuItemEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])
 --- Method
 --- Convenience method to create an event handler that selects a menu item, with optionally specified behavior on how the menu item selection occurs
@@ -192,18 +221,22 @@ end
 
 --- Application:focus(app[, choice])
 --- Method
---- Focuses the application
+--- Activates an application or focuses a specific application window or tab
 ---
 --- Parameters:
 ---  * `app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object
----  * `choice` - an optional choice object
+---  * `choice` - an optional [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object, each with a `windowId` field and (optional) `tabIndex` field
 ---
 --- Returns:
 ---   * None
 function Application.focus(app, choice)
     if choice then
         local window = hs.window(tonumber(choice.windowId))
-        _ = window:focus() and window:focusTab(choice.tabIndex)
+
+        if window then window:focus() end
+        if window and choice.tabIndex then
+            window:focusTab(choice.tabIndex)
+        end
     elseif app then
         app:activate()
     end
