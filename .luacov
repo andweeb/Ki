@@ -4,6 +4,7 @@ return {
     reportfile = 'luacov.report.out',
     runreport = true,
     exclude = {
+        'docs',
         'deps',
         'dist',
         'luacov$',
