@@ -4,9 +4,9 @@
 
 ### What's that?
 
-Ki introduces a novel approach to automating macOS. Inspired by text editing models found in [vi](https://en.wikipedia.org/wiki/Vi#Interface) and [Kakoune](http://kakoune.org/why-kakoune/why-kakoune.html), Ki enables composable commands to execute desktop tasks to see whether modal shortcuts can be effective in the macOS environment.
+Ki introduces a novel approach to automating macOS. Inspired by text editing models found in [vi](https://en.wikipedia.org/wiki/Vi#Interface) and [Kakoune](http://kakoune.org/why-kakoune/why-kakoune.html), Ki enables composable commands to execute desktop tasks and see whether modal shortcuts can be effective in the macOS environment.
 
-By entering `normal` mode with the command and escape key <kbd>⌘⎋</kbd>, an extensive set of command chains become availabe to achieve various workflows:
+By entering `normal` mode with the command and escape key <kbd>⌘⎋</kbd>, an extensive set of command chains become available to achieve various workflows:
 - <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>s</kbd> - enter `entity` mode <kbd>⌘e</kbd> and activate or focus the **Safari** <kbd>s</kbd> application
 - <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>Space</kbd><kbd>s</kbd> - enter `action` mode <kbd>⌘a</kbd> and toggle media <kbd>Space</kbd> playing in the frontmost **Safari** <kbd>s</kbd> window and tab
 - <kbd>⌘⎋</kbd><kbd>⌘s</kbd><kbd>s</kbd><kbd>⌘3</kbd> - enter `select` mode <kbd>⌘s</kbd> and focus a specific **Safari** <kbd>s</kbd> tab, the third one <kbd>⌘3</kbd> from the left
