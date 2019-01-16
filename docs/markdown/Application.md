@@ -12,6 +12,7 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
  * [focus](#focus)
  * [getApplication](#getApplication)
  * [getMenuItemList](#getMenuItemList)
+ * [getSelectionItems](#getSelectionItems)
  * [initialize](#initialize)
  * [toggleFullScreen](#toggleFullScreen)
 
@@ -39,8 +40,8 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Application:focus(app[, choice])`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Focuses the application                                                                     |
-| **Parameters**                              | <ul><li>`app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object</li><li>`choice` - an optional choice object</li></ul> |
+| **Description**                             | Activates an application or focuses a specific application window or tab                                                                     |
+| **Parameters**                              | <ul><li>`app` - the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object</li><li>`choice` - an optional [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object, each with a `windowId` field and (optional) `tabIndex` field</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [getApplication](#getApplication)         |                                                                                     |
@@ -58,6 +59,14 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | **Description**                             | Gets a list of menu items from a hierarchical menu item path                                                                     |
 | **Parameters**                              | <ul><li>`app` - The target [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object</li><li>`menuItemPath` - A table representing the hierarchical path of the target menu item (e.g. `{ "File", "Share" }`)</li></ul> |
 | **Returns**                                 | <ul><li> A list of [menu items](https://www.hammerspoon.org/docs/hs.application.html#getMenuItems) or `nil`</li></ul>          |
+
+| [getSelectionItems](#getSelectionItems)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Application:getSelectionItems()`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Returns choice objects containing application window information.                                                                     |
+| **Parameters**                              | <ul><li>None</li></ul> |
+| **Returns**                                 | <ul><li> A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li></ul>          |
 
 | [initialize](#initialize)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

@@ -1,6 +1,6 @@
 --- === Ki ===
 ---
---- Modal macOS automation
+--- **Expressive modal macOS automation, inspired by vi**
 ---
 --- Ki uses some particular terminology in its API and documentation:
 --- * **event** - a step in a desktop workflow, consisting of the event handler and assigned shortcut keybinding. The table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys, key name, and event handler. For example, the following events open applications on keydown events on `s` and `⇧⌘s`:
@@ -9,17 +9,19 @@
 --- local openSpotify = function() hs.application.launchOrFocus("Spotify") end
 --- local shortcuts = {
 ---     { nil, "s", openSafari, { "Safari", "Activate/Focus" } },
----     { { "shift" }, "s", openSpotify, { "Spotify", "Activate/Focus" } },
+---     { { "cmd", "shift" }, "s", openSpotify, { "Spotify", "Activate/Focus" } },
 --- }
 --- ```
---- An `Entity` instance can be also used as an event handler:
+--- An [`Entity`](#Entity) instance can be also used as an event handler:
 --- ```lua
 --- local shortcuts = {
----     { nil, "e", Ki.createApplication("Microsoft Excel"), { "Microsoft Excel", "Activate/Focus" } },
+---     { nil, "s", Ki.createApplication("Safari"), { "Safari", "Activate/Focus" } },
+---     { { "cmd", "shift" }, "e", Ki.createApplication("Spotify"), { "Spotify", "Activate/Focus" } },
 --- }
 --- ```
+--- The boolean return value of the event handler or an entity's `dispatchAction` function indicates whether to automatically exit back to `desktop` mode after the action has completed.
 ---
---- * **state event** - a unidirectional link between two states in the [finite state machine](https://github.com/unindented/lua-fsm#usage) (structured differently from workflow/transition events). The state events below allow the user to transition from `desktop` mode to `normal` mode to `entity` mode and exit back to `desktop` mode:
+--- * **state event** - a unidirectional link between two states in the [finite state machine](https://github.com/unindented/lua-fsm#usage) (structured differently from workflow/transition events). The state events below allow the user to transition from `desktop` mode to `normal` mode to `entity` mode and back to `desktop` mode:
 ---  ```
 ---  local stateEvents = {
 ---      { name = "enterNormalMode", from = "desktop", to = "normal" },
@@ -36,7 +38,7 @@
 ---
 --- * **workflow** - a series of transition and workflow events that execute some desktop task, cycling from `desktop` mode back to `desktop` mode
 ---
---- * **workflow event** - an event that carries out the automative aspect in a workflow
+--- * **workflow event** - an event that carries out the automative aspect in a workflow; basically an event that's not a transition or state event
 
 local Ki = {}
 Ki.__index = Ki
@@ -78,15 +80,15 @@ _G.SHORTCUT_METADATA_INDEX = 4
 local fsm = _G.requirePackage("fsm")
 local util = _G.requirePackage("util", true)
 local Defaults = _G.requirePackage("defaults", true)
-local defaultEvents, defaultEntities = Defaults.create(Ki)
+local defaultWorkflowEvents, defaultEntities = Defaults.create(Ki)
 
 -- Allow Spotlight to be used to find alternate names for applications
 hs.application.enableSpotlightForNameSearches(true)
 
---- Ki.defaultEvents
+--- Ki.defaultWorkflowEvents
 --- Variable
---- A table containing the default events for all default modes in Ki.
-Ki.defaultEvents = defaultEvents
+--- A table containing the default workflow events for all default modes in Ki.
+Ki.defaultWorkflowEvents = defaultWorkflowEvents
 
 --- Ki.defaultEntities
 --- Variable
@@ -194,9 +196,9 @@ function Ki:_createEventsMetatable(overrideLHS)
 end
 
 -- Allow default events to be overridden
-setmetatable(Ki.defaultEvents, Ki:_createEventsMetatable(true))
+setmetatable(Ki.defaultWorkflowEvents, Ki:_createEventsMetatable(true))
 
---- Ki.transitions
+--- Ki.transitionEvents
 --- Variable
 --- A table containing the definitions of transition events.
 ---
@@ -210,7 +212,7 @@ setmetatable(Ki.defaultEvents, Ki:_createEventsMetatable(true))
 ---  * from `normal` mode, <kbd>⌘b</kbd> to enter `brightness` mode
 ---  * <kbd>⎋</kbd> to exit back to `desktop` mode from any of the modes above
 ---
---- The example transition events in the snippet below allow the following transitions:
+--- The example transition events in the snippet below allow the following transition events:
 ---  * from `desktop` mode, enter `normal` mode with <kbd>⌘⎋</kbd>
 ---  * from `normal` mode, enter `desktop` mode with <kbd>⎋</kbd>
 ---
@@ -224,7 +226,7 @@ setmetatable(Ki.defaultEvents, Ki:_createEventsMetatable(true))
 ---  local enterNormalMode = function() Ki.state:enterNormalMode() end
 ---  local exitMode = function() Ki.state:exitMode() end
 ---
----  Ki.transitions = {
+---  Ki.transitionEvents = {
 ---      desktop = {
 ---          { {"cmd"}, "escape", enterNormalMode, { "Desktop Mode", "Transition to Normal Mode" } },
 ---      },
@@ -235,101 +237,105 @@ setmetatable(Ki.defaultEvents, Ki:_createEventsMetatable(true))
 ---  ```
 ---
 --- **Note**: `action` mode is unique in that its events are generated at runtime and automatically dispatched to the intended `entity` handler. That's why there are no explicit transition events to `entity` mode defined in this default transitions table.
-Ki.transitions = {}
-Ki._defaultTransitions = {
+Ki.transitionEvents = {}
+
+--- Ki.defaultTransitionEvents
+--- Variable
+--- A table containing the default transition events for all default modes in Ki.
+Ki.defaultTransitionEvents = {
     desktop = {
         {
             {"cmd"}, "escape",
-            function(...) Ki.state:enterNormalMode(table.unpack({...})) end,
+            function() Ki.state:enterNormalMode() end,
             { "Desktop Mode", "Transition to Normal Mode" },
         },
     },
     normal = {
         {
             nil, "escape",
-            function(...) Ki.state:exitMode(table.unpack({...})) end,
+            function() Ki.state:exitMode() end,
             { "Normal Mode", "Exit to Desktop Mode" },
         },
         {
             {"cmd"}, "e",
-            function(...) Ki.state:enterEntityMode(table.unpack({...})) end,
+            function() Ki.state:enterEntityMode() end,
             { "Normal Mode", "Transition to Entity Mode" },
         },
         {
             {"cmd"}, "a",
-            function(...) Ki.state:enterActionMode(table.unpack({...})) end,
+            function() Ki.state:enterActionMode() end,
             { "Normal Mode", "Transition to Action Mode" },
         },
         {
             {"cmd"}, "u",
-            function(...) Ki.state:enterUrlMode(table.unpack({...})) end,
+            function() Ki.state:enterUrlMode() end,
             { "Normal Mode", "Transition to URL Mode" },
         },
         {
             {"cmd"}, "s",
-            function(...) Ki.state:enterSelectMode(table.unpack({...})) end,
+            function() Ki.state:enterSelectMode() end,
             { "Normal Mode", "Transition to Select Mode" },
         },
         {
             {"cmd"}, "b",
-            function(...) Ki.state:enterBrightnessControlMode(table.unpack({...})) end,
+            function() Ki.state:enterBrightnessControlMode() end,
             { "Normal Mode", "Transition to Brightness Control Mode" },
         },
         {
             {"cmd"}, "v",
-            function(...) Ki.state:enterVolumeControlMode(table.unpack({...})) end,
+            function() Ki.state:enterVolumeControlMode() end,
             { "Normal Mode", "Transition to Volume Control Mode" },
         },
     },
     entity = {
         {
             nil, "escape",
-            function(...) Ki.state:exitMode(table.unpack({...})) end,
+            function() Ki.state:exitMode() end,
             { "Entity Mode", "Exit to Normal Mode" },
         },
         {
             {"cmd"}, "s",
-            function(...) Ki.state:enterSelectMode(table.unpack({...})) end,
+            function() Ki.state:enterSelectMode() end,
             { "Entity Mode", "Transition to Select Mode" },
         },
     },
     action = {
         {
             nil, "escape",
-            function(...) Ki.state:exitMode(table.unpack({...})) end,
+            function() Ki.state:exitMode() end,
             { "Action Mode", "Exit to Normal Mode" },
         },
     },
     select = {
         {
             nil, "escape",
-            function(...) Ki.state:exitMode(table.unpack({...})) end,
+            function() Ki.state:exitMode() end,
             { "Select Mode", "Exit to Normal Mode" },
         },
     },
     url = {
         {
             nil, "escape",
-            function(...) Ki.state:exitMode(table.unpack({...})) end,
+            function() Ki.state:exitMode() end,
             { "URL Mode", "Exit to Normal Mode" },
         },
     },
     volume = {
         {
             nil, "escape",
-            function(...) Ki.state:exitMode(table.unpack({...})) end,
+            function() Ki.state:exitMode() end,
             { "Volume Control Mode", "Exit to Normal Mode" },
         },
     },
     brightness = {
         {
             nil, "escape",
-            function(...) Ki.state:exitMode(table.unpack({...})) end,
+            function() Ki.state:exitMode() end,
             { "Brightness Control Mode", "Exit to Normal Mode" },
         },
     },
 }
-setmetatable(Ki._defaultTransitions, Ki:_createEventsMetatable())
+setmetatable(Ki.defaultTransitionEvents, Ki:_createEventsMetatable())
 
 --- Ki.stateEvents
 --- Variable
@@ -339,7 +345,7 @@ setmetatable(Ki._defaultTransitions, Ki:_createEventsMetatable())
 --- * `{ name = "enterEntityMode", from = "normal", to = "entity" }`
 --- * `{ name = "exitMode", from = "entity", to = "normal" }`
 ---
---- **Note**: these events will only _initialize and expose_ methods on `Ki.state`. For example, the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods will only be _initialized_ with the example state events above. These methods will need to be called in transition events ([`Ki.transitions`](#transitions)) in order to actually trigger the transition from mode to mode.
+--- **Note**: these events will only _initialize and expose_ methods on `Ki.state`. For example, the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods will only be _initialized_ with the example state events above. These methods will need to be called in transition events ([`Ki.transitionEvents`](#transitionEvents)) in order to actually trigger the transition from mode to mode.
 Ki.stateEvents = {}
 Ki._defaultStateEvents = {
     { name = "enterNormalMode", from = "desktop", to = "normal" },
@@ -361,9 +367,9 @@ Ki._defaultStateEvents = {
 }
 setmetatable(Ki._defaultStateEvents, Ki._createStatesMetatable())
 
---- Ki.workflows
+--- Ki.workflowEvents
 --- Variable
---- A table containing lists of workflows keyed by mode name. The following example creates two entity and url events:
+--- A table containing lists of custom workflow events keyed by mode name. The following example creates two entity and url events:
 --- ```lua
 --- local function handleUrlEvent(url)
 ---     hs.urlevent.openURL(url)
@@ -374,7 +380,7 @@ setmetatable(Ki._defaultStateEvents, Ki._createStatesMetatable())
 ---     spoon.Ki.state:exitMode()
 --- end
 ---
---- spoon.Ki.workflows = {
+--- spoon.Ki.workflowEvents = {
 ---     url = {
 ---         { nil, "g", function() handleUrlEvent("https://google.com") end },
 ---         { nil, "r", function() handleUrlEvent("https://reddit.com") end },
@@ -385,7 +391,7 @@ setmetatable(Ki._defaultStateEvents, Ki._createStatesMetatable())
 ---     },
 --- }
 --- ```
-Ki.workflows = {}
+Ki.workflowEvents = {}
 
 --- Ki.statusDisplay
 --- Variable
@@ -448,7 +454,7 @@ end
 -- Handle keydown event by triggering the appropriate event handler or entity action dispatcher depending on the mode, modifier keys, and keycode
 function Ki:_handleKeyDown(event)
     local mode = self.state.current
-    local workflowEvents = self.workflows[mode]
+    local workflowEvents = self.workflowEvents[mode]
     local handler = nil
 
     local flags = event:getFlags()
@@ -540,13 +546,13 @@ function Ki:start()
     })
 
     -- Set transition and workflow events
-    local workflows = self.defaultEvents + self.workflows
-    local transitions = self._defaultTransitions + self.transitions
-    self.workflows = transitions + workflows
+    local workflowEvents = self.defaultWorkflowEvents + self.workflowEvents
+    local transitionEvents = self.defaultTransitionEvents + self.transitionEvents
+    self.workflowEvents = transitionEvents + workflowEvents
 
     -- Collect all actions
     local actions = {}
-    for _, workflowActions in pairs(self.workflows) do
+    for _, workflowActions in pairs(self.workflowEvents) do
         for _, workflow in pairs(workflowActions) do
             table.insert(actions, workflow)
         end
@@ -561,7 +567,7 @@ function Ki:start()
     end
 
     -- Add show cheatsheet entity event into workflow entity events
-    table.insert(self.workflows.entity, {
+    table.insert(self.workflowEvents.entity, {
         { "shift" }, "/", showCheatsheet, { "Entities", "Cheatsheet" },
     })
 

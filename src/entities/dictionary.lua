@@ -3,7 +3,7 @@ local actions = {
     newWindow = Application.createMenuItemEvent("New Window", { focusAfter = true }),
     newTab = Application.createMenuItemEvent("New Tab", { focusAfter = true }),
     search = Application.createMenuItemEvent("Search For a New Word...", { focusAfter = true }),
-    close = Application.createMenuItemEvent({ "Close Tab", "Close Window" }, {
+    close = Application.createMenuItemEvent({ "Close Tab", "Close" }, {
         isToggleable = true,
         focusBefore = true,
     }),

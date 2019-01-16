@@ -1,7 +1,7 @@
 <html>
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Hammerspoon docs: Application</title>
+    <title>Ki docs: Application</title>
     <style type="text/css">
       a { text-decoration: none; }
       a:hover { text-decoration: underline; }
@@ -30,6 +30,7 @@
             <li><a href="#focus">focus</a></li>
             <li><a href="#getApplication">getApplication</a></li>
             <li><a href="#getMenuItemList">getMenuItemList</a></li>
+            <li><a href="#getSelectionItems">getSelectionItems</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#toggleFullScreen">toggleFullScreen</a></li>
           </ul>
@@ -104,11 +105,11 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Focuses the application</p>
+                <td><p>Activates an application or focuses a specific application window or tab</p>
 <p>Parameters:</p>
 <ul>
 <li><code>app</code> - the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object</li>
-<li><code>choice</code> - an optional choice object</li>
+<li><code>choice</code> - an optional <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> object, each with a <code>windowId</code> field and (optional) <code>tabIndex</code> field</li>
 </ul>
 <p>Returns:</p>
 <ul>
@@ -168,6 +169,33 @@
 <p>Returns:</p>
 <ul>
 <li>A list of <a href="https://www.hammerspoon.org/docs/hs.application.html#getMenuItems">menu items</a> or <code>nil</code></li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getSelectionItems">
+            <a name="//apple_ref/cpp/Method/getSelectionItems" class="dashAnchor"></a>
+            <h5><a href="#getSelectionItems">getSelectionItems</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application:getSelectionItems()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Returns choice objects containing application window information.</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects</li>
 </ul>
 </td>
               </tr>

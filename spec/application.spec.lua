@@ -33,6 +33,84 @@ local function requirePackageMocker(mocks)
     end
 end
 
+-- Entity `getSelectionItems` method test suite
+local function getSelectionItemsTests()
+    local tests = {
+        {
+            name = "returns basic application window information",
+            windows = {
+                {
+                    id = function() return 1 end,
+                    title = function() return "Test Window" end,
+                    isMinimized = function() return false end,
+                    isFullScreen = function() return false end,
+                },
+            },
+            expectedResult = {
+                {
+                    text = "Test Window",
+                    subText = "Window 1 ",
+                    windowId = 1,
+                },
+            },
+        },
+        {
+            name = "returns full-screen application window information",
+            windows = {
+                {
+                    id = function() return 1 end,
+                    title = function() return "Test Window" end,
+                    isMinimized = function() return false end,
+                    isFullScreen = function() return true end,
+                },
+            },
+            expectedResult = {
+                {
+                    text = "Test Window",
+                    subText = "Window 1 (full screen)",
+                    windowId = 1,
+                },
+            },
+        },
+        {
+            name = "returns minimized application window information",
+            windows = {
+                {
+                    id = function() return 1 end,
+                    title = function() return "Test Window" end,
+                    isMinimized = function() return true end,
+                    isFullScreen = function() return false end,
+                },
+            },
+            expectedResult = {
+                {
+                    text = "Test Window",
+                    subText = "Window 1 (minimized)",
+                    windowId = 1,
+                },
+            },
+        },
+    }
+
+    -- Run `getSelectionItems` method test cases
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local application = require("application")
+            local mockApp = {
+                allWindows = function()
+                    return test.windows
+                end,
+            }
+
+            application.getApplication = function() return mockApp end
+
+            local result = application:getSelectionItems()
+
+            assert.are.same(test.expectedResult, result)
+        end)
+    end
+end
+
 -- Entity `createMenuItemEvent` method test suite
 local function createMenuItemEventTests()
     local mockApp = {
@@ -174,10 +252,7 @@ local function focusTests()
             args = { mockApp, { text = "choice" } },
             activateCallCount = 0,
             focusCallCount = 1,
-            focusTabCall = {
-                count = 1,
-                args = { match._, match._ },
-            },
+            focusTabCall = { count = 0 },
         },
         {
             name = "focuses the specific application window tab",
@@ -540,6 +615,7 @@ describe("application.lua (#application)", function()
         _G.print = printFunc
     end)
 
+    describe("`getSelectionItems` method", getSelectionItemsTests)
     describe("`createMenuItemEvent` method", createMenuItemEventTests)
     describe("`focus` method", focusTests)
     describe("`getApplication` method", getApplicationTests)
