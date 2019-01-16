@@ -13,7 +13,7 @@ spoon.Ki.stateEvents = {
 }
 
 -- Set custom scroll mode transition events.
-spoon.Ki.transitions = {
+spoon.Ki.transitionEvents = {
     -- Add normal mode transition event to enter scroll mode with cmd+ctrl+s from normal mode
     normal = {
         {
@@ -40,7 +40,7 @@ local function createScrollEvent(offsets)
 end
 
 -- Define custom scroll mode shortcuts
-local scrollWorkflows = {
+local scrollEvents = {
     { nil, "h", createScrollEvent({ 50, 0 }), { "Scroll Events", "Scroll Left" } },
     { nil, "k", createScrollEvent({ 0, 50 }), { "Scroll Events", "Scroll Up" } },
     { nil, "j", createScrollEvent({ 0, -50 }), { "Scroll Events", "Scroll Down" } },
@@ -50,8 +50,8 @@ local scrollWorkflows = {
 }
 
 -- Set custom workflows
-spoon.Ki.workflows = {
-    scroll = scrollWorkflows,
+spoon.Ki.workflowEvents = {
+    scroll = scrollEvents,
 }
 
 -- Start Ki

@@ -1,7 +1,7 @@
 # [docs](index.md) » Ki
 ---
 
-Modal macOS automation
+**Expressive modal macOS automation, inspired by vi**
 
 Ki uses some particular terminology in its API and documentation:
 * **event** - a step in a desktop workflow, consisting of the event handler and assigned shortcut keybinding. The table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys, key name, and event handler. For example, the following events open applications on keydown events on `s` and `⇧⌘s`:
@@ -10,17 +10,19 @@ local openSafari = function() hs.application.launchOrFocus("Safari") end
 local openSpotify = function() hs.application.launchOrFocus("Spotify") end
 local shortcuts = {
     { nil, "s", openSafari, { "Safari", "Activate/Focus" } },
-    { { "shift" }, "s", openSpotify, { "Spotify", "Activate/Focus" } },
+    { { "cmd", "shift" }, "s", openSpotify, { "Spotify", "Activate/Focus" } },
 }
 ```
-An `Entity` instance can be also used as an event handler:
+An [`Entity`](#Entity) instance can be also used as an event handler:
 ```lua
 local shortcuts = {
-    { nil, "e", Ki.createApplication("Microsoft Excel"), { "Microsoft Excel", "Activate/Focus" } },
+    { nil, "s", Ki.createApplication("Safari"), { "Safari", "Activate/Focus" } },
+    { { "cmd", "shift" }, "e", Ki.createApplication("Spotify"), { "Spotify", "Activate/Focus" } },
 }
 ```
+The boolean return value of the event handler or an entity's `dispatchAction` function indicates whether to automatically exit back to `desktop` mode after the action has completed.
 
-* **state event** - a unidirectional link between two states in the [finite state machine](https://github.com/unindented/lua-fsm#usage) (structured differently from workflow/transition events). The state events below allow the user to transition from `desktop` mode to `normal` mode to `entity` mode and exit back to `desktop` mode:
+* **state event** - a unidirectional link between two states in the [finite state machine](https://github.com/unindented/lua-fsm#usage) (structured differently from workflow/transition events). The state events below allow the user to transition from `desktop` mode to `normal` mode to `entity` mode and back to `desktop` mode:
  ```
  local stateEvents = {
      { name = "enterNormalMode", from = "desktop", to = "normal" },
@@ -37,19 +39,20 @@ local shortcuts = {
 
 * **workflow** - a series of transition and workflow events that execute some desktop task, cycling from `desktop` mode back to `desktop` mode
 
-* **workflow event** - an event that carries out the automative aspect in a workflow
+* **workflow event** - an event that carries out the automative aspect in a workflow; basically an event that's not a transition or state event
 
 ## API Overview
 * Variables - Configurable values
  * [Application](#Application)
  * [defaultEntities](#defaultEntities)
- * [defaultEvents](#defaultEvents)
+ * [defaultTransitionEvents](#defaultTransitionEvents)
+ * [defaultWorkflowEvents](#defaultWorkflowEvents)
  * [Entity](#Entity)
  * [state](#state)
  * [stateEvents](#stateEvents)
  * [statusDisplay](#statusDisplay)
- * [transitions](#transitions)
- * [workflows](#workflows)
+ * [transitionEvents](#transitionEvents)
+ * [workflowEvents](#workflowEvents)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [start](#start)
  * [stop](#stop)
@@ -70,11 +73,17 @@ local shortcuts = {
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing the default automatable desktop entity instances in Ki.                                                                     |
 
-| [defaultEvents](#defaultEvents)         |                                                                                     |
+| [defaultTransitionEvents](#defaultTransitionEvents)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.defaultEvents`                                                                    |
+| **Signature**                               | `Ki.defaultTransitionEvents`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | A table containing the default events for all default modes in Ki.                                                                     |
+| **Description**                             | A table containing the default transition events for all default modes in Ki.                                                                     |
+
+| [defaultWorkflowEvents](#defaultWorkflowEvents)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.defaultWorkflowEvents`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A table containing the default workflow events for all default modes in Ki.                                                                     |
 
 | [Entity](#Entity)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -100,17 +109,17 @@ local shortcuts = {
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table that defines the behavior for displaying the status of mode transitions. The `show` function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:                                                                     |
 
-| [transitions](#transitions)         |                                                                                     |
+| [transitionEvents](#transitionEvents)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.transitions`                                                                    |
+| **Signature**                               | `Ki.transitionEvents`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing the definitions of transition events.                                                                     |
 
-| [workflows](#workflows)         |                                                                                     |
+| [workflowEvents](#workflowEvents)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.workflows`                                                                    |
+| **Signature**                               | `Ki.workflowEvents`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | A table containing lists of workflows keyed by mode name. The following example creates two entity and url events:                                                                     |
+| **Description**                             | A table containing lists of custom workflow events keyed by mode name. The following example creates two entity and url events:                                                                     |
 
 ### Methods
 

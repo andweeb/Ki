@@ -4,7 +4,7 @@
 hs.loadSpoon('Ki')
 
 -- Set custom transition event that enters normal mode.
-spoon.Ki.transitions = {
+spoon.Ki.transitionEvents = {
     -- Add desktop mode transition event to enter normal mode with cmd+; from desktop mode
     desktop = {
         {

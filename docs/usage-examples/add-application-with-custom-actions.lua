@@ -32,18 +32,18 @@ local vlcShortcuts = {
 local VLC = Application:new("VLC", vlcShortcuts)
 
 -- Define the VLC workflow events
-local entityWorkflows = {
+local entityEvents = {
     { nil, "v", VLC, { "Entities", "VLC Media Player" } },
 }
 
-local selectEntityWorkflows = {
+local selectEntityEvents = {
     { nil, "v", VLC, { "Entities", "Select VLC Windows" } },
 }
 
 -- Set custom workflows
-spoon.Ki.workflows = {
-    entity = entityWorkflows,
-    select = selectEntityWorkflows,
+spoon.Ki.workflowEvents = {
+    entity = entityEvents,
+    select = selectEntityEvents,
 }
 
 -- Start Ki

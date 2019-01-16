@@ -15,7 +15,7 @@
   <body>
     <header>
       <h1><a href="./index.html">docs</a> &raquo; Ki</h1>
-      <p>Modal macOS automation</p>
+      <p><strong>Expressive modal macOS automation, inspired by vi</strong></p>
 <p>Ki uses some particular terminology in its API and documentation:</p>
 <ul>
 <li><p><strong>event</strong> - a step in a desktop workflow, consisting of the event handler and assigned shortcut keybinding. The table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys, key name, and event handler. For example, the following events open applications on keydown events on <code>s</code> and <code>⇧⌘s</code>:</p>
@@ -23,16 +23,18 @@
 <span class="kd">local</span> <span class="n">openSpotify</span> <span class="o">=</span> <span class="kr">function</span><span class="p">()</span> <span class="n">hs</span><span class="p">.</span><span class="n">application</span><span class="p">.</span><span class="n">launchOrFocus</span><span class="p">(</span><span class="s2">&quot;Spotify&quot;</span><span class="p">)</span> <span class="kr">end</span>
 <span class="kd">local</span> <span class="n">shortcuts</span> <span class="o">=</span> <span class="p">{</span>
   <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">openSafari</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;Safari&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
-  <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">openSpotify</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;Spotify&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">openSpotify</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;Spotify&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
-<p>An <code>Entity</code> instance can be also used as an event handler:</p>
+<p>An <a href="#Entity"><code>Entity</code></a> instance can be also used as an event handler:</p>
 <div class="highlight"><pre><span></span><span class="kd">local</span> <span class="n">shortcuts</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">createApplication</span><span class="p">(</span><span class="s2">&quot;Microsoft Excel&quot;</span><span class="p">),</span> <span class="p">{</span> <span class="s2">&quot;Microsoft Excel&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">createApplication</span><span class="p">(</span><span class="s2">&quot;Safari&quot;</span><span class="p">),</span> <span class="p">{</span> <span class="s2">&quot;Safari&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
+  <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">createApplication</span><span class="p">(</span><span class="s2">&quot;Spotify&quot;</span><span class="p">),</span> <span class="p">{</span> <span class="s2">&quot;Spotify&quot;</span><span class="p">,</span> <span class="s2">&quot;Activate/Focus&quot;</span> <span class="p">}</span> <span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
+<p>The boolean return value of the event handler or an entity's <code>dispatchAction</code> function indicates whether to automatically exit back to <code>desktop</code> mode after the action has completed.</p>
 </li>
-<li><p><strong>state event</strong> - a unidirectional link between two states in the <a href="https://github.com/unindented/lua-fsm#usage">finite state machine</a> (structured differently from workflow/transition events). The state events below allow the user to transition from <code>desktop</code> mode to <code>normal</code> mode to <code>entity</code> mode and exit back to <code>desktop</code> mode:</p>
+<li><p><strong>state event</strong> - a unidirectional link between two states in the <a href="https://github.com/unindented/lua-fsm#usage">finite state machine</a> (structured differently from workflow/transition events). The state events below allow the user to transition from <code>desktop</code> mode to <code>normal</code> mode to <code>entity</code> mode and back to <code>desktop</code> mode:</p>
 
 <pre><code>local stateEvents = {
    { name = "enterNormalMode", from = "desktop", to = "normal" },
@@ -47,7 +49,7 @@
 </li>
 <li><p><strong>workflow</strong> - a series of transition and workflow events that execute some desktop task, cycling from <code>desktop</code> mode back to <code>desktop</code> mode</p>
 </li>
-<li><p><strong>workflow event</strong> - an event that carries out the automative aspect in a workflow</p>
+<li><p><strong>workflow event</strong> - an event that carries out the automative aspect in a workflow; basically an event that's not a transition or state event</p>
 </li>
 </ul>
 
@@ -58,13 +60,14 @@
           <ul>
             <li><a href="#Application">Application</a></li>
             <li><a href="#defaultEntities">defaultEntities</a></li>
-            <li><a href="#defaultEvents">defaultEvents</a></li>
+            <li><a href="#defaultTransitionEvents">defaultTransitionEvents</a></li>
+            <li><a href="#defaultWorkflowEvents">defaultWorkflowEvents</a></li>
             <li><a href="#Entity">Entity</a></li>
             <li><a href="#state">state</a></li>
             <li><a href="#stateEvents">stateEvents</a></li>
             <li><a href="#statusDisplay">statusDisplay</a></li>
-            <li><a href="#transitions">transitions</a></li>
-            <li><a href="#workflows">workflows</a></li>
+            <li><a href="#transitionEvents">transitionEvents</a></li>
+            <li><a href="#workflowEvents">workflowEvents</a></li>
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
@@ -112,13 +115,13 @@
               </tr>
             </table>
           </section>
-          <section id="defaultEvents">
-            <a name="//apple_ref/cpp/Variable/defaultEvents" class="dashAnchor"></a>
-            <h5><a href="#defaultEvents">defaultEvents</a></h5>
+          <section id="defaultTransitionEvents">
+            <a name="//apple_ref/cpp/Variable/defaultTransitionEvents" class="dashAnchor"></a>
+            <h5><a href="#defaultTransitionEvents">defaultTransitionEvents</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki.defaultEvents</code></td>
+                <td><code>Ki.defaultTransitionEvents</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -126,7 +129,26 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A table containing the default events for all default modes in Ki.</p>
+                <td><p>A table containing the default transition events for all default modes in Ki.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="defaultWorkflowEvents">
+            <a name="//apple_ref/cpp/Variable/defaultWorkflowEvents" class="dashAnchor"></a>
+            <h5><a href="#defaultWorkflowEvents">defaultWorkflowEvents</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki.defaultWorkflowEvents</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A table containing the default workflow events for all default modes in Ki.</p>
 </td>
               </tr>
             </table>
@@ -189,7 +211,7 @@
 <li><code>{ name = "enterEntityMode", from = "normal", to = "entity" }</code></li>
 <li><code>{ name = "exitMode", from = "entity", to = "normal" }</code></li>
 </ul>
-<p><strong>Note</strong>: these events will only <em>initialize and expose</em> methods on <code>Ki.state</code>. For example, the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods will only be <em>initialized</em> with the example state events above. These methods will need to be called in transition events (<a href="#transitions"><code>Ki.transitions</code></a>) in order to actually trigger the transition from mode to mode.</p>
+<p><strong>Note</strong>: these events will only <em>initialize and expose</em> methods on <code>Ki.state</code>. For example, the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods will only be <em>initialized</em> with the example state events above. These methods will need to be called in transition events (<a href="#transitionEvents"><code>Ki.transitionEvents</code></a>) in order to actually trigger the transition from mode to mode.</p>
 </td>
               </tr>
             </table>
@@ -221,13 +243,13 @@
               </tr>
             </table>
           </section>
-          <section id="transitions">
-            <a name="//apple_ref/cpp/Variable/transitions" class="dashAnchor"></a>
-            <h5><a href="#transitions">transitions</a></h5>
+          <section id="transitionEvents">
+            <a name="//apple_ref/cpp/Variable/transitionEvents" class="dashAnchor"></a>
+            <h5><a href="#transitionEvents">transitionEvents</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki.transitions</code></td>
+                <td><code>Ki.transitionEvents</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -247,7 +269,7 @@
 <li>from <code>normal</code> mode, <kbd>⌘b</kbd> to enter <code>brightness</code> mode</li>
 <li><kbd>⎋</kbd> to exit back to <code>desktop</code> mode from any of the modes above</li>
 </ul>
-<p>The example transition events in the snippet below allow the following transitions:</p>
+<p>The example transition events in the snippet below allow the following transition events:</p>
 <ul>
 <li>from <code>desktop</code> mode, enter <code>normal</code> mode with <kbd>⌘⎋</kbd></li>
 <li><p>from <code>normal</code> mode, enter <code>desktop</code> mode with <kbd>⎋</kbd></p>
@@ -261,7 +283,7 @@ Ki.stateEvents = {
 local enterNormalMode = function() Ki.state:enterNormalMode() end
 local exitMode = function() Ki.state:exitMode() end
 
-Ki.transitions = {
+Ki.transitionEvents = {
   desktop = {
       { {"cmd"}, "escape", enterNormalMode, { "Desktop Mode", "Transition to Normal Mode" } },
   },
@@ -276,13 +298,13 @@ Ki.transitions = {
               </tr>
             </table>
           </section>
-          <section id="workflows">
-            <a name="//apple_ref/cpp/Variable/workflows" class="dashAnchor"></a>
-            <h5><a href="#workflows">workflows</a></h5>
+          <section id="workflowEvents">
+            <a name="//apple_ref/cpp/Variable/workflowEvents" class="dashAnchor"></a>
+            <h5><a href="#workflowEvents">workflowEvents</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki.workflows</code></td>
+                <td><code>Ki.workflowEvents</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -290,7 +312,7 @@ Ki.transitions = {
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A table containing lists of workflows keyed by mode name. The following example creates two entity and url events:</p>
+                <td><p>A table containing lists of custom workflow events keyed by mode name. The following example creates two entity and url events:</p>
 <div class="highlight"><pre><span></span><span class="kd">local</span> <span class="kr">function</span> <span class="nf">handleUrlEvent</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="n">hs</span><span class="p">.</span><span class="n">urlevent</span><span class="p">.</span><span class="n">openURL</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="n">spoon</span><span class="p">.</span><span class="n">Ki</span><span class="p">.</span><span class="n">state</span><span class="p">:</span><span class="n">exitMode</span><span class="p">()</span>
@@ -300,7 +322,7 @@ Ki.transitions = {
     <span class="n">spoon</span><span class="p">.</span><span class="n">Ki</span><span class="p">.</span><span class="n">state</span><span class="p">:</span><span class="n">exitMode</span><span class="p">()</span>
 <span class="kr">end</span>
 
-<span class="n">spoon</span><span class="p">.</span><span class="n">Ki</span><span class="p">.</span><span class="n">workflows</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">spoon</span><span class="p">.</span><span class="n">Ki</span><span class="p">.</span><span class="n">workflowEvents</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">url</span> <span class="o">=</span> <span class="p">{</span>
         <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="kr">function</span><span class="p">()</span> <span class="n">handleUrlEvent</span><span class="p">(</span><span class="s2">&quot;https://google.com&quot;</span><span class="p">)</span> <span class="kr">end</span> <span class="p">},</span>
         <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="kr">function</span><span class="p">()</span> <span class="n">handleUrlEvent</span><span class="p">(</span><span class="s2">&quot;https://reddit.com&quot;</span><span class="p">)</span> <span class="kr">end</span> <span class="p">},</span>

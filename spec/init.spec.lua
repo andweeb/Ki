@@ -103,8 +103,8 @@ local function startKiTests()
             ki:init()
             ki:start()
 
-            assert.has_property(ki, "transitions")
-            assert.has_property(ki, "workflows")
+            assert.has_property(ki, "transitionEvents")
+            assert.has_property(ki, "workflowEvents")
         end)
 
         it("should set custom workflow events", function()
@@ -117,13 +117,13 @@ local function startKiTests()
             }
 
             ki:init()
-            ki.workflows = testEvents
+            ki.workflowEvents = testEvents
             ki:start()
 
-            assert.has_property(ki, "workflows")
-            assert.has_property(ki.workflows, "entity")
-            assert.has_value(ki.workflows.entity, testEvents.entity[1])
-            assert.has_value(ki.workflows.entity, testEvents.entity[2])
+            assert.has_property(ki, "workflowEvents")
+            assert.has_property(ki.workflowEvents, "entity")
+            assert.has_value(ki.workflowEvents.entity, testEvents.entity[1])
+            assert.has_value(ki.workflowEvents.entity, testEvents.entity[2])
         end)
     end)
 end
@@ -258,14 +258,14 @@ local function handleKeyDownTests()
         {
             name = "returns nil on non-existent event handler in desktop mode",
             mode = "desktop",
-            workflows = { desktop = {} },
+            workflowEvents = { desktop = {} },
             event = mockEvent({}, ""),
             expectedResult = nil,
         },
         {
             name = "plays sound on non-existent event handler for a non-desktop mode",
             mode = "test",
-            workflows = { test = {} },
+            workflowEvents = { test = {} },
             event = mockEvent({}, ""),
             shouldPlaySound = true,
             expectedResult = true,
@@ -273,7 +273,7 @@ local function handleKeyDownTests()
         {
             name = "notifies error on misconfigured event handler",
             mode = "test",
-            workflows = {
+            workflowEvents = {
                 test = {
                     { { "ctrl" }, "a", { "invalid", "event handler" } },
                 },
@@ -285,21 +285,21 @@ local function handleKeyDownTests()
         {
             name = "dispatches action through entity object",
             mode = "test",
-            workflows = {
+            workflowEvents = {
                 test = {
                     { { "ctrl" }, "a", { dispatchAction = spy.new(function() end) } },
                 },
             },
             event = mockEvent({ "ctrl" }, "a"),
             expectedResult = true,
-            expectedEventHandlerSpy = function(workflows)
-                return workflows.test[1][3].dispatchAction
+            expectedEventHandlerSpy = function(workflowEvents)
+                return workflowEvents.test[1][3].dispatchAction
             end,
         },
         {
             name = "dispatches action through entity object and exits mode",
             mode = "test",
-            workflows = {
+            workflowEvents = {
                 test = {
                     {
                         { "ctrl" },
@@ -311,8 +311,8 @@ local function handleKeyDownTests()
             event = mockEvent({ "ctrl" }, "a"),
             shouldExitMode = true,
             expectedResult = true,
-            expectedEventHandlerSpy = function(workflows)
-                return workflows.test[1][3].dispatchAction
+            expectedEventHandlerSpy = function(workflowEvents)
+                return workflowEvents.test[1][3].dispatchAction
             end,
         },
     }
@@ -330,7 +330,7 @@ local function handleKeyDownTests()
             local mockPlaySound = spy.new(function() end)
             local mockExitMode = spy.new(function() end)
 
-            Ki.workflows = test.workflows
+            Ki.workflowEvents = test.workflowEvents
             Ki.state = {
                 current = test.mode,
                 exitMode = mockExitMode,
@@ -352,7 +352,7 @@ local function handleKeyDownTests()
                 assert.spy(mockPlaySound).was.called()
             end
             if test.expectedEventHandlerSpy then
-                assert.spy(test.expectedEventHandlerSpy(Ki.workflows)).was.called()
+                assert.spy(test.expectedEventHandlerSpy(Ki.workflowEvents)).was.called()
             end
             if test.shouldExitMode then
                 assert.spy(mockExitMode).was.called()

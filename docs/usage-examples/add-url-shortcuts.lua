@@ -3,19 +3,21 @@
 -- Load & initialize Ki spoon
 hs.loadSpoon('Ki')
 
--- Create some event handlers to open URLs
-local openKiGithubURL = function() return hs.urlevent.openURL("https://github.com/andweeb/ki") end
-local openHammerspoonURL = function() return hs.urlevent.openURL("http://www.hammerspoon.org") end
+local function openURLEvent(url)
+    return function()
+        return hs.urlevent.openURL(url)
+    end
+end
 
 -- Define url shortcuts
-local urlWorkflows = {
-    { nil, "k", openKiGithubURL, { "URL Events", "Ki Github Page" } },
-    { { "shift" }, "h", openHammerspoonURL, { "URL Events", "Hammerspoon Website" } },
+local urlEvents = {
+    { nil, "k", openURLEvent("https://github.com/andweeb/ki"), { "URL Events", "Ki Github Page" } },
+    { { "shift" }, "h", openURLEvent("http://www.hammerspoon.org"), { "URL Events", "Hammerspoon Website" } },
 }
 
--- Set custom URL mode workflows
-spoon.Ki.workflows = {
-    url = urlWorkflows,
+-- Set custom URL mode workflow events
+spoon.Ki.workflowEvents = {
+    url = urlEvents,
 }
 
 -- Start Ki
