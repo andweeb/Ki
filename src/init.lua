@@ -417,6 +417,22 @@ function Ki._renderHotkeyText(modifiers, keyName)
         ctrl = "⌃",
         fn = "<fn>",
     }
+    local keyGlyphs = {
+        ["return"] = "↩",
+        enter = "⌤",
+        delete = "⌫",
+        escape = "⎋",
+        right = "→",
+        left = "←",
+        up = "↑",
+        down = "↓",
+        pageup = "⇞",
+        pagedown = "⇟",
+        home = "↖",
+        ["end"] = "↘",
+        tab = "⇥",
+        space = "␣",
+    }
 
     for name, isKeyDown in pairs(modifiers) do
         if name and modNames[name] and isKeyDown then
@@ -424,8 +440,10 @@ function Ki._renderHotkeyText(modifiers, keyName)
         end
     end
 
-    return modKeyText..keyName
+    return modKeyText..(keyGlyphs[keyName] or keyName:gsub("^%l", string.upper))
 end
+
+local currentWorkflowText = {}
 
 -- Generate the finite state machine callbacks for all state events, generic `onstatechange` callbacks for recording/resetting event history and state event-specific callbacks
 function Ki:_createFsmCallbacks()
@@ -449,6 +467,38 @@ function Ki:_createFsmCallbacks()
     end
 
     return callbacks
+end
+
+hs.alert.defaultStyle.strokeColor = { white = 1, alpha = 0 }
+hs.alert.defaultStyle.fillColor = { white = 0.05, alpha = 0.75 }
+hs.alert.defaultStyle.radius = 10
+hs.alert.defaultStyle.atScreenEdge = 2
+
+local workflowIndex = 1
+local workflowTitles = {
+    "Open Safari: ",
+    "Open a new Safari tab",
+    "Open a new Safari window",
+    "Open a new private Safari window",
+}
+
+local function showPressedHotkey(flags, keyName)
+    table.insert(currentWorkflowText, Ki._renderHotkeyText(flags, keyName))
+
+    local workflowText = workflowTitles[workflowIndex]
+    for _, text in pairs(currentWorkflowText) do
+        if text ~= "" then
+            workflowText = workflowText.." "..text
+        end
+    end
+
+    hs.alert.closeAll()
+    hs.alert.show(workflowText, hs.alert.defaultStyle, nil, 0.5)
+
+    if Ki.state.current == "desktop" then
+        currentWorkflowText = {}
+        workflowIndex = workflowIndex + 1
+    end
 end
 
 -- Handle keydown event by triggering the appropriate event handler or entity action dispatcher depending on the mode, modifier keys, and keycode
@@ -505,6 +555,8 @@ function Ki:_handleKeyDown(event)
 
             self.createEntity().notifyError("Unexpected event handler", details)
         end
+
+        showPressedHotkey(flags, keyName)
 
         return true
     elseif mode ~= "desktop" then
