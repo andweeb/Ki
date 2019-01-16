@@ -66,13 +66,6 @@ local entities = {
 ---  * A list of `entity` workflow events
 ---  * A list of `select` workflow events
 function Defaults.createEntityEvents()
-    local entitySelectEvents = {
-        { nil, "g", entities.GoogleChrome, { "Select Events", "Select a Google Chrome tab or window" } },
-        { nil, "m", entities.Messages, { "Select Events", "Select a Messages conversation" } },
-        { nil, "n", entities.Notes, { "Select Events", "Select a Note" } },
-        { nil, "s", entities.Safari, { "Select Events", "Select a Safari tab or window" } },
-    }
-
     local entityEvents = {
         { nil, "a", entities.AppStore, { "Entities", "App Store" } },
         { nil, "b", entities.Books, { "Entities", "Books" } },
@@ -104,6 +97,18 @@ function Defaults.createEntityEvents()
         { { "shift", "cmd" }, "p", entities.Photos, { "Entities", "Photos" } },
         { { "shift", "cmd" }, "m", entities.Mail, { "Entities", "Mail" } },
         { { "shift", "cmd" }, "s", entities.Stickies, { "Entities", "Stickies" } },
+    }
+
+    local entitySelectEvents = {
+        { nil, "d", entities.Dictionary, { "Entities", "Select a Dictionary window" } },
+        { nil, "f", entities.Finder, { "Select Events", "Select a Finder window" } },
+        { nil, "g", entities.GoogleChrome, { "Select Events", "Select a Google Chrome tab or window" } },
+        { nil, "m", entities.Messages, { "Select Events", "Select a Messages conversation" } },
+        { nil, "n", entities.Notes, { "Select Events", "Select a Note" } },
+        { nil, "p", entities.Preview, { "Select Events", "Select a Preview window" } },
+        { nil, "s", entities.Safari, { "Select Events", "Select a Safari tab or window" } },
+        { nil, "t", entities.Terminal, { "Select Events", "Select a Terminal window" } },
+        { { "shift" }, "t", entities.TextEdit, { "Select Events", "Select a Text Edit window" } },
     }
 
     return entityEvents, entitySelectEvents

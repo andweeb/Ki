@@ -1,6 +1,10 @@
 local Application = dofile(_G.spoonPath.."/application.lua")
 local actions = {
     addBookmark = Application.createMenuItemEvent("Add Bookmark...", { focusBefore = true }),
+    showWebInspector = Application.createMenuItemEvent({ "Show Web Inspector", "Close Web Inspector" }, {
+        isToggleable = true,
+        focusBefore = true,
+    }),
     openLocation = Application.createMenuItemEvent("Open Location...", { focusBefore = true }),
     moveTabToNewWindow = Application.createMenuItemEvent("Move Tab to New Window", { focusBefore = true }),
     mergeAllWindows = Application.createMenuItemEvent("Merge All Windows", { focusBefore = true }),
@@ -43,12 +47,6 @@ function Application.getSelectionItems()
     end
 
     return choices
-end
-
-function actions.showWebInspector(app, choice)
-    Application.focus(app, choice)
-    _ = app:selectMenuItem("Show Web Inspector") or app:selectMenuItem("Close Web Inspector")
-    return true
 end
 
 function actions.toggleMute(_, choice)
