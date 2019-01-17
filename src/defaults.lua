@@ -133,6 +133,7 @@ function Defaults.createUrlEvents()
 
     local urlEvents = {
         { nil, "a", urlEventHandler("https://amazon.com"), { "URL Events", "Amazon" } },
+        { nil, "d", urlEventHandler("https://dev.to"), { "URL Events", "Dev.to" } },
         { nil, "f", urlEventHandler("https://facebook.com"), { "URL Events", "Facebook" } },
         { nil, "g", urlEventHandler("https://google.com"), { "URL Events", "Google" } },
         { nil, "h", urlEventHandler("https://news.ycombinator.com"), { "URL Events", "Hacker News" } },
