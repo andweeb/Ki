@@ -1,5 +1,7 @@
 # Ki
 
+[![Build Status](https://travis-ci.com/andweeb/ki.svg?branch=master)](https://travis-ci.com/andweeb/ki) [![codecov](https://codecov.io/gh/andweeb/ki/branch/master/graph/badge.svg)](https://codecov.io/gh/andweeb/ki)
+
 > A proof of concept to apply the ["Zen" of vi](https://stackoverflow.com/questions/1218390/what-is-your-most-productive-shortcut-with-vim/1220118#1220118) to desktop automation.
 
 ### What's that?
