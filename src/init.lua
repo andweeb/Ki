@@ -44,7 +44,7 @@ local Ki = {}
 Ki.__index = Ki
 
 Ki.name = "Ki"
-Ki.version = "1.0.0"
+Ki.version = "1.1.0"
 Ki.author = "Andrew Kwon"
 Ki.homepage = "https://github.com/andweeb/ki"
 Ki.license = "MIT - https://opensource.org/licenses/MIT"
