@@ -11,7 +11,12 @@ local mocks = {
         get = function()
             return nil
         end,
-        enableSpotlightForNameSearches = function() end,
+        enableSpotlightForNameSearches = function()
+            return nil
+        end,
+        infoForBundlePath = function()
+            return nil
+        end,
         launchOrFocus = function()
             return nil
         end,
@@ -34,6 +39,12 @@ local mocks = {
             return nil
         end,
     },
+    dir = function()
+        return nil
+    end,
+    displayName = function()
+        return nil
+    end,
     dockicon = {
         hide = function()
             return nil
@@ -44,7 +55,24 @@ local mocks = {
             modalPanel = nil,
         },
     },
+    execute = function()
+        return nil
+    end,
+    fs = {
+        attributes = function()
+            return nil
+        end,
+        fileUTI = function()
+            return nil
+        end,
+        pathToAbsolute = function()
+            return nil
+        end,
+    },
     image = {
+        iconForFileType = function()
+            return nil
+        end,
         imageFromAppBundle = function()
             return {
                 encodeAsURLString = function()
@@ -91,6 +119,7 @@ local mocks = {
             return nil
         end,
     },
+    open = function() return nil end,
     osascript = {
         applescript = function()
             return nil
@@ -126,6 +155,11 @@ local mocks = {
     },
     styledtext = {
         new = function()
+            return nil
+        end,
+    },
+    timer = {
+        doAfter = function()
             return nil
         end,
     },

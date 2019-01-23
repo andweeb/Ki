@@ -1,0 +1,327 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Ki docs: File</title>
+    <style type="text/css">
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      th { background-color: #DDDDDD; vertical-align: top; padding: 3px; }
+      td { width: 100%; background-color: #EEEEEE; vertical-align: top; padding: 3px; }
+      table { width: 100% ; border: 1px solid #0; text-align: left; }
+      section > table table td { width: 0; }
+    </style>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="./index.html">docs</a> &raquo; File</h1>
+      <p>File class that subclasses <a href="Entity.html">Entity</a> to represent some directory or file</p>
+
+      </header>
+      <h3>API Overview</h3>
+      <ul>
+        <li>Variables - Configurable values</li>
+          <ul>
+            <li><a href="#behaviors">behaviors</a></li>
+          </ul>
+        <li>Methods - API calls which can only be made on an object returned by a constructor</li>
+          <ul>
+            <li><a href="#createEvent">createEvent</a></li>
+            <li><a href="#getFileIcon">getFileIcon</a></li>
+            <li><a href="#initialize">initialize</a></li>
+            <li><a href="#moveToTrash">moveToTrash</a></li>
+            <li><a href="#navigate">navigate</a></li>
+            <li><a href="#open">open</a></li>
+            <li><a href="#openInfoWindow">openInfoWindow</a></li>
+            <li><a href="#openWith">openWith</a></li>
+            <li><a href="#showFileSelectionModal">showFileSelectionModal</a></li>
+          </ul>
+      </ul>
+      <h3>API Documentation</h3>
+        <h4 class="documentation-section">Variables</h4>
+          <section id="behaviors">
+            <a name="//apple_ref/cpp/Variable/behaviors" class="dashAnchor"></a>
+            <h5><a href="#behaviors">behaviors</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File.behaviors</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>File <a href="Entity.html#behaviors">behaviors</a> defined to invoke event handlers with the file path.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+        <h4 class="documentation-section">Methods</h4>
+          <section id="createEvent">
+            <a name="//apple_ref/cpp/Method/createEvent" class="dashAnchor"></a>
+            <h5><a href="#createEvent">createEvent</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:createEvent(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Convenience method to create file events that share the similar behavior of allowing navigation before item selection</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of a file</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>An event handler function</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getFileIcon">
+            <a name="//apple_ref/cpp/Method/getFileIcon" class="dashAnchor"></a>
+            <h5><a href="#getFileIcon">getFileIcon</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:getFileIcon(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Retrieves an icon image for the given file path or returns nil if not found</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of a file</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The file icon <a href="http://www.hammerspoon.org/docs/hs.image.html"><code>hs.image</code></a> object</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="initialize">
+            <a name="//apple_ref/cpp/Method/initialize" class="dashAnchor"></a>
+            <h5><a href="#initialize">initialize</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:initialize(path, shortcuts)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Initializes a new file instance with its path and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The initial directory path</li>
+<li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the file entity</li>
+</ul>
+<p>Each <code>shortcut</code> item should be a list with items at the following indices:</p>
+<ul>
+<li><code>1</code> - An optional table containing zero or more of the following keyboard modifiers: <code>"cmd"</code>, <code>"alt"</code>, <code>"shift"</code>, <code>"ctrl"</code>, <code>"fn"</code></li>
+<li><code>2</code> - The name of a keyboard key. String representations of keys can be found in <a href="https://www.hammerspoon.org/docs/hs.keycodes.html#map"><code>hs.keycodes.map</code></a>.</li>
+<li><code>3</code> - The event handler that defines the action for when the shortcut is triggered</li>
+<li><code>4</code> - A table containing the metadata for the shortcut, also a list with items at the following indices:<ul>
+<li><code>1</code> - The category name of the shortcut</li>
+<li><code>2</code> - A description of what the shortcut does</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="moveToTrash">
+            <a name="//apple_ref/cpp/Method/moveToTrash" class="dashAnchor"></a>
+            <h5><a href="#moveToTrash">moveToTrash</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:moveToTrash(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Moves a file or directory at the given path to the Trash</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - the path of the target file to move to the trash</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="navigate">
+            <a name="//apple_ref/cpp/Method/navigate" class="dashAnchor"></a>
+            <h5><a href="#navigate">navigate</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:navigate(path, handler)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Recursively navigates through parent and child directories until a selection is made</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - the path of the target file</li>
+<li><code>handler</code> - the selection callback handler function invoked with the following arguments:<ul>
+<li><code>targetFilePath</code> - the target path of the selected file</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="open">
+            <a name="//apple_ref/cpp/Method/open" class="dashAnchor"></a>
+            <h5><a href="#open">open</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:open(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Opens a file or directory at the given path</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - the path of the target file to open</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="openInfoWindow">
+            <a name="//apple_ref/cpp/Method/openInfoWindow" class="dashAnchor"></a>
+            <h5><a href="#openInfoWindow">openInfoWindow</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:openInfoWindow(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Opens a Finder information window for the file at <code>path</code></p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - the path of the target file</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="openWith">
+            <a name="//apple_ref/cpp/Method/openWith" class="dashAnchor"></a>
+            <h5><a href="#openWith">openWith</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:openWith(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Opens a file or directory at the given path with a specified application and raises the application to the front</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - the path of the target file to open</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="showFileSelectionModal">
+            <a name="//apple_ref/cpp/Method/showFileSelectionModal" class="dashAnchor"></a>
+            <h5><a href="#showFileSelectionModal">showFileSelectionModal</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:showFileSelectionModal(path, handler)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Shows a selection modal with a list of files at a given path.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - the path of the directory that should have its file contents listed in the selection modal</li>
+<li><code>handler</code> - the selection event handler function that takes in the following arguments:<ul>
+<li><code>targetPath</code> - the selected target path</li>
+<li><code>shouldTriggerAction</code> - a boolean value to ensure the action is triggered</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+  </body>
+</html>

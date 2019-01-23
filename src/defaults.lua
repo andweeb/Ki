@@ -22,6 +22,8 @@ if not _G.requirePackage then
     end
 end
 
+local File = _G.requirePackage("file", true)
+
 local entities = {
     ActivityMonitor = _G.requirePackage("entities/activity-monitor", true),
     AppStore = _G.requirePackage("entities/app-store", true),
@@ -54,6 +56,44 @@ local entities = {
     TextEdit = _G.requirePackage("entities/text-edit", true),
     VoiceMemos = _G.requirePackage("entities/voice-memos", true),
 }
+
+--- Defaults.createFileEvents()
+--- Method
+--- Defines the initial set of actions with predefined keybindings for `file` mode
+---
+--- Parameters:
+---  * None
+---
+--- Returns:
+---  * A list of `file` workflow events
+function Defaults.createFileEvents()
+    local finderAppLocation = "/System/Library/CoreServices/Finder.app/Contents/Applications"
+    local function openFinderAppEvent(name)
+        return function()
+            hs.execute("open "..finderAppLocation.."/"..name..".app")
+            return true
+        end
+    end
+
+    local fileEvents = {
+        { nil, "a", File:new("/Applications"), { "Files", "Applications" } },
+        { nil, "d", File:new("~/Downloads"), { "Files", "Downloads" } },
+        { nil, "h", File:new("~"), { "Files", "$HOME" } },
+        { nil, "m", File:new("~/Movies"), { "Files", "Movies" } },
+        { nil, "p", File:new("~/Pictures"), { "Files", "Pictures" } },
+        { nil, "t", File:new("~/.Trash"), { "Files", "Trash" } },
+        { { "cmd" }, "a", openFinderAppEvent("Airdrop"), { "Files", "Airdrop" } },
+        { { "cmd" }, "c", openFinderAppEvent("Computer"), { "Files", "Computer" } },
+        { { "cmd" }, "i", openFinderAppEvent("iCloud Drive"), { "Files", "iCloud Drive" } },
+        { { "cmd" }, "n", openFinderAppEvent("Network"), { "Files", "Network" } },
+        { { "cmd" }, "r", openFinderAppEvent("Recents"), { "Files", "Recents" } },
+        { { "shift" }, "a", openFinderAppEvent("All My Files"), { "Files", "All My Files" } },
+        { { "shift" }, "d", File:new("~/Desktop"), { "Files", "Desktop" } },
+        { { "cmd", "shift" }, "d", File:new("~/Documents"), { "Files", "Documents" } },
+    }
+
+    return fileEvents
+end
 
 --- Defaults.createEntityEvents()
 --- Method
@@ -316,6 +356,7 @@ end
 function Defaults.create(Ki)
     local urlEvents = Defaults.createUrlEvents()
     local entityEvents, entitySelectEvents = Defaults.createEntityEvents()
+    local fileEvents = Defaults.createFileEvents()
     local volumeEvents = Defaults.createVolumeEvents()
     local brightnessEvents = Defaults.createBrightnessEvents()
     local normalEvents = Defaults.createNormalEvents(Ki)
@@ -323,6 +364,7 @@ function Defaults.create(Ki)
         url = urlEvents,
         select = entitySelectEvents,
         entity = entityEvents,
+        file = fileEvents,
         volume = volumeEvents,
         brightness = brightnessEvents,
         normal = normalEvents,
