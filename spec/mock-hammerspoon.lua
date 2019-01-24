@@ -39,6 +39,9 @@ local mocks = {
             return nil
         end,
     },
+    dialog = function()
+        return nil
+    end,
     dir = function()
         return nil
     end,

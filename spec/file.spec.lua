@@ -58,22 +58,32 @@ end
 local function initializeTests()
     local tests = {
         {
-            name = "creates a file instance",
-            args = { function() end },
-            expectedResult = true,
+            name = "creates a file entity instance",
+            args = { "~/.vimrc" },
+        },
+        {
+            name = "creates a file entity instance",
+            args = { "~/Downloads" },
+            isDirectory = true,
         },
     }
 
     -- Run `initialize` method tests
     for _, test in pairs(tests) do
         it(test.name, function()
-            local path = "~"
+            local mockHs = hammerspoonMocker()
             local file = require("file")
+            local mockFs = {
+                attributes = function() return { mode = test.isDirectory and "directory" } end,
+                pathToAbsolute = function() end,
+            }
+
+            _G.hs = mock(mockHs({ fs = mockFs }))
 
             file.mergeShortcuts = function() end
-            file:initialize(path)
+            file:initialize(table.unpack(test.args))
 
-            assert.are.same(file.path, path)
+            assert.are.same(file.path, test.args[1])
         end)
     end
 end
@@ -317,6 +327,13 @@ local function openTests()
             args = { nil },
             openCallCount = 0,
         },
+        {
+            name = "opens finder when opening a directory",
+            args = { "/test/path" },
+            isDirectory = true,
+            openCallCount = 1,
+            openFinderCount = 1,
+        },
     }
 
     -- Run `open` method tests
@@ -324,18 +341,26 @@ local function openTests()
         it(test.name, function()
             local file = require("file")
             local fileOpenSpy = spy.new(function() end)
+            local finderOpenSpy = spy.new(function() end)
             local mockHs = hammerspoonMocker()
             local mockFs = {
-                pathToAbsolute = function()
-                    return test.expectedResult
-                end,
+                attributes = function() return { mode = test.isDirectory and "directory" } end,
+                pathToAbsolute = function() end,
+            }
+            local mockApplication = {
+                open = finderOpenSpy,
             }
 
-            _G.hs = mock(mockHs({ open = fileOpenSpy, fs = mockFs }))
+            _G.hs = mock(mockHs({
+                application = mockApplication,
+                open = fileOpenSpy,
+                fs = mockFs,
+            }))
 
             file.open(table.unpack(test.args))
 
             assert.spy(fileOpenSpy).was.called(test.openCallCount)
+            assert.spy(finderOpenSpy).was.called(test.openFinderCount or 0)
         end)
     end
 end
@@ -469,9 +494,16 @@ end
 local function moveToTrashTests()
     local tests = {
         {
+            name = "cancel file move operation",
+            args = { "/test/path" },
+            confirmation = "Cancel",
+            executesApplescript = false,
+        },
+        {
             name = "moves the file to trash successfully",
             args = { "/test/path" },
-            isSuccessful = true,
+            confirmation = "Confirm",
+            executesApplescript = true,
             applescriptResults = {
                 true,
             },
@@ -479,7 +511,9 @@ local function moveToTrashTests()
         {
             name = "notifies on applescript error",
             args = { "/test/path" },
-            isSuccessful = false,
+            confirmation = "Confirm",
+            executesApplescript = true,
+            notifiesError = true,
             applescriptResults = {
                 false,
                 nil,
@@ -493,21 +527,28 @@ local function moveToTrashTests()
         it(test.name, function()
             local file = require("file")
             local mockHs = hammerspoonMocker()
+            local applescriptSpy = spy.new(function()
+                return table.unpack(test.applescriptResults)
+            end)
             local mockOsascript = {
-                applescript = function()
-                    return table.unpack(test.applescriptResults)
-                end,
+                applescript = applescriptSpy,
+            }
+            local mockDialog = {
+                blockAlert = function() return test.confirmation end,
             }
 
             file.notifyError = spy.new(function() end)
 
-            _G.hs = mock(mockHs({ osascript = mockOsascript }))
+            _G.hs = mock(mockHs({
+                osascript = mockOsascript,
+                dialog = mockDialog,
+            }))
 
             file:moveToTrash(table.unpack(test.args))
 
-            if test.isSuccessful then
-                assert.spy(file.notifyError).was.called(0)
-            else
+            assert.spy(applescriptSpy).was.called(test.executesApplescript and 1 or 0)
+
+            if test.notifiesError then
                 assert.spy(file.notifyError).was.called(1)
             end
         end)

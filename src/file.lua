@@ -55,13 +55,13 @@ File.behaviors = Entity.behaviors + {
 ---  * None
 function File:initialize(path, shortcuts)
     local absolutePath = hs.fs.pathToAbsolute(path)
-    local attributes = hs.fs.attributes(absolutePath)
-    local isDirectory = attributes ~= nil and attributes.mode == "directory"
+    local attributes = hs.fs.attributes(absolutePath) or {}
+    local isDirectory = attributes.mode == "directory"
 
     local actions = {
         open = self.open,
         showCheatsheet = function() self.cheatsheet:show() end,
-        openFileInFolder = self:createEvent(path, function(target) hs.open(target) end),
+        openFileInFolder = self:createEvent(path, function(target) self.open(target) end),
         openFileInFolderWith = self:createEvent(path, function(target) self:openWith(target) end),
         showInfoForFileInFolder = self:createEvent(path, function(target) self:openInfoWindow(target) end),
         quickLookFileInFolder = self:createEvent(path, function(target) hs.execute("qlmanage -p "..target) end),
@@ -183,11 +183,16 @@ function File:showFileSelectionModal(path, handler)
     local parentDirectory = absolutePath:match(parentPathRegex) or "/"
     local iterator, directory = hs.fs.dir(absolutePath)
 
-    local target = { path = path }
+    -- Add selection modal shortcut to open files with cmd + return
+    local function openFile(modal)
+        local selectedRow = modal:selectedRow()
+        local choice = modal:selectedRowContents(selectedRow)
+        handler(choice.filePath, true)
+        modal:cancel()
+    end
     local navigationShortcuts = {
-        { { "cmd" }, "return", function() handler(target.path, true) end },
+        { { "cmd" }, "return", openFile },
     }
-
     self.selectionModalShortcuts = self.mergeShortcuts(navigationShortcuts, self.selectionModalShortcuts)
 
     if iterator == nil then
@@ -199,7 +204,6 @@ function File:showFileSelectionModal(path, handler)
         local filePath = absolutePath.."/"..file
         local displayName = hs.fs.displayName(filePath) or file
         local subText = filePath
-
 
         if file == "." then
             displayName = file
@@ -222,7 +226,6 @@ function File:showFileSelectionModal(path, handler)
 
     self.showSelectionModal(choices, function(choice)
         if choice then
-            target.path = choice.filePath
             handler(choice.filePath)
         end
     end)
@@ -241,7 +244,14 @@ function File.open(path)
     if not path then return nil end
 
     local absolutePath = hs.fs.pathToAbsolute(path)
+    local attributes = hs.fs.attributes(absolutePath) or {}
+    local isDirectory = attributes.mode == "directory"
+
     hs.open(absolutePath)
+
+    if isDirectory then
+        hs.application.open("Finder")
+    end
 end
 
 --- File:openWith(path)
@@ -319,7 +329,7 @@ end
 
 --- File:moveToTrash(path)
 --- Method
---- Moves a file or directory at the given path to the Trash
+--- Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the operation.
 ---
 --- Parameters:
 ---  * `path` - the path of the target file to move to the trash
@@ -327,12 +337,17 @@ end
 --- Returns:
 ---   * None
 function File:moveToTrash(path)
-    local isOk, _, rawTable = hs.osascript.applescript([[
-        tell application "Finder" to delete (POSIX file "]]..path..[[")
-    ]])
+    local confirmation = "Move \""..path.."\" to the Trash?"
+    local answer = hs.dialog.blockAlert(confirmation, "", "Confirm", "Cancel")
 
-    if not isOk then
-        self.notifyError("Error moving file to trash", rawTable.NSLocalizedFailureReason)
+    if answer == "Confirm" then
+        local isOk, _, rawTable = hs.osascript.applescript([[
+            tell application "Finder" to delete (POSIX file "]]..path..[[")
+        ]])
+
+        if not isOk then
+            self.notifyError("Error moving file to trash", rawTable.NSLocalizedFailureReason)
+        end
     end
 end
 

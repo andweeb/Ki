@@ -58,7 +58,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `File:moveToTrash(path)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Moves a file or directory at the given path to the Trash                                                                     |
+| **Description**                             | Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the operation.                                                                     |
 | **Parameters**                              | <ul><li>`path` - the path of the target file to move to the trash</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
