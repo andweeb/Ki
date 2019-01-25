@@ -48,6 +48,7 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
  * [defaultTransitionEvents](#defaultTransitionEvents)
  * [defaultWorkflowEvents](#defaultWorkflowEvents)
  * [Entity](#Entity)
+ * [File](#File)
  * [state](#state)
  * [stateEvents](#stateEvents)
  * [statusDisplay](#statusDisplay)
@@ -90,6 +91,12 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
 | **Signature**                               | `Ki.Entity`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some generic automatable desktop entity. Class methods and properties are documented [here](Entity.html).                                                                     |
+
+| [File](#File)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.File`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some file or directory at an existing file path. Class methods and properties are documented [here](File.html).                                                                     |
 
 | [state](#state)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

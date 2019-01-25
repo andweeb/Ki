@@ -28,6 +28,7 @@ build() {
     (cd "$SRC_DIR" && for file in *.{lua,html,css}; do cp "$file" "$BUILD_DIR/$file"; done)
     cp -r "$WORKING_DIR/src/entities" "$BUILD_DIR/entities"
     cp -r "$WORKING_DIR/src/osascripts" "$BUILD_DIR/osascripts"
+    cp -r "$WORKING_DIR/bin" "$BUILD_DIR/bin"
     if [ -f "$WORKING_DIR/docs.json" ]; then
         cp "$WORKING_DIR/docs.json" "$BUILD_DIR/docs.json"
     fi

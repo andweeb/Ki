@@ -105,6 +105,11 @@ Ki.Entity = _G.requirePackage("entity", true)
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that subclasses [Entity](Entity.html) to represent some automatable desktop application. Class methods and properties are documented [here](Application.html).
 Ki.Application = _G.requirePackage("application", true)
 
+--- Ki.File
+--- Variable
+--- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some file or directory at an existing file path. Class methods and properties are documented [here](File.html).
+Ki.File = _G.requirePackage("file", true)
+
 --- Ki.state
 --- Variable
 --- The internal [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki.
@@ -262,6 +267,11 @@ Ki.defaultTransitionEvents = {
             { "Normal Mode", "Transition to Entity Mode" },
         },
         {
+            {"cmd"}, "f",
+            function() Ki.state:enterFileMode() end,
+            { "Normal Mode", "Transition to File Mode" },
+        },
+        {
             {"cmd"}, "a",
             function() Ki.state:enterActionMode() end,
             { "Normal Mode", "Transition to Action Mode" },
@@ -294,9 +304,21 @@ Ki.defaultTransitionEvents = {
             { "Entity Mode", "Exit to Normal Mode" },
         },
         {
+            {"cmd"}, "f",
+            function() Ki.state:enterFileMode() end,
+            { "Entity Mode", "Transition to File Mode" },
+        },
+        {
             {"cmd"}, "s",
             function() Ki.state:enterSelectMode() end,
             { "Entity Mode", "Transition to Select Mode" },
+        },
+    },
+    file = {
+        {
+            nil, "escape",
+            function() Ki.state:exitMode() end,
+            { "File Mode", "Exit to Desktop Mode" },
         },
     },
     action = {
@@ -354,11 +376,15 @@ Ki._defaultStateEvents = {
     { name = "enterActionMode", from = "normal", to = "action" },
     { name = "enterSelectMode", from = "entity", to = "select" },
     { name = "enterSelectMode", from = "normal", to = "select" },
+    { name = "enterFileMode", from = "normal", to = "file" },
+    { name = "enterFileMode", from = "entity", to = "file" },
+    { name = "enterSelectMode", from = "file", to = "select" },
     { name = "enterVolumeControlMode", from = "normal", to = "volume" },
     { name = "enterBrightnessControlMode", from = "normal", to = "brightness" },
     { name = "enterUrlMode", from = "normal", to = "url" },
     { name = "exitMode", from = "normal", to = "desktop" },
     { name = "exitMode", from = "entity", to = "desktop" },
+    { name = "exitMode", from = "file", to = "desktop" },
     { name = "exitMode", from = "url", to = "desktop" },
     { name = "exitMode", from = "select", to = "desktop" },
     { name = "exitMode", from = "action", to = "desktop" },

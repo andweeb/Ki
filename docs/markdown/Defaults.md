@@ -9,6 +9,7 @@ Definitions of default events and entities
  * [create](#create)
  * [createBrightnessEvents](#createBrightnessEvents)
  * [createEntityEvents](#createEntityEvents)
+ * [createFileEvents](#createFileEvents)
  * [createNormalEvents](#createNormalEvents)
  * [createUrlEvents](#createUrlEvents)
  * [createVolumeEvents](#createVolumeEvents)
@@ -40,6 +41,14 @@ Definitions of default events and entities
 | **Description**                             | Defines the initial set of actions with predefined keybindings for `entity` and `select` mode                                                                     |
 | **Parameters**                              | <ul><li>None</li></ul> |
 | **Returns**                                 | <ul><li>A list of `entity` workflow events</li><li>A list of `select` workflow events</li></ul>          |
+
+| [createFileEvents](#createFileEvents)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Defaults.createFileEvents()`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Defines the initial set of actions with predefined keybindings for `file` mode                                                                     |
+| **Parameters**                              | <ul><li>None</li></ul> |
+| **Returns**                                 | <ul><li>A list of `file` workflow events</li></ul>          |
 
 | [createNormalEvents](#createNormalEvents)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
