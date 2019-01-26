@@ -367,6 +367,85 @@ end
 
 -- File `openWith` method test suite
 local function openWithTests()
+    -- `openWith` method choice object creation tests
+    local choiceTests = {
+        {
+            name = "creates choice objects without images",
+            shellOutput = "/Applications/Test.app\n/Applications/Utilities/Test.app\n",
+            expectedChoices = {
+                {
+                    text = "/Applications/Test.app",
+                    subText = "/Applications/Test.app",
+                    applicationPath =  "/Applications/Test.app",
+                },
+                {
+                    text = "/Applications/Utilities/Test.app",
+                    subText = "/Applications/Utilities/Test.app",
+                    applicationPath =  "/Applications/Utilities/Test.app",
+                },
+            },
+        },
+        {
+            name = "attaches images to choice objects",
+            shellOutput = "/Applications/Test.app\n/Applications/Utilities/Test.app\n",
+            infoForBundlePath = { CFBundleName = "Test", },
+            image = { test = true },
+            expectedChoices = {
+                {
+                    text = "Test",
+                    subText = "/Applications/Test.app",
+                    applicationPath =  "/Applications/Test.app",
+                    image = { test = true },
+                },
+                {
+                    text = "Test",
+                    subText = "/Applications/Utilities/Test.app",
+                    applicationPath =  "/Applications/Utilities/Test.app",
+                    image = { test = true },
+                },
+            },
+        },
+    }
+
+    -- Run `openWith` method choice object creation tests
+    for _, test in pairs(choiceTests) do
+        it(test.name, function()
+            local file = require("file")
+            local mockHs = hammerspoonMocker()
+            local mockTimer = {
+                doAfter = function(_, callback)
+                    callback()
+                end,
+            }
+            local mockImage = {
+                imageFromAppBundle = function()
+                    return test.image
+                end
+            }
+            local mockApplication = {
+                infoForBundlePath = function()
+                    return test.infoForBundlePath
+                end
+            }
+
+            file.showSelectionModal = function(choices)
+                assert.are.same(test.expectedChoices, choices)
+            end
+
+            _G.hs = mock(mockHs({
+                image = mockImage,
+                timer = mockTimer,
+                application = mockApplication,
+                execute = function()
+                    return test.shellOutput
+                end,
+            }))
+
+            file:openWith("/test/path")
+        end)
+    end
+
+    -- `openWith` method on selection tests
     local tests = {
         {
             name = "successfully opens the file with application",
@@ -494,12 +573,6 @@ end
 local function moveToTrashTests()
     local tests = {
         {
-            name = "cancel file move operation",
-            args = { "/test/path" },
-            confirmation = "Cancel",
-            executesApplescript = false,
-        },
-        {
             name = "moves the file to trash successfully",
             args = { "/test/path" },
             confirmation = "Confirm",
@@ -533,15 +606,12 @@ local function moveToTrashTests()
             local mockOsascript = {
                 applescript = applescriptSpy,
             }
-            local mockDialog = {
-                blockAlert = function() return test.confirmation end,
-            }
 
             file.notifyError = spy.new(function() end)
+            file.triggerAfterConfirmation = function(_, action) action() end
 
             _G.hs = mock(mockHs({
                 osascript = mockOsascript,
-                dialog = mockDialog,
             }))
 
             file:moveToTrash(table.unpack(test.args))

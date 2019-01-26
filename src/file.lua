@@ -97,7 +97,7 @@ function File:initialize(path, shortcuts)
     self.cheatsheet:init(self.path, cheatsheetDescription, mergedShortcuts)
 end
 
---- File:createEvent(path)
+--- File:createEvent(path) -> function
 --- Method
 --- Convenience method to create file events that share the similar behavior of allowing navigation before item selection
 ---
@@ -112,7 +112,7 @@ function File:createEvent(path, action)
     end
 end
 
---- File:getFileIcon(path)
+--- File:getFileIcon(path) -> [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html)
 --- Method
 --- Retrieves an icon image for the given file path or returns nil if not found
 ---
@@ -164,7 +164,7 @@ function File:navigate(path, handler)
     end)
 end
 
---- File:showFileSelectionModal(path, handler)
+--- File:showFileSelectionModal(path, handler) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list
 --- Method
 --- Shows a selection modal with a list of files at a given path.
 ---
@@ -337,10 +337,9 @@ end
 --- Returns:
 ---   * None
 function File:moveToTrash(path)
-    local confirmation = "Move \""..path.."\" to the Trash?"
-    local answer = hs.dialog.blockAlert(confirmation, "", "Confirm", "Cancel")
+    local question = "Move \""..path.."\" to the Trash?"
 
-    if answer == "Confirm" then
+    self.triggerAfterConfirmation(question, function()
         local isOk, _, rawTable = hs.osascript.applescript([[
             tell application "Finder" to delete (POSIX file "]]..path..[[")
         ]])
@@ -348,7 +347,7 @@ function File:moveToTrash(path)
         if not isOk then
             self.notifyError("Error moving file to trash", rawTable.NSLocalizedFailureReason)
         end
-    end
+    end)
 end
 
 return File

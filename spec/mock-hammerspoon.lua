@@ -61,6 +61,9 @@ local mocks = {
     execute = function()
         return nil
     end,
+    focus = function()
+        return nil
+    end,
     fs = {
         attributes = function()
             return nil
