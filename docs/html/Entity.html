@@ -35,6 +35,7 @@
             <li><a href="#notifyError">notifyError</a></li>
             <li><a href="#renderScriptTemplate">renderScriptTemplate</a></li>
             <li><a href="#showSelectionModal">showSelectionModal</a></li>
+            <li><a href="#triggerAfterConfirmation">triggerAfterConfirmation</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
@@ -123,7 +124,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity:getEventHandler(shortcuts, flags, keyName)</code></td>
+                <td><code>Entity:getEventHandler(shortcuts, flags, keyName) -&gt; function or nil</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -299,7 +300,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity.showSelectionModal(choices, eventHandler, ...)</code></td>
+                <td><code>Entity.showSelectionModal(choices, callback)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -311,7 +312,35 @@
 <p>Parameters:</p>
 <ul>
 <li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display on the chooser modal</li>
-<li><code>eventHandler</code> - The callback function invoked when a choice is selected from the modal</li>
+<li><code>callback</code> - The callback function invoked when a choice is selected from the modal</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="triggerAfterConfirmation">
+            <a name="//apple_ref/cpp/Method/triggerAfterConfirmation" class="dashAnchor"></a>
+            <h5><a href="#triggerAfterConfirmation">triggerAfterConfirmation</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity.triggerAfterConfirmation(question, action)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Opens a dialog block alert for user confirmation before triggering an action</p>
+<p>Parameters:</p>
+<ul>
+<li><code>question</code> - Text to display in the block alert</li>
+<li><code>action</code> - The callback function to be invoked after user confirmation</li>
 </ul>
 <p>Returns:</p>
 <ul>

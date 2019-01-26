@@ -17,6 +17,7 @@ Entity class that represents some generic automatable desktop entity
  * [notifyError](#notifyError)
  * [renderScriptTemplate](#renderScriptTemplate)
  * [showSelectionModal](#showSelectionModal)
+ * [triggerAfterConfirmation](#triggerAfterConfirmation)
 
 ## API Documentation
 
@@ -46,7 +47,7 @@ Entity class that represents some generic automatable desktop entity
 
 | [getEventHandler](#getEventHandler)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity:getEventHandler(shortcuts, flags, keyName)`                                                                    |
+| **Signature**                               | `Entity:getEventHandler(shortcuts, flags, keyName) -> function or nil`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Returns the event handler within the provided shortcuts with the given shortcut keybindings, or nil if not found                                                                     |
 | **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects</li><li>`flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)</li><li>`keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)</li></ul> |
@@ -93,9 +94,17 @@ Entity class that represents some generic automatable desktop entity
 
 | [showSelectionModal](#showSelectionModal)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity.showSelectionModal(choices, eventHandler, ...)`                                                                    |
+| **Signature**                               | `Entity.showSelectionModal(choices, callback)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.                                                                     |
-| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal</li><li>`eventHandler` - The callback function invoked when a choice is selected from the modal</li></ul> |
+| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal</li><li>`callback` - The callback function invoked when a choice is selected from the modal</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
+
+| [triggerAfterConfirmation](#triggerAfterConfirmation)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity.triggerAfterConfirmation(question, action)`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Opens a dialog block alert for user confirmation before triggering an action                                                                     |
+| **Parameters**                              | <ul><li>`question` - Text to display in the block alert</li><li>`action` - The callback function to be invoked after user confirmation</li></ul> |
+| **Returns**                                 | <ul><li> None</li></ul>          |
 

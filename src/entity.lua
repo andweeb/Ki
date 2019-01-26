@@ -175,6 +175,24 @@ function Entity:getSelectionItems() -- luacheck: ignore
 end
 -- luacov: enable
 
+--- Entity.triggerAfterConfirmation(question, action)
+--- Method
+--- Opens a dialog block alert for user confirmation before triggering an action
+---
+--- Parameters:
+---  * `question` - Text to display in the block alert
+---  * `action` - The callback function to be invoked after user confirmation
+---
+--- Returns:
+---   * None
+function Entity.triggerAfterConfirmation(question, action)
+    hs.focus()
+
+    local answer = hs.dialog.blockAlert(question, "", "Confirm", "Cancel")
+
+    if answer == "Confirm" then action() end
+end
+
 --- Entity.selectionModalShortcuts
 --- Variable
 --- A list of shortcuts that can be used when the selection modal is visible. The following shortcuts are available by default:
@@ -185,13 +203,13 @@ Entity.selectionModalShortcuts = {
     { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },
 }
 
---- Entity.showSelectionModal(choices, eventHandler, ...)
+--- Entity.showSelectionModal(choices, callback)
 --- Method
 --- Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.
 ---
 --- Parameters:
 ---  * `choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal
----  * `eventHandler` - The callback function invoked when a choice is selected from the modal
+---  * `callback` - The callback function invoked when a choice is selected from the modal
 ---
 --- Returns:
 ---  * None
@@ -224,7 +242,7 @@ function Entity.showSelectionModal(choices, callback)
     modal:show()
 end
 
---- Entity:getEventHandler(shortcuts, flags, keyName)
+--- Entity:getEventHandler(shortcuts, flags, keyName) -> function or nil
 --- Method
 --- Returns the event handler within the provided shortcuts with the given shortcut keybindings, or nil if not found
 ---

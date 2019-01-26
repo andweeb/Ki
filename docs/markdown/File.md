@@ -32,7 +32,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 
 | [createEvent](#createEvent)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:createEvent(path)`                                                                    |
+| **Signature**                               | `File:createEvent(path) -> function`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Convenience method to create file events that share the similar behavior of allowing navigation before item selection                                                                     |
 | **Parameters**                              | <ul><li>`path` - The path of a file</li></ul> |
@@ -40,7 +40,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 
 | [getFileIcon](#getFileIcon)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:getFileIcon(path)`                                                                    |
+| **Signature**                               | `File:getFileIcon(path) -> [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Retrieves an icon image for the given file path or returns nil if not found                                                                     |
 | **Parameters**                              | <ul><li>`path` - The path of a file</li></ul> |
@@ -96,7 +96,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 
 | [showFileSelectionModal](#showFileSelectionModal)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:showFileSelectionModal(path, handler)`                                                                    |
+| **Signature**                               | `File:showFileSelectionModal(path, handler) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Shows a selection modal with a list of files at a given path.                                                                     |
 | **Parameters**                              | <ul><li>`path` - the path of the directory that should have its file contents listed in the selection modal</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `targetPath` - the selected target path</li><li>   `shouldTriggerAction` - a boolean value to ensure the action is triggered</li></ul> |

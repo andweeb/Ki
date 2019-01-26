@@ -160,6 +160,40 @@ local function mergeShortcutsTests()
     end
 end
 
+local function triggerAfterConfirmationTests()
+    local tests = {
+        {
+            name = "triggers action on user confirmation",
+            args = { "question", spy.new(function() end) },
+            triggersAction = true,
+            answer = "Confirm",
+        },
+    }
+
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local actionSpy = test.args[2]
+            local focusSpy = spy.new(function() end)
+            local mockHs = hammerspoonMocker()
+            local entity = require("entity")
+            local mockDialog = {
+                blockAlert = function() return test.answer end,
+            }
+
+            _G.hs = mock(mockHs({
+                dialog = mockDialog,
+                focus = focusSpy,
+            }))
+
+            entity.triggerAfterConfirmation(table.unpack(test.args))
+
+            assert.spy(focusSpy).was.called(1)
+            assert.spy(actionSpy).was.called(test.triggersAction and 1 or 0)
+        end)
+    end
+end
+
+
 local function showSelectionModalTests()
     local function createHsMocks(newChooser, newEventTap)
         local mockChooser = { new = newChooser }
@@ -365,5 +399,6 @@ describe("entity.lua (#entity)", function()
     describe("`getEventHandler` method", getEventHandlerTests)
     describe("`dispatchAction` method", dispatchActionTests)
     describe("`mergeShortcuts` method", mergeShortcutsTests)
+    describe("`triggerAfterConfirmation` method", triggerAfterConfirmationTests)
     describe("`showSelectionModal` method", showSelectionModalTests)
 end)
