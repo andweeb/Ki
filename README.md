@@ -6,23 +6,42 @@
 
 ### What's that?
 
-Ki introduces a novel approach to automating macOS. Inspired by the [vi](https://en.wikipedia.org/wiki/Vi#Interface) text editor, Ki enables composable commands to execute desktop tasks to see whether it can be effective in automating the desktop environment.
+Ki introduces a novel approach to automating macOS. Inspired by the [vi text editor](https://en.wikipedia.org/wiki/Vi#Interface), Ki enables modal hotkeys to execute desktop tasks to determine whether it can be effective in a desktop environment.
 
-From the default resting `desktop` state, enter `normal` mode with the default hotkey <kbd>⌘⎋</kbd> (Command and Escape), where an extensive set of command chains become available to achieve various workflows:
-- <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>s</kbd> - enter `entity` mode <kbd>⌘e</kbd> and open or focus the **Safari** <kbd>s</kbd> application
-- <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>Space</kbd><kbd>s</kbd> - enter `action` mode <kbd>⌘a</kbd> and toggle media <kbd>Space</kbd> in the frontmost **Safari** <kbd>s</kbd> window
-- <kbd>⌘⎋</kbd><kbd>⌘s</kbd><kbd>s</kbd><kbd>⌘3</kbd> - enter `select` mode <kbd>⌘s</kbd> and focus a specific **Safari** <kbd>s</kbd> tab, the third one <kbd>⌘3</kbd> from the left
+The default state of macOS could be considered to be in `desktop` mode. Ki binds a `Command` `Escape` <kbd>⌘⎋</kbd> hotkey that transitions to `normal` mode, in which an extensive set of command chains can be initiated.
 
-With those semantics in mind, we can intuit other "sentences" if we know other entities <kbd>g</kbd>, <kbd>m</kbd>, and <kbd>⇧s</kbd>:
-- <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>g</kbd> - enter `entity` mode <kbd>⌘e</kbd> and open or focus the **Google Chrome** <kbd>g</kbd> application
-- <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>Space</kbd><kbd>⇧s</kbd> - enter `action` mode <kbd>⌘a</kbd> and toggle the current song <kbd>Space</kbd> in the **Spotify** <kbd>⇧s</kbd> application
-- <kbd>⌘⎋</kbd><kbd>⌘s</kbd><kbd>m</kbd><kbd>⌘3</kbd> - enter `select` mode <kbd>⌘s</kbd> and focus a specific **Messages** <kbd>m</kbd> conversation, the third one <kbd>⌘3</kbd> from the top
+To view all Ki shortcuts, a cheatsheet modal can be activated with <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>?</kbd>. To see all shortcuts for actions that an entity implements, an entity-specific cheatsheet modal can be activated with <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>?</kbd><kbd>(entity hotkey)</kbd>.
 
-For certain applications, shortcuts can be chained even further to compose more complex workflows:
-- <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>Space</kbd><kbd>⌘s</kbd><kbd>g</kbd><kbd>⌘4</kbd> - enter `action` mode <kbd>⌘a</kbd> to toggle media <kbd>Space</kbd>, and enter `select` mode <kbd>⌘s</kbd> to target the specific **Google Chrome** <kbd>g</kbd> tab, the fourth one <kbd>⌘4</kbd> from the left
-- <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>w</kbd><kbd>⌘s</kbd><kbd>s</kbd><kbd>⌘2</kbd> - enter `action` mode <kbd>⌘a</kbd> to close a tab <kbd>w</kbd>, and enter `select` mode <kbd>⌘s</kbd> to target the specific **Safari** <kbd>s</kbd> tab, the second one <kbd>⌘2</kbd> from the left
+<details>
+ <summary>Click to view example workflows and their modal keybindings with accompanying descriptions.</summary>
 
-To see Ki shortcuts, you can activate the **Cheatsheet** with <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>?</kbd>. To see all shortcuts for actions that an entity implements, you can show its **Cheatsheet** with <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>?</kbd><kbd>(entity)</kbd>.
+<br>
+
+We can use `entity`, `action`, and `select` mode to achieve various common tasks from `desktop` mode:
+
+Intent | Keybindings | Translation
+:--- | :---: | :---
+Launch or focus Safari | <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>s</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘e</kbd> enter `entity` mode <br>• <kbd>s</kbd>  target the **Safari** application
+Toggle media in frontmost Safari window | <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>Space</kbd><kbd>s</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘a</kbd> enter `action` mode <br>• <kbd>Space</kbd> **toggle** media <br>• <kbd>s</kbd> target the **Safari** application
+Focus the third Safari tab | <kbd>⌘⎋</kbd><kbd>⌘s</kbd><kbd>s</kbd><kbd>⌘3</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘s</kbd> enter `select` mode <br>• <kbd>s</kbd> target the **Safari** application <br>• <kbd>⌘3</kbd> target the **third** tab
+
+With those semantics in mind, we can intuit other "sentences" if we know other entities <kbd>g</kbd>, <kbd>⇧s</kbd>, and <kbd>m</kbd>:
+
+Intent | Keybindings | Translation
+:--- | :---: | :---
+Launch or focus Google Chrome | <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>g</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘e</kbd> enter `entity` mode <br>• <kbd>g</kbd>  target the **Google Chrome** application
+Toggle current song in Spotify | <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>Space</kbd><kbd>⇧s</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘a</kbd> enter `action` mode <br>• <kbd>Space</kbd> **toggle** current song <br>• <kbd>⇧s</kbd> target the **Spotify** application
+Focus the third Messages conversation | <kbd>⌘⎋</kbd><kbd>⌘s</kbd><kbd>m</kbd><kbd>⌘3</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘s</kbd> enter `select` mode <br>• <kbd>m</kbd> target the **Messages** application <br>• <kbd>⌘3</kbd> target the **third** conversation from the top
+
+Combinations of the different modes can lead to even more complex workflows!
+
+Intent | Keybindings | Translation
+:--- | :---: | :---
+Toggle media in the fourth Chrome tab | <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>Space</kbd><kbd>⌘s</kbd><kbd>g</kbd><kbd>⌘4</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘a</kbd> enter `action` mode <br>• <kbd>Space</kbd> **toggle** media <br>• <kbd>⌘s</kbd> enter `select` mode <br>• <kbd>g</kbd> target **Google Chrome** <br>• <kbd>⌘4</kbd> target the **fourth** tab
+Close the second Safari tab | <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>w</kbd><kbd>⌘s</kbd><kbd>s</kbd><kbd>⌘2</kbd> | • <kbd>⌘⎋</kbd> enter `normal` mode <br> • <kbd>⌘a</kbd> enter `action` mode <br>• <kbd>w</kbd> **close** tab <br>• <kbd>⌘s</kbd> enter `select` mode <br>• <kbd>s</kbd> target the **Safari** application <br>• <kbd>⌘2</kbd> target the **second** tab
+
+Ki has an ambitious goal of full automative coverage and already comes shipped with default hotkeys and actions for all native macOS applications. A number of other modes (`file`, `url`, etc.) are available for automating other aspects of macOS, and can be found in the Ki cheatsheet: <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>?</kbd>.
+</details>
 
 ## Installation
 
@@ -44,11 +63,12 @@ Nearly everything in Ki is customizable! API documentation can be found [here](h
 
 ```bash
 # Setup
+# Requires `luarocks` and `pip`
 make deps      # install local luarocks dependencies necessary for Ki
 make dev-deps  # install global luarocks dev dependencies and pip requirements for the docs generator
 
 # Development
-# Prefix the target names below with `watch-` to monitor for file changes using `fswatch`
+# The target names below can be prefixed with `watch-` to monitor for file changes using `fswatch`
 make docs      # generate source documentation
 make lint      # run linter on source and spec files
 make test      # run busted unit tests and generate coverage files
