@@ -42,7 +42,7 @@ Entity class that represents some generic automatable desktop entity
 | **Signature**                               | `Entity:dispatchAction(mode, shortcut) -> boolean`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Dispatch an action from a shortcut within the context of the given mode                                                                     |
-| **Parameters**                              | <ul><li>`mode` - The name of the current mode</li><li>`shortcut` - A shortcut object containing the keybindings and event handler for the entity</li></ul> |
+| **Parameters**                              | <ul><li>`mode` - The name of the current mode</li><li>`shortcut` - A shortcut object containing the keybindings and event handler for the entity</li><li>`workflow` - The list of events that compose the current workflow</li></ul> |
 | **Returns**                                 | <ul><li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul>          |
 
 | [getEventHandler](#getEventHandler)         |                                                                                     |

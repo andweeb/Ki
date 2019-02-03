@@ -33,6 +33,20 @@ File.behaviors = Entity.behaviors + {
         eventHandler(self.path)
         return true
     end,
+    file = function(self, eventHandler, _, _, workflow)
+        local shouldNavigate = false
+
+        for _, event in pairs(workflow) do
+            if event.mode == "select" then
+                shouldNavigate = true
+                break
+            end
+        end
+
+        eventHandler(self.path, shouldNavigate)
+
+        return true
+    end,
 }
 
 --- File:initialize(path, shortcuts)
@@ -57,17 +71,24 @@ function File:initialize(path, shortcuts)
     local absolutePath = hs.fs.pathToAbsolute(path)
     local attributes = hs.fs.attributes(absolutePath) or {}
     local isDirectory = attributes.mode == "directory"
+    local openFileInFolder = self:createEvent(path, function(target) self.open(target) end)
 
     local actions = {
-        open = self.open,
         copy = function(target) self:copy(target) end,
         move = function(target) self:move(target) end,
         showCheatsheet = function() self.cheatsheet:show() end,
-        openFileInFolder = self:createEvent(path, function(target) self.open(target) end),
+        openFileInFolder = openFileInFolder,
         openFileInFolderWith = self:createEvent(path, function(target) self:openWith(target) end),
         showInfoForFileInFolder = self:createEvent(path, function(target) self:openInfoWindow(target) end),
         quickLookFileInFolder = self:createEvent(path, function(target) hs.execute("qlmanage -p "..target) end),
         deleteFileInFolder = self:createEvent(path, function(target) self:moveToTrash(target) end),
+        open = function(target, shouldNavigate)
+            if shouldNavigate then
+                return openFileInFolder(target)
+            end
+
+            return self.open(target)
+        end,
     }
     local commonShortcuts = {
         { nil, nil, actions.open, { path, "Activate/Focus" } },

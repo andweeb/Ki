@@ -334,6 +334,11 @@ Ki.defaultTransitionEvents = {
             function() Ki.state:exitMode() end,
             { "Select Mode", "Exit to Normal Mode" },
         },
+        {
+            {"cmd"}, "f",
+            function() Ki.state:enterFileMode() end,
+            { "Select Mode", "Transition to File Mode" },
+        },
     },
     url = {
         {
@@ -378,6 +383,7 @@ Ki._defaultStateEvents = {
     { name = "enterSelectMode", from = "normal", to = "select" },
     { name = "enterFileMode", from = "normal", to = "file" },
     { name = "enterFileMode", from = "entity", to = "file" },
+    { name = "enterFileMode", from = "select", to = "file" },
     { name = "enterSelectMode", from = "file", to = "select" },
     { name = "enterVolumeControlMode", from = "normal", to = "volume" },
     { name = "enterBrightnessControlMode", from = "normal", to = "brightness" },
