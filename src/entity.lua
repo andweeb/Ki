@@ -276,10 +276,11 @@ end
 --- Parameters:
 ---  * `mode` - The name of the current mode
 ---  * `shortcut` - A shortcut object containing the keybindings and event handler for the entity
+---  * `workflow` - The list of events that compose the current workflow
 ---
 --- Returns:
 ---  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
-function Entity:dispatchAction(mode, shortcut)
+function Entity:dispatchAction(mode, shortcut, workflow)
     local flags = shortcut.flags
     local keyName = shortcut.keyName
     local eventHandler = self.getEventHandler(self.shortcuts, flags, keyName)
@@ -287,7 +288,7 @@ function Entity:dispatchAction(mode, shortcut)
     if eventHandler then
         local behaviorFunc = self.behaviors[mode] or self.behaviors.default
 
-        return behaviorFunc(self, eventHandler, flags, keyName)
+        return behaviorFunc(self, eventHandler, flags, keyName, workflow)
     else
         return self.autoExitMode
     end
