@@ -8,14 +8,17 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 * Variables - Configurable values
  * [behaviors](#behaviors)
 * Methods - API calls which can only be made on an object returned by a constructor
+ * [copy](#copy)
  * [createEvent](#createEvent)
  * [getFileIcon](#getFileIcon)
  * [initialize](#initialize)
+ * [move](#move)
  * [moveToTrash](#moveToTrash)
  * [navigate](#navigate)
  * [open](#open)
  * [openInfoWindow](#openInfoWindow)
  * [openWith](#openWith)
+ * [runFileModeApplescript](#runFileModeApplescript)
  * [showFileSelectionModal](#showFileSelectionModal)
 
 ## API Documentation
@@ -29,6 +32,14 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Description**                             | File [behaviors](Entity.html#behaviors) defined to invoke event handlers with the file path.                                                                     |
 
 ### Methods
+
+| [copy](#copy)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `File:copy(path)`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Method to copy one file into a directory. Opens a navigation modal for selecting the target file, then on selection opens another navigation modal to select the destination path. A confirmation dialog is presented to proceed with copying the file to the target directory.                                                                     |
+| **Parameters**                              | <ul><li>`path` - the initial directory path to select a target file to copy</li></ul> |
+| **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [createEvent](#createEvent)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -53,6 +64,14 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Description**                             | Initializes a new file instance with its path and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.                                                                     |
 | **Parameters**                              | <ul><li>`path` - The initial directory path</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the file entity</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
+
+| [move](#move)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `File:move(path)`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Method to move one file into a directory. Opens a navigation modal for selecting the target file, then on selection opens another navigation modal to select the destination path. A confirmation dialog is presented to proceed with moving the file to the target directory.                                                                     |
+| **Parameters**                              | <ul><li>`path` - the initial directory path to select a target file to move</li></ul> |
+| **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [moveToTrash](#moveToTrash)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -92,6 +111,14 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Opens a file or directory at the given path with a specified application and raises the application to the front                                                                     |
 | **Parameters**                              | <ul><li>`path` - the path of the target file to open</li></ul> |
+| **Returns**                                 | <ul><li> None</li></ul>          |
+
+| [runFileModeApplescript](#runFileModeApplescript)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `File:runFileModeApplescript(viewModel)`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Convenience method to render and run the `file-mode-operations.applescript` file and notify on execution errors. Refer to the applescript template file itself to see available view model records.                                                                     |
+| **Parameters**                              | <ul><li>`viewModel` - The view model object used to render the template</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [showFileSelectionModal](#showFileSelectionModal)         |                                                                                     |
