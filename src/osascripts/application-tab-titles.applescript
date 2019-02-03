@@ -18,7 +18,8 @@ tell application "{{application}}"
 		if ok then
 			repeat with tabItem in tabList
 				set tabURL to URL of tabItem
-				set tabTitles to tabTitles & ("\"" & (name of tabItem) & " (" & tabURL & ")" & "\"" as string)
+				set escapedTabTitle to my replaceString(name of tabItem, "\"", "\\\"")
+				set tabTitles to tabTitles & ("\"" & (escapedTabTitle) & " (" & tabURL & ")" & "\"" as string)
 			end repeat
 		end if
 		
@@ -32,3 +33,12 @@ tell application "{{application}}"
 	
 	return windowTabTitles
 end tell
+
+on replaceString(targetText, searchString, replacementString)
+	set AppleScript's text item delimiters to the searchString
+	set the itemList to every text item of targetText
+	set AppleScript's text item delimiters to the replacementString
+	set targetText to the itemList as string
+	set AppleScript's text item delimiters to ""
+	return targetText
+end replaceString
