@@ -60,6 +60,8 @@ function File:initialize(path, shortcuts)
 
     local actions = {
         open = self.open,
+        copy = function(target) self:copy(target) end,
+        move = function(target) self:move(target) end,
         showCheatsheet = function() self.cheatsheet:show() end,
         openFileInFolder = self:createEvent(path, function(target) self.open(target) end),
         openFileInFolderWith = self:createEvent(path, function(target) self:openWith(target) end),
@@ -75,7 +77,9 @@ function File:initialize(path, shortcuts)
     -- Append directory shortcuts if the file entity is representing a directory path
     if isDirectory then
         local commonDirectoryShortcuts = {
+            { nil, "c", actions.copy, { path, "Copy File to Folder" } },
             { nil, "d", actions.deleteFileInFolder, { path, "Move File in Folder to Trash" } },
+            { nil, "m", actions.move, { path, "Move File to Folder" } },
             { nil, "o", actions.openFileInFolder, { path, "Open File in Folder" } },
             { nil, "i", actions.showInfoForFileInFolder, { path, "Get File Info for File in Folder" } },
             { nil, "space", actions.quickLookFileInFolder, { path, "Quick Look" } },
@@ -109,6 +113,26 @@ end
 function File:createEvent(path, action)
     return function()
         self:navigate(path, action)
+    end
+end
+
+--- File:runFileModeApplescript(viewModel)
+--- Method
+--- Convenience method to render and run the `file-mode-operations.applescript` file and notify on execution errors. Refer to the applescript template file itself to see available view model records.
+---
+--- Parameters:
+---  * `viewModel` - The view model object used to render the template
+---
+--- Returns:
+---   * None
+function File:runFileModeApplescript(viewModel)
+    local script = self.renderScriptTemplate("file-mode-operations", viewModel)
+    local isOk, _, rawTable = hs.osascript.applescript(script)
+
+    if not isOk then
+        local operationName = viewModel and "\""..viewModel.operation.."\"" or "unknown"
+        local errorMessage = "Error executing the "..operationName.." file operation"
+        self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
     end
 end
 
@@ -290,15 +314,11 @@ function File:openWith(path)
         self.showSelectionModal(choices, function(choice)
             if not choice then return end
 
-            local isOk, _, rawTable = hs.osascript.applescript([[
-                tell application "Finder"
-                    open file ("]]..path..[[" as POSIX file) using ("]]..choice.applicationPath..[[" as POSIX file)
-                end tell
-            ]])
-
-            if not isOk then
-                self.notifyError("Error opening file with specified application", rawTable.NSLocalizedFailureReason)
-            end
+            self:runFileModeApplescript({
+                operation = "open-with",
+                filePath1 = path,
+                filePath2 = choice.applicationPath,
+            })
         end)
     end)
 end
@@ -313,18 +333,7 @@ end
 --- Returns:
 ---   * None
 function File:openInfoWindow(path)
-    local isOk, _, rawTable = hs.osascript.applescript([[
-        set targetFile to (POSIX file "]]..path..[[") as alias
-        tell application "Finder"
-            set infoWindow to information window of targetFile
-            open infoWindow
-            activate
-        end tell
-    ]])
-
-    if not isOk then
-        self.notifyError("Error getting info", rawTable.NSLocalizedFailureReason)
-    end
+    self:runFileModeApplescript({ operation = "open-info-window", filePath1 = path })
 end
 
 --- File:moveToTrash(path)
@@ -340,13 +349,57 @@ function File:moveToTrash(path)
     local question = "Move \""..path.."\" to the Trash?"
 
     self.triggerAfterConfirmation(question, function()
-        local isOk, _, rawTable = hs.osascript.applescript([[
-            tell application "Finder" to delete (POSIX file "]]..path..[[")
-        ]])
+        self:runFileModeApplescript({ operation = "move-to-trash", filePath1 = path })
+    end)
+end
 
-        if not isOk then
-            self.notifyError("Error moving file to trash", rawTable.NSLocalizedFailureReason)
-        end
+--- File:move(path)
+--- Method
+--- Method to move one file into a directory. Opens a navigation modal for selecting the target file, then on selection opens another navigation modal to select the destination path. A confirmation dialog is presented to proceed with moving the file to the target directory.
+---
+--- Parameters:
+---  * `path` - the initial directory path to select a target file to move
+---
+--- Returns:
+---   * None
+function File:move(initialPath)
+    self:navigate(initialPath, function(targetPath)
+        self:navigate(initialPath, function(destinationPath)
+            local question = "Move \""..targetPath.."\" to \""..destinationPath.."\"?"
+
+            self.triggerAfterConfirmation(question, function()
+                self:runFileModeApplescript({
+                    operation = "move",
+                    filePath1 = targetPath,
+                    filePath2 = destinationPath,
+                })
+            end)
+        end)
+    end)
+end
+
+--- File:copy(path)
+--- Method
+--- Method to copy one file into a directory. Opens a navigation modal for selecting the target file, then on selection opens another navigation modal to select the destination path. A confirmation dialog is presented to proceed with copying the file to the target directory.
+---
+--- Parameters:
+---  * `path` - the initial directory path to select a target file to copy
+---
+--- Returns:
+---   * None
+function File:copy(initialPath)
+    self:navigate(initialPath, function(targetPath)
+        self:navigate(initialPath, function(destinationPath)
+            local question = "Copy \""..targetPath.."\" to \""..destinationPath.."\"?"
+
+            self.triggerAfterConfirmation(question, function()
+                self:runFileModeApplescript({
+                    operation = "copy",
+                    filePath1 = targetPath,
+                    filePath2 = destinationPath,
+                })
+            end)
+        end)
     end)
 end
 

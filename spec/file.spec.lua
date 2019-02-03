@@ -97,6 +97,12 @@ local function getFileIconTests()
             expectedResult = "file image",
         },
         {
+            name = "gets the app icon if file is an application",
+            args = { "/test/path" },
+            isApplicationFile = true,
+            expectedResult = "app image",
+        },
+        {
             name = "returns nil when there is no path",
             args = { nil },
             expectedResult = nil,
@@ -108,13 +114,30 @@ local function getFileIconTests()
         it(test.name, function()
             local file = require("file")
             local mockHs = hammerspoonMocker()
+            local mockApplication = {
+                infoForBundlePath = function()
+                    if test.isApplicationFile then
+                        return { CFBundleIdentifier = "" }
+                    end
+                end,
+            }
             local mockImage = {
+                imageFromAppBundle = function()
+                    if test.isApplicationFile then
+                        return test.expectedResult
+                    end
+                end,
                 iconForFileType = function()
-                    return test.expectedResult
+                    if not test.isApplicationFile then
+                        return test.expectedResult
+                    end
                 end,
             }
 
-            _G.hs = mock(mockHs({ image = mockImage }))
+            _G.hs = mock(mockHs({
+                image = mockImage,
+                application = mockApplication,
+            }))
 
             local result = file.getFileIcon(table.unpack(test.args))
 
@@ -494,6 +517,7 @@ local function openWithTests()
             -- Mock selection modal to invoke a selection immediately with mocked args
             -- and mock notify error to ensure it's called when appropriate
             file.notifyError = spy.new(function() end)
+            file.renderScriptTemplate = function() end
             file.showSelectionModal = function(_, callback)
                 callback(test.selectedFile)
             end
@@ -554,6 +578,7 @@ local function openInfoWindowTests()
                 end,
             }
 
+            file.renderScriptTemplate = function() end
             file.notifyError = spy.new(function() end)
 
             _G.hs = mock(mockHs({ osascript = mockOsascript }))
@@ -607,6 +632,7 @@ local function moveToTrashTests()
                 applescript = applescriptSpy,
             }
 
+            file.renderScriptTemplate = function() end
             file.notifyError = spy.new(function() end)
             file.triggerAfterConfirmation = function(_, action) action() end
 
@@ -615,6 +641,122 @@ local function moveToTrashTests()
             }))
 
             file:moveToTrash(table.unpack(test.args))
+
+            assert.spy(applescriptSpy).was.called(test.executesApplescript and 1 or 0)
+
+            if test.notifiesError then
+                assert.spy(file.notifyError).was.called(1)
+            end
+        end)
+    end
+end
+
+-- File `move` method test suite
+local function moveTests()
+    local tests = {
+        {
+            name = "moves the file to a destination folder successfully",
+            args = { "/test/path" },
+            confirmation = "Confirm",
+            executesApplescript = true,
+            applescriptResults = {
+                true,
+            },
+        },
+        {
+            name = "notifies on applescript error",
+            args = { "/test/path" },
+            confirmation = "Confirm",
+            executesApplescript = true,
+            notifiesError = true,
+            applescriptResults = {
+                false,
+                nil,
+                {},
+            },
+        },
+    }
+
+    -- Run `move` method tests
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local file = require("file")
+            local mockHs = hammerspoonMocker()
+            local applescriptSpy = spy.new(function()
+                return table.unpack(test.applescriptResults)
+            end)
+            local mockOsascript = {
+                applescript = applescriptSpy,
+            }
+
+            file.renderScriptTemplate = function() end
+            file.notifyError = spy.new(function() end)
+            file.triggerAfterConfirmation = function(_, action) action() end
+            file.navigate = function(_, _, callback) callback("/test/path") end
+
+            _G.hs = mock(mockHs({
+                osascript = mockOsascript,
+            }))
+
+            file:move(table.unpack(test.args))
+
+            assert.spy(applescriptSpy).was.called(test.executesApplescript and 1 or 0)
+
+            if test.notifiesError then
+                assert.spy(file.notifyError).was.called(1)
+            end
+        end)
+    end
+end
+
+-- File `copy` method test suite
+local function copyTests()
+    local tests = {
+        {
+            name = "copies the file to a destination folder successfully",
+            args = { "/test/path" },
+            confirmation = "Confirm",
+            executesApplescript = true,
+            applescriptResults = {
+                true,
+            },
+        },
+        {
+            name = "notifies on applescript error",
+            args = { "/test/path" },
+            confirmation = "Confirm",
+            executesApplescript = true,
+            notifiesError = true,
+            applescriptResults = {
+                false,
+                nil,
+                {},
+            },
+        },
+    }
+
+    -- Run `move` method tests
+    for _, test in pairs(tests) do
+        it(test.name, function()
+            local file = require("file")
+            local mockHs = hammerspoonMocker()
+            local applescriptSpy = spy.new(function()
+                return table.unpack(test.applescriptResults)
+            end)
+            local mockOsascript = {
+                applescript = applescriptSpy,
+            }
+
+            file.renderScriptTemplate = function() end
+            file.notifyError = spy.new(function() end)
+            file.triggerAfterConfirmation = function(_, action) action() end
+            file.navigate = function(_, _, callback) callback("/test/path") end
+
+            _G.hs = mock(mockHs({
+                osascript = mockOsascript,
+            }))
+
+            file:copy(table.unpack(test.args))
 
             assert.spy(applescriptSpy).was.called(test.executesApplescript and 1 or 0)
 
@@ -654,5 +796,6 @@ describe("file.lua (#file)", function()
     describe("`openWith` method", openWithTests)
     describe("`openInfoWindow` method", openInfoWindowTests)
     describe("`moveToTrash` method", moveToTrashTests)
-    -- describe("`showSelectionModal` method", showSelectionModalTests)
+    describe("`move` method", moveTests)
+    describe("`copy` method", copyTests)
 end)

@@ -300,7 +300,19 @@ end
 --- Returns:
 ---  * A list of `normal` workflow events
 function Defaults.createNormalEvents(Ki)
-    local function startScreenSaver()
+    local actions = {}
+
+    function actions.logout()
+        Ki.state:exitMode()
+
+        local answer = hs.dialog.blockAlert("Log out from your computer?", "", "Log out", "Cancel")
+
+        if answer == "Log out" then
+            hs.osascript.applescript([[ tell application "System Events" to log out ]])
+        end
+    end
+
+    function actions.startScreenSaver()
         hs.osascript.applescript([[
             tell application "System Events" to start current screen saver
         ]])
@@ -308,12 +320,12 @@ function Defaults.createNormalEvents(Ki)
         return true
     end
 
-    local function sleep()
+    function actions.sleep()
         Ki.state:exitMode()
         hs.osascript.applescript([[ tell application "Finder" to sleep ]])
     end
 
-    local function restart()
+    function actions.restart()
         Ki.state:exitMode()
 
         local answer = hs.dialog.blockAlert("Restart your computer?", "", "Restart", "Cancel")
@@ -323,7 +335,7 @@ function Defaults.createNormalEvents(Ki)
         end
     end
 
-    local function shutdown()
+    function actions.shutdown()
         Ki.state:exitMode()
 
         local answer = hs.dialog.blockAlert("Shut down your computer?", "", "Shut Down", "Cancel")
@@ -334,10 +346,11 @@ function Defaults.createNormalEvents(Ki)
     end
 
     local normalEvents = {
-        { { "ctrl" }, "q", shutdown, { "Normal Mode", "Shut Down" } },
-        { { "ctrl" }, "s", sleep, { "Normal Mode", "Sleep" } },
-        { { "ctrl" }, "r", restart, { "Normal Mode", "Restart" } },
-        { { "cmd", "ctrl" }, "s", startScreenSaver, { "Normal Mode", "Enter Screen Saver" } },
+        { { "ctrl" }, "l", actions.logout, { "Normal Mode", "Log Out" } },
+        { { "ctrl" }, "q", actions.shutdown, { "Normal Mode", "Shut Down" } },
+        { { "ctrl" }, "r", actions.restart, { "Normal Mode", "Restart" } },
+        { { "ctrl" }, "s", actions.sleep, { "Normal Mode", "Sleep" } },
+        { { "cmd", "ctrl" }, "s", actions.startScreenSaver, { "Normal Mode", "Enter Screen Saver" } },
     }
 
     return normalEvents
