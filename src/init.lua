@@ -349,6 +349,7 @@ setmetatable(Ki.defaultTransitionEvents, Ki:_createEventsMetatable())
 Ki.stateEvents = {}
 Ki._defaultStateEvents = {
     { name = "enterNormalMode", from = "desktop", to = "normal" },
+    { name = "enterEditDemoTextMode", from = "desktop", to = "edit-demo-text" },
     { name = "enterEntityMode", from = "normal", to = "entity" },
     { name = "enterEntityMode", from = "action", to = "entity" },
     { name = "enterActionMode", from = "normal", to = "action" },
@@ -364,6 +365,7 @@ Ki._defaultStateEvents = {
     { name = "exitMode", from = "action", to = "desktop" },
     { name = "exitMode", from = "volume", to = "desktop" },
     { name = "exitMode", from = "brightness", to = "desktop" },
+    { name = "exitMode", from = "edit-demo-text", to = "desktop" },
 }
 setmetatable(Ki._defaultStateEvents, Ki._createStatesMetatable())
 
@@ -443,6 +445,7 @@ function Ki._renderHotkeyText(modifiers, keyName)
     return modKeyText..(keyGlyphs[keyName] or keyName:gsub("^%l", string.upper))
 end
 
+local description = { text = "" }
 local currentWorkflowText = {}
 
 -- Generate the finite state machine callbacks for all state events, generic `onstatechange` callbacks for recording/resetting event history and state event-specific callbacks
@@ -474,30 +477,24 @@ hs.alert.defaultStyle.fillColor = { white = 0.05, alpha = 0.75 }
 hs.alert.defaultStyle.radius = 10
 hs.alert.defaultStyle.atScreenEdge = 2
 
-local workflowIndex = 1
-local workflowTitles = {
-    "Open Safari: ",
-    "Open a new Safari tab",
-    "Open a new Safari window",
-    "Open a new private Safari window",
-}
+local function showPressedHotkey(workflowText, flags, keyName)
+    if keyName ~= nil then
+        table.insert(currentWorkflowText, Ki._renderHotkeyText(flags, keyName))
+    end
 
-local function showPressedHotkey(flags, keyName)
-    table.insert(currentWorkflowText, Ki._renderHotkeyText(flags, keyName))
-
-    local workflowText = workflowTitles[workflowIndex]
     for _, text in pairs(currentWorkflowText) do
         if text ~= "" then
             workflowText = workflowText.." "..text
         end
     end
 
+    if workflowText == "" then return end
+
     hs.alert.closeAll()
     hs.alert.show(workflowText, hs.alert.defaultStyle, nil, 0.5)
 
     if Ki.state.current == "desktop" then
         currentWorkflowText = {}
-        workflowIndex = workflowIndex + 1
     end
 end
 
@@ -509,6 +506,39 @@ function Ki:_handleKeyDown(event)
 
     local flags = event:getFlags()
     local keyName = hs.keycodes.map[event:getKeyCode()]
+
+    if flags:containExactly({}) and keyName == "escape" then
+        hs.alert.closeAll()
+    end
+
+    if flags:containExactly({ "cmd" }) and keyName == ";" then
+        description.text = ""
+        self.state:enterEditDemoTextMode()
+        return true
+    end
+
+    -- Friggin whatever lmao
+    if mode == "edit-demo-text" then
+        if keyName == "escape" or keyName == "return" then
+            self.state:exitMode()
+        elseif keyName == "space" then
+            description.text = description.text.." "
+        elseif keyName == "delete" then
+            description.text = description.text:sub(1, -2)
+        elseif flags:containExactly({ "shift" })  then
+            if keyName == ";" then
+                description.text = description.text..":"
+            else
+                description.text = description.text..keyName:gsub("^%l", string.upper)
+            end
+        else
+            description.text = description.text..keyName
+        end
+
+        showPressedHotkey(description.text)
+
+        return true
+    end
 
     -- Determine event handler
     for _, workflowEvent in pairs(workflowEvents) do
@@ -556,7 +586,7 @@ function Ki:_handleKeyDown(event)
             self.createEntity().notifyError("Unexpected event handler", details)
         end
 
-        showPressedHotkey(flags, keyName)
+        showPressedHotkey(description.text, flags, keyName)
 
         return true
     elseif mode ~= "desktop" then
