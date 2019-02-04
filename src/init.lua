@@ -335,6 +335,11 @@ Ki.defaultTransitionEvents = {
             { "Select Mode", "Exit to Normal Mode" },
         },
         {
+            {"cmd"}, "e",
+            function() Ki.state:enterEntityMode() end,
+            { "Select Mode", "Transition to Entity Mode" },
+        },
+        {
             {"cmd"}, "f",
             function() Ki.state:enterFileMode() end,
             { "Select Mode", "Transition to File Mode" },
@@ -378,6 +383,7 @@ Ki._defaultStateEvents = {
     { name = "enterNormalMode", from = "desktop", to = "normal" },
     { name = "enterEntityMode", from = "normal", to = "entity" },
     { name = "enterEntityMode", from = "action", to = "entity" },
+    { name = "enterEntityMode", from = "select", to = "entity" },
     { name = "enterActionMode", from = "normal", to = "action" },
     { name = "enterSelectMode", from = "entity", to = "select" },
     { name = "enterSelectMode", from = "normal", to = "select" },
