@@ -23,6 +23,7 @@ if not _G.requirePackage then
 end
 
 local File = _G.requirePackage("file", true)
+local SmartFolder = _G.requirePackage("smart-folder", true)
 
 local entities = {
     ActivityMonitor = _G.requirePackage("entities/activity-monitor", true),
@@ -75,6 +76,10 @@ function Defaults.createFileEvents()
         end
     end
 
+    local recentsSavedSearchPath =
+        "/System/Library/CoreServices/Finder.app/Contents/Resources/MyLibraries/myDocuments.cannedSearch/Resources/search.savedSearch"
+    local Recents = SmartFolder:new(recentsSavedSearchPath)
+
     local fileEvents = {
         { nil, "a", File:new("/Applications"), { "Files", "Applications" } },
         { nil, "d", File:new("~/Downloads"), { "Files", "Downloads" } },
@@ -84,9 +89,9 @@ function Defaults.createFileEvents()
         { nil, "t", File:new("~/.Trash"), { "Files", "Trash" } },
         { { "cmd" }, "a", openFinderAppEvent("Airdrop"), { "Files", "Airdrop" } },
         { { "cmd" }, "c", openFinderAppEvent("Computer"), { "Files", "Computer" } },
-        { { "cmd" }, "i", openFinderAppEvent("iCloud Drive"), { "Files", "iCloud Drive" } },
+        { { "cmd" }, "i", openFinderAppEvent("iCloud\\ Drive"), { "Files", "iCloud Drive" } },
         { { "cmd" }, "n", openFinderAppEvent("Network"), { "Files", "Network" } },
-        { { "cmd" }, "r", openFinderAppEvent("Recents"), { "Files", "Recents" } },
+        { { "cmd" }, "r", Recents, { "Files", "Recents" } },
         { { "shift" }, "a", openFinderAppEvent("All My Files"), { "Files", "All My Files" } },
         { { "shift" }, "d", File:new("~/Desktop"), { "Files", "Desktop" } },
         { { "cmd", "shift" }, "d", File:new("~/Documents"), { "Files", "Documents" } },

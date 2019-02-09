@@ -32,7 +32,7 @@ local function requirePackageMocker(mocks)
         end
 
         if isInternal then
-            return mock(dofile("src/"..name..".lua"))
+            return mocks[name] or mock(dofile("src/"..name..".lua"))
         else
             if name == "fsm" then
                 return mocks.fsm or mock(mockFsm)
@@ -376,7 +376,13 @@ describe("init.lua (#init)", function()
         -- Setup each test with a fake Hammerspoon environment and mocked external dependencies
         package.loaded.init = nil
         _G.hs = mock(hammerspoonMocker()())
-        _G.requirePackage = requirePackageMocker()
+        _G.requirePackage = requirePackageMocker({
+            defaults = {
+                create = function()
+                    return {}, {}
+                end,
+            },
+        })
     end)
 
     after_each(function ()

@@ -198,9 +198,13 @@ end
 --- A list of shortcuts that can be used when the selection modal is visible. The following shortcuts are available by default:
 ---  * <kbd>^k</kbd> to navigate up an item
 ---  * <kbd>^j</kbd> to navigate down an item
+---  * <kbd>^u</kbd> to navigate a page of rows up
+---  * <kbd>^d</kbd> to navigate a page of rows down
 Entity.selectionModalShortcuts = {
     { { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },
     { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },
+    { { "ctrl" }, "d", function(modal) modal:selectedRow(modal:selectedRow() + modal:rows()) end },
+    { { "ctrl" }, "u", function(modal) modal:selectedRow(modal:selectedRow() - modal:rows()) end },
 }
 
 --- Entity.showSelectionModal(choices, callback)

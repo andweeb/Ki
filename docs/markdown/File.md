@@ -1,7 +1,7 @@
 # [docs](index.md) » File
 ---
 
-File class that subclasses [Entity](Entity.html) to represent some directory or file
+File class that subclasses [Entity](Entity.html) to represent some directory or file to be automated
 
 
 ## API Overview
@@ -10,6 +10,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 * Methods - API calls which can only be made on an object returned by a constructor
  * [copy](#copy)
  * [createEvent](#createEvent)
+ * [createFileChoices](#createFileChoices)
  * [getFileIcon](#getFileIcon)
  * [initialize](#initialize)
  * [move](#move)
@@ -49,11 +50,19 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Parameters**                              | <ul><li>`path` - The path of a file</li></ul> |
 | **Returns**                                 | <ul><li> An event handler function</li></ul>          |
 
+| [createFileChoices](#createFileChoices)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `File.createFileChoices(fileListIterator, createText, createSubText) -> choice object list`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Creates a list of choice objects each representing the file walked with the provided iterator                                                                     |
+| **Parameters**                              | <ul><li>`fileListIterator` - an iterator to walk a list of file paths, i.e. `s:gmatch(pattern)`</li><li>`createText` - an optional function that takes in a single `path` argument to return a formatted string to assign to the `text` field in each file choice object</li><li>`createSubText` - an optional function that takes in a single `path` argument to return a formatted string to assign to the `subText` field in each file choice object</li></ul> |
+| **Returns**                                 | <ul><li> `choices` - A list of choice objects each containing the following fields:</li><li>   `text` - The primary chooser text string</li><li>   `subText` - The chooser subtext string</li><li>   `fileName` - The name of the file</li><li>   `path` - The path of the file</li></ul>          |
+
 | [getFileIcon](#getFileIcon)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `File:getFileIcon(path) -> [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Retrieves an icon image for the given file path or returns nil if not found                                                                     |
+| **Description**                             | Retrieves an icon image for the given file path or returns `nil` if not found                                                                     |
 | **Parameters**                              | <ul><li>`path` - The path of a file</li></ul> |
 | **Returns**                                 | <ul><li> The file icon [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html) object</li></ul>          |
 
