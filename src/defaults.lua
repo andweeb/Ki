@@ -33,6 +33,7 @@ local entities = {
     Calculator = _G.requirePackage("entities/calculator", true),
     Contacts = _G.requirePackage("entities/contacts", true),
     Dictionary = _G.requirePackage("entities/dictionary", true),
+    DiskUtility = _G.requirePackage("entities/disk-utility", true),
     FaceTime = _G.requirePackage("entities/facetime", true),
     Finder = _G.requirePackage("entities/finder", true),
     GoogleChrome = _G.requirePackage("entities/google-chrome", true),
@@ -87,6 +88,7 @@ function Defaults.createFileEvents()
         { nil, "m", File:new("~/Movies"), { "Files", "Movies" } },
         { nil, "p", File:new("~/Pictures"), { "Files", "Pictures" } },
         { nil, "t", File:new("~/.Trash"), { "Files", "Trash" } },
+        { nil, "v", File:new("/Volumes"), { "Files", "Volumes" } },
         { { "cmd" }, "a", openFinderAppEvent("Airdrop"), { "Files", "Airdrop" } },
         { { "cmd" }, "c", openFinderAppEvent("Computer"), { "Files", "Computer" } },
         { { "cmd" }, "i", openFinderAppEvent("iCloud\\ Drive"), { "Files", "iCloud Drive" } },
@@ -129,6 +131,7 @@ function Defaults.createEntityEvents()
         { nil, "t", entities.Terminal, { "Entities", "Terminal" } },
         { nil, "v", entities.VoiceMemos, { "Entities", "Voice Memos" } },
         { nil, ",", entities.SystemPreferences, { "Entities", "System Preferences" } },
+        { { "cmd" }, "d", entities.DiskUtility, { "Entities", "Disk Utility" } },
         { { "alt", "cmd" }, "s", entities.Siri, { "Entities", "Siri" } },
         { { "shift" }, "a", entities.ActivityMonitor, { "Entities", "Activity Monitor" } },
         { { "shift" }, "c", entities.Calculator, { "Entities", "Calculator" } },
@@ -153,6 +156,7 @@ function Defaults.createEntityEvents()
         { nil, "p", entities.Preview, { "Select Events", "Select a Preview window" } },
         { nil, "s", entities.Safari, { "Select Events", "Select a Safari tab or window" } },
         { nil, "t", entities.Terminal, { "Select Events", "Select a Terminal window" } },
+        { nil, ",", entities.SystemPreferences, { "Entities", "Select a System Preferences pane" } },
         { { "shift" }, "t", entities.TextEdit, { "Select Events", "Select a Text Edit window" } },
     }
 
