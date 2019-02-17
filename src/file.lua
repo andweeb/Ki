@@ -1,6 +1,6 @@
 --- === File ===
 ---
---- File class that subclasses [Entity](Entity.html) to represent some directory or file
+--- File class that subclasses [Entity](Entity.html) to represent some directory or file to be automated
 ---
 
 local luaVersion = _VERSION:match("%d+%.%d+")
@@ -33,6 +33,20 @@ File.behaviors = Entity.behaviors + {
         eventHandler(self.path)
         return true
     end,
+    file = function(self, eventHandler, _, _, workflow)
+        local shouldNavigate = false
+
+        for _, event in pairs(workflow) do
+            if event.mode == "select" then
+                shouldNavigate = true
+                break
+            end
+        end
+
+        eventHandler(self.path, shouldNavigate)
+
+        return true
+    end,
 }
 
 --- File:initialize(path, shortcuts)
@@ -57,17 +71,24 @@ function File:initialize(path, shortcuts)
     local absolutePath = hs.fs.pathToAbsolute(path)
     local attributes = hs.fs.attributes(absolutePath) or {}
     local isDirectory = attributes.mode == "directory"
+    local openFileInFolder = self:createEvent(path, function(target) self.open(target) end)
 
     local actions = {
-        open = self.open,
         copy = function(target) self:copy(target) end,
         move = function(target) self:move(target) end,
         showCheatsheet = function() self.cheatsheet:show() end,
-        openFileInFolder = self:createEvent(path, function(target) self.open(target) end),
+        openFileInFolder = openFileInFolder,
         openFileInFolderWith = self:createEvent(path, function(target) self:openWith(target) end),
         showInfoForFileInFolder = self:createEvent(path, function(target) self:openInfoWindow(target) end),
         quickLookFileInFolder = self:createEvent(path, function(target) hs.execute("qlmanage -p "..target) end),
         deleteFileInFolder = self:createEvent(path, function(target) self:moveToTrash(target) end),
+        open = function(target, shouldNavigate)
+            if shouldNavigate then
+                return openFileInFolder(target)
+            end
+
+            return self.open(target)
+        end,
     }
     local commonShortcuts = {
         { nil, nil, actions.open, { path, "Activate/Focus" } },
@@ -79,9 +100,9 @@ function File:initialize(path, shortcuts)
         local commonDirectoryShortcuts = {
             { nil, "c", actions.copy, { path, "Copy File to Folder" } },
             { nil, "d", actions.deleteFileInFolder, { path, "Move File in Folder to Trash" } },
+            { nil, "i", actions.showInfoForFileInFolder, { path, "Open File Info Window" } },
             { nil, "m", actions.move, { path, "Move File to Folder" } },
             { nil, "o", actions.openFileInFolder, { path, "Open File in Folder" } },
-            { nil, "i", actions.showInfoForFileInFolder, { path, "Get File Info for File in Folder" } },
             { nil, "space", actions.quickLookFileInFolder, { path, "Quick Look" } },
             { { "shift" }, "o", actions.openFileInFolderWith, { path, "Open File in Folder with App" } },
         }
@@ -138,7 +159,7 @@ end
 
 --- File:getFileIcon(path) -> [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html)
 --- Method
---- Retrieves an icon image for the given file path or returns nil if not found
+--- Retrieves an icon image for the given file path or returns `nil` if not found
 ---
 --- Parameters:
 ---  * `path` - The path of a file
@@ -278,6 +299,46 @@ function File.open(path)
     end
 end
 
+--- File.createFileChoices(fileListIterator, createText, createSubText) -> choice object list
+--- Method
+--- Creates a list of choice objects each representing the file walked with the provided iterator
+---
+--- Parameters:
+---  * `fileListIterator` - an iterator to walk a list of file paths, i.e. `s:gmatch(pattern)`
+---  * `createText` - an optional function that takes in a single `path` argument to return a formatted string to assign to the `text` field in each file choice object
+---  * `createSubText` - an optional function that takes in a single `path` argument to return a formatted string to assign to the `subText` field in each file choice object
+---
+--- Returns:
+---   * `choices` - A list of choice objects each containing the following fields:
+---     * `text` - The primary chooser text string
+---     * `subText` - The chooser subtext string
+---     * `fileName` - The name of the file
+---     * `path` - The path of the file
+function File.createFileChoices(fileListIterator, createText, createSubText)
+    local choices = {}
+    local fileNameRegex = "^.+/(.+)$"
+
+    for path in fileListIterator do
+        local bundleInfo = hs.application.infoForBundlePath(path)
+        local fileName = path:match(fileNameRegex) or ""
+        local choice = {
+            text = createText and createText(path) or fileName,
+            subText = createSubText and createSubText(path) or path,
+            fileName = fileName,
+            path = path,
+        }
+
+        if bundleInfo then
+            choice.text = bundleInfo.CFBundleName
+            choice.image = hs.image.imageFromAppBundle(bundleInfo.CFBundleIdentifier)
+        end
+
+        table.insert(choices, choice)
+    end
+
+    return choices
+end
+
 --- File:openWith(path)
 --- Method
 --- Opens a file or directory at the given path with a specified application and raises the application to the front
@@ -291,23 +352,7 @@ function File:openWith(path)
     local allApplicationsPath = _G.spoonPath.."/bin/AllApplications"
     local shellscript = allApplicationsPath.." -path \""..path.."\""
     local output = hs.execute(shellscript)
-    local choices = {}
-
-    for applicationPath in string.gmatch(output, "[^\n]+") do
-        local bundleInfo = hs.application.infoForBundlePath(applicationPath)
-        local choice = {
-            text = applicationPath,
-            subText = applicationPath,
-            applicationPath = applicationPath,
-        }
-
-        if bundleInfo then
-            choice.text = bundleInfo.CFBundleName
-            choice.image = hs.image.imageFromAppBundle(bundleInfo.CFBundleIdentifier)
-        end
-
-        table.insert(choices, choice)
-    end
+    local choices = self.createFileChoices(string.gmatch(output, "[^\n]+"))
 
     -- Defer execution to avoid conflicts with the prior selection modal that just closed
     hs.timer.doAfter(0, function()
@@ -317,7 +362,7 @@ function File:openWith(path)
             self:runFileModeApplescript({
                 operation = "open-with",
                 filePath1 = path,
-                filePath2 = choice.applicationPath,
+                filePath2 = choice.path,
             })
         end)
     end)

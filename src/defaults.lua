@@ -23,6 +23,7 @@ if not _G.requirePackage then
 end
 
 local File = _G.requirePackage("file", true)
+local SmartFolder = _G.requirePackage("smart-folder", true)
 
 local entities = {
     ActivityMonitor = _G.requirePackage("entities/activity-monitor", true),
@@ -32,6 +33,7 @@ local entities = {
     Calculator = _G.requirePackage("entities/calculator", true),
     Contacts = _G.requirePackage("entities/contacts", true),
     Dictionary = _G.requirePackage("entities/dictionary", true),
+    DiskUtility = _G.requirePackage("entities/disk-utility", true),
     FaceTime = _G.requirePackage("entities/facetime", true),
     Finder = _G.requirePackage("entities/finder", true),
     GoogleChrome = _G.requirePackage("entities/google-chrome", true),
@@ -75,6 +77,10 @@ function Defaults.createFileEvents()
         end
     end
 
+    local recentsSavedSearchPath =
+        "/System/Library/CoreServices/Finder.app/Contents/Resources/MyLibraries/myDocuments.cannedSearch/Resources/search.savedSearch"
+    local Recents = SmartFolder:new(recentsSavedSearchPath)
+
     local fileEvents = {
         { nil, "a", File:new("/Applications"), { "Files", "Applications" } },
         { nil, "d", File:new("~/Downloads"), { "Files", "Downloads" } },
@@ -82,11 +88,12 @@ function Defaults.createFileEvents()
         { nil, "m", File:new("~/Movies"), { "Files", "Movies" } },
         { nil, "p", File:new("~/Pictures"), { "Files", "Pictures" } },
         { nil, "t", File:new("~/.Trash"), { "Files", "Trash" } },
+        { nil, "v", File:new("/Volumes"), { "Files", "Volumes" } },
         { { "cmd" }, "a", openFinderAppEvent("Airdrop"), { "Files", "Airdrop" } },
         { { "cmd" }, "c", openFinderAppEvent("Computer"), { "Files", "Computer" } },
-        { { "cmd" }, "i", openFinderAppEvent("iCloud Drive"), { "Files", "iCloud Drive" } },
+        { { "cmd" }, "i", openFinderAppEvent("iCloud\\ Drive"), { "Files", "iCloud Drive" } },
         { { "cmd" }, "n", openFinderAppEvent("Network"), { "Files", "Network" } },
-        { { "cmd" }, "r", openFinderAppEvent("Recents"), { "Files", "Recents" } },
+        { { "cmd" }, "r", Recents, { "Files", "Recents" } },
         { { "shift" }, "a", openFinderAppEvent("All My Files"), { "Files", "All My Files" } },
         { { "shift" }, "d", File:new("~/Desktop"), { "Files", "Desktop" } },
         { { "cmd", "shift" }, "d", File:new("~/Documents"), { "Files", "Documents" } },
@@ -124,6 +131,7 @@ function Defaults.createEntityEvents()
         { nil, "t", entities.Terminal, { "Entities", "Terminal" } },
         { nil, "v", entities.VoiceMemos, { "Entities", "Voice Memos" } },
         { nil, ",", entities.SystemPreferences, { "Entities", "System Preferences" } },
+        { { "cmd" }, "d", entities.DiskUtility, { "Entities", "Disk Utility" } },
         { { "alt", "cmd" }, "s", entities.Siri, { "Entities", "Siri" } },
         { { "shift" }, "a", entities.ActivityMonitor, { "Entities", "Activity Monitor" } },
         { { "shift" }, "c", entities.Calculator, { "Entities", "Calculator" } },
@@ -148,6 +156,7 @@ function Defaults.createEntityEvents()
         { nil, "p", entities.Preview, { "Select Events", "Select a Preview window" } },
         { nil, "s", entities.Safari, { "Select Events", "Select a Safari tab or window" } },
         { nil, "t", entities.Terminal, { "Select Events", "Select a Terminal window" } },
+        { nil, ",", entities.SystemPreferences, { "Entities", "Select a System Preferences pane" } },
         { { "shift" }, "t", entities.TextEdit, { "Select Events", "Select a Text Edit window" } },
     }
 

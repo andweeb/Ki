@@ -15,7 +15,7 @@
   <body>
     <header>
       <h1><a href="./index.html">docs</a> &raquo; File</h1>
-      <p>File class that subclasses <a href="Entity.html">Entity</a> to represent some directory or file</p>
+      <p>File class that subclasses <a href="Entity.html">Entity</a> to represent some directory or file to be automated</p>
 
       </header>
       <h3>API Overview</h3>
@@ -28,6 +28,7 @@
           <ul>
             <li><a href="#copy">copy</a></li>
             <li><a href="#createEvent">createEvent</a></li>
+            <li><a href="#createFileChoices">createFileChoices</a></li>
             <li><a href="#getFileIcon">getFileIcon</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#move">move</a></li>
@@ -116,6 +117,41 @@
               </tr>
             </table>
           </section>
+          <section id="createFileChoices">
+            <a name="//apple_ref/cpp/Method/createFileChoices" class="dashAnchor"></a>
+            <h5><a href="#createFileChoices">createFileChoices</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File.createFileChoices(fileListIterator, createText, createSubText) -&gt; choice object list</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Creates a list of choice objects each representing the file walked with the provided iterator</p>
+<p>Parameters:</p>
+<ul>
+<li><code>fileListIterator</code> - an iterator to walk a list of file paths, i.e. <code>s:gmatch(pattern)</code></li>
+<li><code>createText</code> - an optional function that takes in a single <code>path</code> argument to return a formatted string to assign to the <code>text</code> field in each file choice object</li>
+<li><code>createSubText</code> - an optional function that takes in a single <code>path</code> argument to return a formatted string to assign to the <code>subText</code> field in each file choice object</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li><code>choices</code> - A list of choice objects each containing the following fields:<ul>
+<li><code>text</code> - The primary chooser text string</li>
+<li><code>subText</code> - The chooser subtext string</li>
+<li><code>fileName</code> - The name of the file</li>
+<li><code>path</code> - The path of the file</li>
+</ul>
+</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="getFileIcon">
             <a name="//apple_ref/cpp/Method/getFileIcon" class="dashAnchor"></a>
             <h5><a href="#getFileIcon">getFileIcon</a></h5>
@@ -130,7 +166,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Retrieves an icon image for the given file path or returns nil if not found</p>
+                <td><p>Retrieves an icon image for the given file path or returns <code>nil</code> if not found</p>
 <p>Parameters:</p>
 <ul>
 <li><code>path</code> - The path of a file</li>

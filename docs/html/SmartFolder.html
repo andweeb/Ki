@@ -1,0 +1,267 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Ki docs: SmartFolder</title>
+    <style type="text/css">
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      th { background-color: #DDDDDD; vertical-align: top; padding: 3px; }
+      td { width: 100%; background-color: #EEEEEE; vertical-align: top; padding: 3px; }
+      table { width: 100% ; border: 1px solid #0; text-align: left; }
+      section > table table td { width: 0; }
+    </style>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="./index.html">docs</a> &raquo; SmartFolder</h1>
+      <p>SmartFolder class that subclasses <a href="File.html">File</a> to represent a <a href="https://support.apple.com/kb/PH25589">smart folder</a> to be automated</p>
+
+      </header>
+      <h3>API Overview</h3>
+      <ul>
+        <li>Methods - API calls which can only be made on an object returned by a constructor</li>
+          <ul>
+            <li><a href="#copy">copy</a></li>
+            <li><a href="#initialize">initialize</a></li>
+            <li><a href="#move">move</a></li>
+            <li><a href="#moveToTrash">moveToTrash</a></li>
+            <li><a href="#openFile">openFile</a></li>
+            <li><a href="#openFileWith">openFileWith</a></li>
+            <li><a href="#openInfoWindow">openInfoWindow</a></li>
+            <li><a href="#showFileSearchSelectionModal">showFileSearchSelectionModal</a></li>
+          </ul>
+      </ul>
+      <h3>API Documentation</h3>
+        <h4 class="documentation-section">Methods</h4>
+          <section id="copy">
+            <a name="//apple_ref/cpp/Method/copy" class="dashAnchor"></a>
+            <h5><a href="#copy">copy</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:copy(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Copies a file in the smart folder search results to different folder</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="initialize">
+            <a name="//apple_ref/cpp/Method/initialize" class="dashAnchor"></a>
+            <h5><a href="#initialize">initialize</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:initialize(path, shortcuts)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Initializes a new smart folder entity instance with its search criteria file and custom shortcuts. By default, a cheatsheet and default shortcuts are initialized.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+<li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the smart folder entity</li>
+</ul>
+<p>Each <code>shortcut</code> item should be a list with items at the following indices:</p>
+<ul>
+<li><code>1</code> - An optional table containing zero or more of the following keyboard modifiers: <code>"cmd"</code>, <code>"alt"</code>, <code>"shift"</code>, <code>"ctrl"</code>, <code>"fn"</code></li>
+<li><code>2</code> - The name of a keyboard key. String representations of keys can be found in <a href="https://www.hammerspoon.org/docs/hs.keycodes.html#map"><code>hs.keycodes.map</code></a>.</li>
+<li><code>3</code> - The event handler that defines the action for when the shortcut is triggered</li>
+<li><code>4</code> - A table containing the metadata for the shortcut, also a list with items at the following indices:<ul>
+<li><code>1</code> - The category name of the shortcut</li>
+<li><code>2</code> - A description of what the shortcut does</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="move">
+            <a name="//apple_ref/cpp/Method/move" class="dashAnchor"></a>
+            <h5><a href="#move">move</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:move(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Moves a selected file in the smart folder to a different folder</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="moveToTrash">
+            <a name="//apple_ref/cpp/Method/moveToTrash" class="dashAnchor"></a>
+            <h5><a href="#moveToTrash">moveToTrash</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:moveToTrash(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Moves a selected file in the smart folder search results to the Trash</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="openFile">
+            <a name="//apple_ref/cpp/Method/openFile" class="dashAnchor"></a>
+            <h5><a href="#openFile">openFile</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:openFile(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Open a file from the smart folder search results</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="openFileWith">
+            <a name="//apple_ref/cpp/Method/openFileWith" class="dashAnchor"></a>
+            <h5><a href="#openFileWith">openFileWith</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:openFileWith(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Open a file selected from the smart folder search results with a specific application</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="openInfoWindow">
+            <a name="//apple_ref/cpp/Method/openInfoWindow" class="dashAnchor"></a>
+            <h5><a href="#openInfoWindow">openInfoWindow</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:openInfoWindow(path)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Opens a Finder information window for the file selected from the smart folder search results</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="showFileSearchSelectionModal">
+            <a name="//apple_ref/cpp/Method/showFileSearchSelectionModal" class="dashAnchor"></a>
+            <h5><a href="#showFileSearchSelectionModal">showFileSearchSelectionModal</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>SmartFolder:showFileSearchSelectionModal(path, callback)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Shows a selection modal with smart folder search result choices</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
+<li><code>callback</code> - The callback function invoked on a file choice selection with a choice object created from <a href="File.html#createFileChoices"><code>File.createFileChoices</code></a></li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+  </body>
+</html>

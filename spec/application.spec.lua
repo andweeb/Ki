@@ -592,6 +592,43 @@ local function selectBehaviorTests()
     end
 end
 
+local function entityBehaviorTests()
+    local behaviorTests = {
+        {
+            name = "returns assigned auto-exit value if application has name",
+            applicationName = "",
+            autoExitMode = false,
+            args = { spy.new(function() end), nil, nil, {} },
+            eventHandlerCallCount = 0,
+            expectedResult = false,
+        },
+    }
+
+    -- Run `entity` mode behavior method tests
+    for _, test in pairs(behaviorTests) do
+        it(test.name, function()
+            local eventHandlerSpy = test.args[1]
+            local application = require("application")
+
+            application.name = test.applicationName
+            application.autoExitMode = test.autoExitMode
+            application.getSelectionItems = function()
+                return test.selectionItems
+            end
+            application.getApplication = function()
+                return #test.applicationName > 0 and {} or nil
+            end
+
+            assert.are.same(type(application.behaviors.entity), "function")
+
+            local result = application.behaviors.entity(application, table.unpack(test.args))
+
+            assert.are.same(test.expectedResult, result)
+            assert.spy(eventHandlerSpy).was.called(test.eventHandlerCallCount)
+        end)
+    end
+end
+
 describe("application.lua (#application)", function()
     local printFunc = _G.print
 
@@ -624,4 +661,5 @@ describe("application.lua (#application)", function()
     describe("`toggleFullScreen` method", toggleFullScreenTests)
     describe("`default` behavior function", defaultBehaviorTests)
     describe("`select` behavior function", selectBehaviorTests)
+    describe("`entity` behavior function", entityBehaviorTests)
 end)

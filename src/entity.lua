@@ -198,9 +198,13 @@ end
 --- A list of shortcuts that can be used when the selection modal is visible. The following shortcuts are available by default:
 ---  * <kbd>^k</kbd> to navigate up an item
 ---  * <kbd>^j</kbd> to navigate down an item
+---  * <kbd>^u</kbd> to navigate a page of rows up
+---  * <kbd>^d</kbd> to navigate a page of rows down
 Entity.selectionModalShortcuts = {
     { { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },
     { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },
+    { { "ctrl" }, "d", function(modal) modal:selectedRow(modal:selectedRow() + modal:rows()) end },
+    { { "ctrl" }, "u", function(modal) modal:selectedRow(modal:selectedRow() - modal:rows()) end },
 }
 
 --- Entity.showSelectionModal(choices, callback)
@@ -276,10 +280,11 @@ end
 --- Parameters:
 ---  * `mode` - The name of the current mode
 ---  * `shortcut` - A shortcut object containing the keybindings and event handler for the entity
+---  * `workflow` - The list of events that compose the current workflow
 ---
 --- Returns:
 ---  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
-function Entity:dispatchAction(mode, shortcut)
+function Entity:dispatchAction(mode, shortcut, workflow)
     local flags = shortcut.flags
     local keyName = shortcut.keyName
     local eventHandler = self.getEventHandler(self.shortcuts, flags, keyName)
@@ -287,7 +292,7 @@ function Entity:dispatchAction(mode, shortcut)
     if eventHandler then
         local behaviorFunc = self.behaviors[mode] or self.behaviors.default
 
-        return behaviorFunc(self, eventHandler, flags, keyName)
+        return behaviorFunc(self, eventHandler, flags, keyName, workflow)
     else
         return self.autoExitMode
     end

@@ -36,10 +36,20 @@ end
 local function behaviorTests()
     local tests = {
         {
-            name = "calls event handler with file path and auto-exits mode",
+            name = "default behavior: calls event handler with file path and auto-exits mode",
             behavior = "default",
-            args = { function() end },
+            path = "test",
+            args = { spy.new(function() end) },
             expectedResult = true,
+            expectedEventHandlerArgs = { "test" },
+        },
+        {
+            name = "file mode behavior: calls event handler with file path and should navigate flag and auto-exits mode",
+            behavior = "file",
+            path = "test",
+            args = { spy.new(function() end), _, _, { { mode = "select" } } },
+            expectedResult = true,
+            expectedEventHandlerArgs = { "test", true },
         },
     }
 
@@ -47,8 +57,11 @@ local function behaviorTests()
     for _, test in pairs(tests) do
         it(test.name, function()
             local file = require("file")
+            file.path = test.path
+
             local result = file.behaviors[test.behavior](file, table.unpack(test.args))
 
+            assert.spy(test.args[1]).was.called_with(table.unpack(test.expectedEventHandlerArgs))
             assert.are.same(test.expectedResult, result)
         end)
     end
@@ -397,14 +410,16 @@ local function openWithTests()
             shellOutput = "/Applications/Test.app\n/Applications/Utilities/Test.app\n",
             expectedChoices = {
                 {
-                    text = "/Applications/Test.app",
+                    text = "Test.app",
                     subText = "/Applications/Test.app",
-                    applicationPath =  "/Applications/Test.app",
+                    fileName =  "Test.app",
+                    path =  "/Applications/Test.app",
                 },
                 {
-                    text = "/Applications/Utilities/Test.app",
+                    text = "Test.app",
                     subText = "/Applications/Utilities/Test.app",
-                    applicationPath =  "/Applications/Utilities/Test.app",
+                    fileName =  "Test.app",
+                    path =  "/Applications/Utilities/Test.app",
                 },
             },
         },
@@ -417,13 +432,15 @@ local function openWithTests()
                 {
                     text = "Test",
                     subText = "/Applications/Test.app",
-                    applicationPath =  "/Applications/Test.app",
+                    path =  "/Applications/Test.app",
+                    fileName =  "Test.app",
                     image = { test = true },
                 },
                 {
                     text = "Test",
                     subText = "/Applications/Utilities/Test.app",
-                    applicationPath =  "/Applications/Utilities/Test.app",
+                    path =  "/Applications/Utilities/Test.app",
+                    fileName =  "Test.app",
                     image = { test = true },
                 },
             },

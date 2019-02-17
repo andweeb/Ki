@@ -334,6 +334,16 @@ Ki.defaultTransitionEvents = {
             function() Ki.state:exitMode() end,
             { "Select Mode", "Exit to Normal Mode" },
         },
+        {
+            {"cmd"}, "e",
+            function() Ki.state:enterEntityMode() end,
+            { "Select Mode", "Transition to Entity Mode" },
+        },
+        {
+            {"cmd"}, "f",
+            function() Ki.state:enterFileMode() end,
+            { "Select Mode", "Transition to File Mode" },
+        },
     },
     url = {
         {
@@ -373,11 +383,13 @@ Ki._defaultStateEvents = {
     { name = "enterNormalMode", from = "desktop", to = "normal" },
     { name = "enterEntityMode", from = "normal", to = "entity" },
     { name = "enterEntityMode", from = "action", to = "entity" },
+    { name = "enterEntityMode", from = "select", to = "entity" },
     { name = "enterActionMode", from = "normal", to = "action" },
     { name = "enterSelectMode", from = "entity", to = "select" },
     { name = "enterSelectMode", from = "normal", to = "select" },
     { name = "enterFileMode", from = "normal", to = "file" },
     { name = "enterFileMode", from = "entity", to = "file" },
+    { name = "enterFileMode", from = "select", to = "file" },
     { name = "enterSelectMode", from = "file", to = "select" },
     { name = "enterVolumeControlMode", from = "normal", to = "volume" },
     { name = "enterBrightnessControlMode", from = "normal", to = "brightness" },
@@ -431,8 +443,17 @@ Ki.statusDisplay = nil
 
 -- A table that stores the workflow history.
 Ki.history = {
+    workflow = {},
     action = {},
 }
+
+function Ki.history:recordEvent(mode, keyName, flags)
+    table.insert(self.workflow, {
+        mode = mode,
+        flags = flags,
+        keyName = keyName,
+    })
+end
 
 function Ki._renderHotkeyText(modifiers, keyName)
     local modKeyText = ""
@@ -470,6 +491,7 @@ function Ki:_createFsmCallbacks()
         self.statusDisplay:show(stateMachine.current, parenthetical)
 
         if nextState == "desktop" then
+            self.history.workflow = {}
             self.history.action = {}
         end
     end
@@ -512,8 +534,10 @@ function Ki:_handleKeyDown(event)
 
     -- Avoid propagating existing handler or non-existent handler in a non-normal mode
     if handler then
+        Ki.history:recordEvent(mode, keyName, flags)
+
         if type(handler) == "table" and handler.dispatchAction then
-            local shouldAutoExit = handler:dispatchAction(mode, Ki.history.action)
+            local shouldAutoExit = handler:dispatchAction(mode, Ki.history.action, Ki.history.workflow)
 
             if shouldAutoExit then
                 self.state:exitMode()
