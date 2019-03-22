@@ -73,11 +73,26 @@ local function initializeTests()
         {
             name = "creates a file entity instance",
             args = { "~/.vimrc" },
+            absolutePath = "/Users/test/.vimrc",
         },
         {
-            name = "creates a file entity instance",
+            name = "creates a directory file entity instance",
             args = { "~/Downloads" },
-            isDirectory = true,
+            absolutePath = "/Users/test/Downloads",
+            getAttributes = function() return { mode = "directory" } end,
+        },
+        {
+            name = "notifies on invalid file path error",
+            args = { "~/.vimrc" },
+            absolutePath = nil,
+            notifiesError = true,
+        },
+        {
+            name = "notifies on get file attributes error",
+            args = { "~/.vimrc" },
+            getAttributes = function() return error("Unable to get file attributes") end,
+            absolutePath = "/Users/test/.vimrc",
+            notifiesError = true,
         },
     }
 
@@ -87,16 +102,21 @@ local function initializeTests()
             local mockHs = hammerspoonMocker()
             local file = require("file")
             local mockFs = {
-                attributes = function() return { mode = test.isDirectory and "directory" } end,
-                pathToAbsolute = function() end,
+                attributes = test.getAttributes or function() return { mode = "file" } end,
+                pathToAbsolute = function() return test.absolutePath end,
             }
 
             _G.hs = mock(mockHs({ fs = mockFs }))
 
+            file.notifyError = spy.new(function() end)
             file.mergeShortcuts = function() end
             file:initialize(table.unpack(test.args))
 
-            assert.are.same(file.path, test.args[1])
+            if test.notifiesError then
+                assert.spy(file.notifyError).was.called(1)
+            else
+                assert.are.same(file.path, test.args[1])
+            end
         end)
     end
 end

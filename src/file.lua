@@ -69,7 +69,20 @@ File.behaviors = Entity.behaviors + {
 ---  * None
 function File:initialize(path, shortcuts)
     local absolutePath = hs.fs.pathToAbsolute(path)
-    local attributes = hs.fs.attributes(absolutePath) or {}
+
+    if not absolutePath then
+        self.notifyError("Error initializing File entity", "Path "..path.." may not exist.")
+        return
+    end
+
+    local success, value = pcall(function() return hs.fs.attributes(absolutePath) or {} end)
+
+    if not success then
+        self.notifyError("Error initializing File entity", value or "")
+        return
+    end
+
+    local attributes = value
     local isDirectory = attributes.mode == "directory"
     local openFileInFolder = self:createEvent(path, function(target) self.open(target) end)
 
