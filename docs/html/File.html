@@ -198,6 +198,11 @@
 <ul>
 <li><code>path</code> - The initial directory path</li>
 <li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the file entity</li>
+<li><code>options</code> - A table containing various options that configures the file instance<ul>
+<li><code>showHiddenFiles</code> - A flag to display hidden files in the file selection modal. Defaults to <code>false</code></li>
+<li><code>sortAttribute</code> - The file attribute to sort the file selection list by. File attributes come from <a href="http://www.hammerspoon.org/docs/hs.fs.html#dir">hs.fs.dir</a>. Defaults to <code>modification</code> (last modified timestamp)</li>
+</ul>
+</li>
 </ul>
 <p>Each <code>shortcut</code> item should be a list with items at the following indices:</p>
 <ul>

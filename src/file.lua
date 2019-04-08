@@ -56,6 +56,9 @@ File.behaviors = Entity.behaviors + {
 --- Parameters:
 ---  * `path` - The initial directory path
 ---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the file entity
+---  * `options` - A table containing various options that configures the file instance
+---    * `showHiddenFiles` - A flag to display hidden files in the file selection modal. Defaults to `false`
+---    * `sortAttribute` - The file attribute to sort the file selection list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)
 ---
 --- Each `shortcut` item should be a list with items at the following indices:
 ---  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`
@@ -67,7 +70,9 @@ File.behaviors = Entity.behaviors + {
 ---
 --- Returns:
 ---  * None
-function File:initialize(path, shortcuts)
+function File:initialize(path, shortcuts, options)
+    options = options or {}
+
     local absolutePath = hs.fs.pathToAbsolute(path)
 
     if not absolutePath then
@@ -130,6 +135,8 @@ function File:initialize(path, shortcuts)
     self.path = path
     self.shortcuts = mergedShortcuts
     self.cheatsheet = cheatsheet
+    self.showHiddenFiles = options.showHiddenFiles or false
+    self.sortAttribute = options.sortAttribute or "modification"
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for file "..self.path
     self.cheatsheet:init(self.path, cheatsheetDescription, mergedShortcuts)
@@ -239,7 +246,6 @@ function File:showFileSelectionModal(path, handler)
     local parentPathRegex = "^(.+)/.+$"
     local absolutePath = hs.fs.pathToAbsolute(path)
     local parentDirectory = absolutePath:match(parentPathRegex) or "/"
-    local iterator, directory = hs.fs.dir(absolutePath)
 
     -- Add selection modal shortcut to open files with cmd + return
     local function openFile(modal)
@@ -248,11 +254,23 @@ function File:showFileSelectionModal(path, handler)
         handler(choice.filePath, true)
         modal:cancel()
     end
+    -- Add selection modal shortcut to toggle hidden files cmd + shift + "."
+    local function toggleHiddenFiles(modal)
+        modal:cancel()
+        self.showHiddenFiles = not self.showHiddenFiles
+
+        -- Defer execution to avoid conflicts with the prior selection modal that just closed
+        hs.timer.doAfter(0, function()
+            self:showFileSelectionModal(path, handler)
+        end)
+    end
     local navigationShortcuts = {
         { { "cmd" }, "return", openFile },
+        { { "cmd", "shift" }, ".", toggleHiddenFiles },
     }
     self.selectionModalShortcuts = self.mergeShortcuts(navigationShortcuts, self.selectionModalShortcuts)
 
+    local iterator, directory = hs.fs.dir(absolutePath)
     if iterator == nil then
         self.notifyError("Error walking the path at "..path)
         return
@@ -260,27 +278,44 @@ function File:showFileSelectionModal(path, handler)
 
     for file in iterator, directory do
         local filePath = absolutePath.."/"..file
+        local attributes = hs.fs.attributes(filePath) or {}
         local displayName = hs.fs.displayName(filePath) or file
+        local isHiddenFile = string.sub(file, 1, 1) == "."
+        local shouldShowFile = isHiddenFile and self.showHiddenFiles or not isHiddenFile
         local subText = filePath
 
-        if file == "." then
-            displayName = file
-            subText = absolutePath.." (Current directory)"
-            filePath = absolutePath
-        elseif file == ".." then
-            displayName = file
-            subText = parentDirectory.." (Parent directory)"
-            filePath = parentDirectory
+        if file ~= "." and file ~= ".." and shouldShowFile then
+            table.insert(choices, {
+                text = displayName,
+                subText = subText,
+                file = file,
+                filePath = filePath,
+                image = filePath and self.getFileIcon(filePath),
+                fileAttributes = attributes,
+            })
         end
-
-        table.insert(choices, {
-            text = displayName,
-            subText = subText,
-            file = file,
-            filePath = filePath,
-            image = filePath and self.getFileIcon(filePath),
-        })
     end
+
+    -- Sort choices by last modified timestamp and add current/parent directories to choices
+    table.sort(choices, function(a, b)
+        local value1 = a.fileAttributes[self.sortAttribute]
+        local value2 = b.fileAttributes[self.sortAttribute]
+        return value1 > value2
+    end)
+    table.insert(choices, {
+        text = "..",
+        subText = parentDirectory.." (Parent directory)",
+        file = "..",
+        filePath = parentDirectory,
+        image = self.getFileIcon(absolutePath),
+    })
+    table.insert(choices, {
+        text = ".",
+        subText = absolutePath.." (Current directory)",
+        file = ".",
+        filePath = absolutePath,
+        image = self.getFileIcon(absolutePath),
+    })
 
     self.showSelectionModal(choices, function(choice)
         if choice then

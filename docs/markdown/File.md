@@ -71,7 +71,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Signature**                               | `File:initialize(path, shortcuts)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Initializes a new file instance with its path and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.                                                                     |
-| **Parameters**                              | <ul><li>`path` - The initial directory path</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the file entity</li></ul> |
+| **Parameters**                              | <ul><li>`path` - The initial directory path</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the file entity</li><li>`options` - A table containing various options that configures the file instance</li><li>  `showHiddenFiles` - A flag to display hidden files in the file selection modal. Defaults to `false`</li><li>  `sortAttribute` - The file attribute to sort the file selection list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
 | [move](#move)         |                                                                                     |
