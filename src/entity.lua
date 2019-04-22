@@ -1,6 +1,6 @@
 --- === Entity ===
 ---
---- Entity class that represents some generic automatable desktop entity
+--- Entity class that represents some abstract automatable desktop entity
 ---
 
 local luaVersion = _VERSION:match("%d+%.%d+")
@@ -38,6 +38,9 @@ local Entity = class("Entity")
 ---  * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
 ---
 --- The table is defined with an `__add` metamethod to overwrite the default entity behaviors.
+---
+--- Currently supported behaviors:
+--- * `default` - triggers the event handler and returns a boolean flag whether to auto-exit back to desktop mode or not, depending on the return value of the handler or the `autoExitMode` variable on the entity class
 Entity.behaviors = {
     default = function(self, eventHandler)
         local _, autoExit = eventHandler()

@@ -1,0 +1,229 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Ki docs: URL</title>
+    <style type="text/css">
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      th { background-color: #DDDDDD; vertical-align: top; padding: 3px; }
+      td { width: 100%; background-color: #EEEEEE; vertical-align: top; padding: 3px; }
+      table { width: 100% ; border: 1px solid #0; text-align: left; }
+      section > table table td { width: 0; }
+    </style>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="./index.html">docs</a> &raquo; URL</h1>
+      <p>URL class that subclasses <a href="Entity.html">Entity</a> to represent some automatable URL entity</p>
+
+      </header>
+      <h3>API Overview</h3>
+      <ul>
+        <li>Variables - Configurable values</li>
+          <ul>
+            <li><a href="#behaviors">behaviors</a></li>
+            <li><a href="#displaySelectionModalIcons">displaySelectionModalIcons</a></li>
+            <li><a href="#paths">paths</a></li>
+          </ul>
+        <li>Methods - API calls which can only be made on an object returned by a constructor</li>
+          <ul>
+            <li><a href="#getDomain">getDomain</a></li>
+            <li><a href="#getSelectionItems">getSelectionItems</a></li>
+            <li><a href="#initialize">initialize</a></li>
+            <li><a href="#open">open</a></li>
+          </ul>
+      </ul>
+      <h3>API Documentation</h3>
+        <h4 class="documentation-section">Variables</h4>
+          <section id="behaviors">
+            <a name="//apple_ref/cpp/Variable/behaviors" class="dashAnchor"></a>
+            <h5><a href="#behaviors">behaviors</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>URL.behaviors</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>URL <a href="Entity.html#behaviors">behaviors</a> defined to invoke event handlers with the file path.
+Currently supported behaviors:</p>
+<ul>
+<li><code>default</code> - Simply triggers the event handler with the entity's url</li>
+<li><code>select</code> - Generates a list of choice items from <a href="#getSelectionItems"><code>self:getSelectionItems</code></a> and displays them in a selection modal for selection</li>
+<li><code>url</code> - Triggers the appropriate event handler for the url. Depending on whether the workflow includes select mode, the select mode behavior will be triggered instead</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="displaySelectionModalIcons">
+            <a name="//apple_ref/cpp/Variable/displaySelectionModalIcons" class="dashAnchor"></a>
+            <h5><a href="#displaySelectionModalIcons">displaySelectionModalIcons</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>URL.displaySelectionModalIcons</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A boolean value to specify whether to show favicons in the selection modal or not. Defaults to <code>true</code>.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="paths">
+            <a name="//apple_ref/cpp/Variable/paths" class="dashAnchor"></a>
+            <h5><a href="#paths">paths</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>URL.paths</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>An array of sub-paths of the URL or other related URLs. Defaults to an empty list, but it can be overridden to contain any of the following:</p>
+<ul>
+<li>The url sub-path that can be appended to the URL entity's path, i.e. /test</li>
+<li>The full url string, i.e. <a href="https://google.com">https://google.com</a></li>
+<li>A table containing a <code>name</code> and <code>path</code> field</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+        <h4 class="documentation-section">Methods</h4>
+          <section id="getDomain">
+            <a name="//apple_ref/cpp/Method/getDomain" class="dashAnchor"></a>
+            <h5><a href="#getDomain">getDomain</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>URL:getDomain(url) -&gt; string</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Retrieves the domain part of the url argument</p>
+<p>Parameters:</p>
+<ul>
+<li><code>url</code> - The url string</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The string domain of the url or <code>nil</code></li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getSelectionItems">
+            <a name="//apple_ref/cpp/Method/getSelectionItems" class="dashAnchor"></a>
+            <h5><a href="#getSelectionItems">getSelectionItems</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>URL:getSelectionItems() -&gt; table of choices or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Generates a list of selection items using the instance's <code>self.paths</code> list</p>
+<p>Returns:</p>
+<ul>
+<li>A list of choice objects</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="initialize">
+            <a name="//apple_ref/cpp/Method/initialize" class="dashAnchor"></a>
+            <h5><a href="#initialize">initialize</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>URL:initialize(url, shortcuts)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Initializes a new url entity instance with its url and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>url</code> - The web address that the entity is representing</li>
+<li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the file entity</li>
+<li><code>options</code> - A table containing various options that configures the file instance<ul>
+<li><code>selections</code> - A flag to display hidden files in the file selection modal. Defaults to <code>false</code></li>
+</ul>
+</li>
+</ul>
+<p>Each <code>shortcut</code> item should be a list with items at the following indices:</p>
+<ul>
+<li><code>1</code> - An optional table containing zero or more of the following keyboard modifiers: <code>"cmd"</code>, <code>"alt"</code>, <code>"shift"</code>, <code>"ctrl"</code>, <code>"fn"</code></li>
+<li><code>2</code> - The name of a keyboard key. String representations of keys can be found in <a href="https://www.hammerspoon.org/docs/hs.keycodes.html#map"><code>hs.keycodes.map</code></a>.</li>
+<li><code>3</code> - The event handler that defines the action for when the shortcut is triggered</li>
+<li><code>4</code> - A table containing the metadata for the shortcut, also a list with items at the following indices:<ul>
+<li><code>1</code> - The category name of the shortcut</li>
+<li><code>2</code> - A description of what the shortcut does</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="open">
+            <a name="//apple_ref/cpp/Method/open" class="dashAnchor"></a>
+            <h5><a href="#open">open</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>URL:open(url)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Opens the url</p>
+<p>Parameters:</p>
+<ul>
+<li><code>url</code> - the address of the url to open</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+  </body>
+</html>

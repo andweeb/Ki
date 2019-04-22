@@ -53,6 +53,7 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
  * [stateEvents](#stateEvents)
  * [statusDisplay](#statusDisplay)
  * [transitionEvents](#transitionEvents)
+ * [URL](#URL)
  * [workflowEvents](#workflowEvents)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [start](#start)
@@ -121,6 +122,12 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
 | **Signature**                               | `Ki.transitionEvents`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing the definitions of transition events.                                                                     |
+
+| [URL](#URL)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.URL`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some url. Class methods and properties are documented [here](URL.html).                                                                     |
 
 | [workflowEvents](#workflowEvents)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

@@ -79,21 +79,9 @@ _G.SHORTCUT_METADATA_INDEX = 4
 
 local fsm = _G.requirePackage("fsm")
 local util = _G.requirePackage("util", true)
-local Defaults = _G.requirePackage("defaults", true)
-local defaultWorkflowEvents, defaultEntities = Defaults.create(Ki)
 
 -- Allow Spotlight to be used to find alternate names for applications
 hs.application.enableSpotlightForNameSearches(true)
-
---- Ki.defaultWorkflowEvents
---- Variable
---- A table containing the default workflow events for all default modes in Ki.
-Ki.defaultWorkflowEvents = defaultWorkflowEvents
-
---- Ki.defaultEntities
---- Variable
---- A table containing the default automatable desktop entity instances in Ki.
-Ki.defaultEntities = defaultEntities
 
 --- Ki.Entity
 --- Variable
@@ -109,6 +97,24 @@ Ki.Application = _G.requirePackage("application", true)
 --- Variable
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some file or directory at an existing file path. Class methods and properties are documented [here](File.html).
 Ki.File = _G.requirePackage("file", true)
+
+--- Ki.URL
+--- Variable
+--- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some url. Class methods and properties are documented [here](URL.html).
+Ki.URL = _G.requirePackage("url", true)
+
+local Defaults = _G.requirePackage("defaults", true)
+local defaultWorkflowEvents, defaultEntities = Defaults.create(Ki)
+
+--- Ki.defaultWorkflowEvents
+--- Variable
+--- A table containing the default workflow events for all default modes in Ki.
+Ki.defaultWorkflowEvents = defaultWorkflowEvents
+
+--- Ki.defaultEntities
+--- Variable
+--- A table containing the default automatable desktop entity instances in Ki.
+Ki.defaultEntities = defaultEntities
 
 --- Ki.state
 --- Variable
@@ -344,6 +350,11 @@ Ki.defaultTransitionEvents = {
             function() Ki.state:enterFileMode() end,
             { "Select Mode", "Transition to File Mode" },
         },
+        {
+            {"cmd"}, "u",
+            function() Ki.state:enterUrlMode() end,
+            { "Select Mode", "Transition to URL Mode" },
+        },
     },
     url = {
         {
@@ -394,6 +405,7 @@ Ki._defaultStateEvents = {
     { name = "enterVolumeControlMode", from = "normal", to = "volume" },
     { name = "enterBrightnessControlMode", from = "normal", to = "brightness" },
     { name = "enterUrlMode", from = "normal", to = "url" },
+    { name = "enterUrlMode", from = "select", to = "url" },
     { name = "exitMode", from = "normal", to = "desktop" },
     { name = "exitMode", from = "entity", to = "desktop" },
     { name = "exitMode", from = "file", to = "desktop" },

@@ -15,7 +15,7 @@
   <body>
     <header>
       <h1><a href="./index.html">docs</a> &raquo; Entity</h1>
-      <p>Entity class that represents some generic automatable desktop entity</p>
+      <p>Entity class that represents some abstract automatable desktop entity</p>
 
       </header>
       <h3>API Overview</h3>
@@ -62,6 +62,10 @@
 <li><code>keyName</code> - A string containing the name of a keyboard key (in <code>hs.keycodes.map</code>)</li>
 </ul>
 <p>The table is defined with an <code>__add</code> metamethod to overwrite the default entity behaviors.</p>
+<p>Currently supported behaviors:</p>
+<ul>
+<li><code>default</code> - triggers the event handler and returns a boolean flag whether to auto-exit back to desktop mode or not, depending on the return value of the handler or the <code>autoExitMode</code> variable on the entity class</li>
+</ul>
 </td>
               </tr>
             </table>
@@ -275,7 +279,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity.renderScriptTemplate(scriptName[, viewModel]) -&gt; string</code></td>
+                <td><code>Entity.renderScriptTemplate(script[, viewModel]) -&gt; string</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -286,12 +290,12 @@
                 <td><p>Generates an applescript from templates located in <code>src/osascripts</code> with some view model object</p>
 <p>Parameters:</p>
 <ul>
-<li><code>scriptName</code> - The applescript file name</li>
+<li><code>scriptPath</code> - The absolute file path to the applescript file or the name of an existing Ki applescript file (in src/osascripts)</li>
 <li><code>viewModel</code> - An optional <a href="http://olivinelabs.com/lustache/">lustache</a> view model</li>
 </ul>
 <p>Returns:</p>
 <ul>
-<li>The rendered script string</li>
+<li>The rendered script string or <code>nil</code></li>
 </ul>
 </td>
               </tr>

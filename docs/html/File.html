@@ -57,7 +57,12 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>File <a href="Entity.html#behaviors">behaviors</a> defined to invoke event handlers with the file path.</p>
+                <td><p>File <a href="Entity.html#behaviors">behaviors</a> defined to invoke event handlers with the file path.
+Currently supported behaviors:</p>
+<ul>
+<li><code>default</code> - simply triggers the event handler with the instance's url string.</li>
+<li><code>file</code> - triggers the appropriate event handler for the file entity instance. Depending on whether the workflow includes select mode, the event handler will be invoked with <code>shouldNavigate</code> set to <code>true</code>.</li>
+</ul>
 </td>
               </tr>
             </table>
