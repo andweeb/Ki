@@ -1,7 +1,7 @@
 # [docs](index.md) » Entity
 ---
 
-Entity class that represents some generic automatable desktop entity
+Entity class that represents some abstract automatable desktop entity
 
 
 ## API Overview
@@ -86,11 +86,11 @@ Entity class that represents some generic automatable desktop entity
 
 | [renderScriptTemplate](#renderScriptTemplate)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity.renderScriptTemplate(scriptName[, viewModel]) -> string`                                                                    |
+| **Signature**                               | `Entity.renderScriptTemplate(script[, viewModel]) -> string`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Generates an applescript from templates located in `src/osascripts` with some view model object                                                                     |
-| **Parameters**                              | <ul><li>`scriptName` - The applescript file name</li><li>`viewModel` - An optional [lustache](http://olivinelabs.com/lustache/) view model</li></ul> |
-| **Returns**                                 | <ul><li>The rendered script string</li></ul>          |
+| **Parameters**                              | <ul><li>`scriptPath` - The absolute file path to the applescript file or the name of an existing Ki applescript file (in src/osascripts)</li><li>`viewModel` - An optional [lustache](http://olivinelabs.com/lustache/) view model</li></ul> |
+| **Returns**                                 | <ul><li>The rendered script string or `nil`</li></ul>          |
 
 | [showSelectionModal](#showSelectionModal)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

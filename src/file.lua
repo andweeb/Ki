@@ -28,6 +28,9 @@ local File = Entity:subclass("File")
 --- File.behaviors
 --- Variable
 --- File [behaviors](Entity.html#behaviors) defined to invoke event handlers with the file path.
+--- Currently supported behaviors:
+--- * `default` - simply triggers the event handler with the instance's url string.
+--- * `file` - triggers the appropriate event handler for the file entity instance. Depending on whether the workflow includes select mode, the event handler will be invoked with `shouldNavigate` set to `true`.
 File.behaviors = Entity.behaviors + {
     default = function(self, eventHandler)
         eventHandler(self.path)

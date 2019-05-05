@@ -1,6 +1,6 @@
 --- === Entity ===
 ---
---- Entity class that represents some generic automatable desktop entity
+--- Entity class that represents some abstract automatable desktop entity
 ---
 
 local luaVersion = _VERSION:match("%d+%.%d+")
@@ -38,6 +38,9 @@ local Entity = class("Entity")
 ---  * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
 ---
 --- The table is defined with an `__add` metamethod to overwrite the default entity behaviors.
+---
+--- Currently supported behaviors:
+--- * `default` - triggers the event handler and returns a boolean flag whether to auto-exit back to desktop mode or not, depending on the return value of the handler or the `autoExitMode` variable on the entity class
 Entity.behaviors = {
     default = function(self, eventHandler)
         local _, autoExit = eventHandler()
@@ -72,22 +75,33 @@ function Entity.notifyError(message, details)
     print("[Ki] "..message..":", details)
 end
 
---- Entity.renderScriptTemplate(scriptName[, viewModel]) -> string
+--- Entity.renderScriptTemplate(script[, viewModel]) -> string
 --- Method
 --- Generates an applescript from templates located in `src/osascripts` with some view model object
 ---
 --- Parameters:
----  * `scriptName` - The applescript file name
+---  * `scriptPath` - The absolute file path to the applescript file or the name of an existing Ki applescript file (in src/osascripts)
 ---  * `viewModel` - An optional [lustache](http://olivinelabs.com/lustache/) view model
 ---
 --- Returns:
----  * The rendered script string
-function Entity.renderScriptTemplate(scriptName, viewModel)
+---  * The rendered script string or `nil`
+function Entity.renderScriptTemplate(script, viewModel)
     viewModel = viewModel or {}
 
-    local localScriptPath = _G.getSpoonPath().."/osascripts/"..scriptName..".applescript"
-    local scriptPath = string.match(scriptName, "/") and scriptName or localScriptPath
-    local file = assert(io.open(scriptPath, "rb"))
+    local scriptPath = script
+
+    if not scriptPath:match("/") then
+        local localScriptPath = _G.getSpoonPath().."/osascripts/"..script..".applescript"
+        scriptPath = string.match(script, "/") and script or localScriptPath
+    end
+
+    local success, file = pcall(function() return assert(io.open(scriptPath, "rb")) end)
+
+    if not success or not file then
+        Entity.notifyError("Unable to render script template for the script", script)
+        return nil
+    end
+
     local scriptTemplate = file:read("*all")
 
     file:close()

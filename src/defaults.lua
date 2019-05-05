@@ -172,34 +172,85 @@ end
 ---
 --- Returns:
 ---  * A list of `url` workflow events
-function Defaults.createUrlEvents()
-    local function urlEventHandler(url)
-        return function()
-            hs.urlevent.openURL(url)
-            return true
-        end
-    end
+function Defaults.createUrlEvents(URL)
+     local Facebook = URL:new("https://facebook.com")
+     Facebook.paths = {
+         { name = "Facebook", path = "https://www.facebook.com" },
+         { name = "FB Messages", path = "/messages" },
+         { name = "FB Marketplace", path = "/marketplace" },
+         { name = "FB watch", path = "/watch" },
+     }
 
-    local urlEvents = {
-        { nil, "a", urlEventHandler("https://amazon.com"), { "URL Events", "Amazon" } },
-        { nil, "f", urlEventHandler("https://facebook.com"), { "URL Events", "Facebook" } },
-        { nil, "g", urlEventHandler("https://google.com"), { "URL Events", "Google" } },
-        { nil, "h", urlEventHandler("https://news.ycombinator.com"), { "URL Events", "Hacker News" } },
-        { nil, "l", urlEventHandler("https://linkedin.com"), { "URL Events", "LinkedIn" } },
-        { nil, "m", urlEventHandler("https://messenger.com"), { "URL Events", "Facebook Messenger" } },
-        { nil, "n", urlEventHandler("https://netflix.com"), { "URL Events", "Netflix" } },
-        { nil, "r", urlEventHandler("https://reddit.com"), { "URL Events", "Reddit" } },
-        { nil, "w", urlEventHandler("https://wikipedia.org"), { "URL Events", "Wikipedia" } },
-        { nil, "y", urlEventHandler("https://youtube.com"), { "URL Events", "YouTube" } },
-        { nil, "z", urlEventHandler("https://zillow.com"), { "URL Events", "Zillow" } },
-        { { "shift" }, "g", urlEventHandler("https://github.com"), { "URL Events", "GitHub" } },
-        { { "shift" }, "m", urlEventHandler("https://maps.google.com"), { "URL Events", "Google Maps" } },
-        { { "shift" }, "w", urlEventHandler("https://weather.com"), { "URL Events", "Weather" } },
-        { { "shift" }, "y", urlEventHandler("https://yelp.com"), { "URL Events", "Yelp" } },
-        { { "cmd", "shift" }, "m", urlEventHandler("https://mail.google.com"), { "URL Events", "Gmail" } },
-    }
+     local HackerNews = URL:new("https://news.ycombinator.com")
+     HackerNews.paths = {
+         { name = "Hacker News", path = "https://news.ycombinator.com" },
+         { name = "New", path = "/newest" },
+         { name = "Threads", path = "/threads" },
+         { name = "Past", path = "/front" },
+         { name = "Comments", path = "/newcomments" },
+         { name = "Ask", path = "/ask" },
+         { name = "Show", path = "/show" },
+         { name = "Jobs", path = "/jobs" },
+         { name = "Submit", path = "/submit" },
+     }
 
-    return urlEvents
+     local LinkedIn = URL:new("https://linkedin.com")
+     LinkedIn.paths = {
+         { name = "LinkedIn", path = "https://linkedin.com" },
+         { name = "My Network", path = "/mynetwork/" },
+         { name = "Jobs", path = "/jobs/" },
+         { name = "Messaging", path = "/messaging/" },
+         { name = "Notifications", path = "/notifications/" },
+     }
+
+     local Google = URL:new("https://google.com")
+     Google.paths = {
+         { name = "Google Search", path = "https://google.com" },
+         { name = "Google Image Search", path = "https://www.google.com/imghp" },
+         { name = "Google Account", path = "https://myaccount.google.com" },
+         { name = "Google Calendar", path = "https://www.google.com/calendar" },
+         { name = "Google Contacts", path = "https://contacts.google.com" },
+         { name = "Google Drive", path = "https://drive.google.com" },
+         { name = "Google Maps", path = "https://maps.google.com" },
+         { name = "Google Play Store", path = "https://play.google.com" },
+         { name = "Google News", path = "https://news.google.com" },
+         { name = "Google Photos", path = "https://photos.google.com" },
+         { name = "Google Shopping", path = "https://www.google.com/shopping" },
+         { name = "Google Translate", path = "https://translate.google.com" },
+         { name = "GMail", path = "https://mail.google.com" },
+         { name = "YouTube", path = "https://www.youtube.com" },
+     }
+
+     local YouTube = URL:new("https://youtube.com")
+     YouTube.paths = {
+         { name = "YouTube", path = "https://youtube.com" },
+         { name = "Trending", path = "/feed/trending" },
+         { name = "Subscriptions", path = "/feed/subscriptions" },
+         { name = "Library", path = "/feed/library" },
+         { name = "History", path = "/feed/history" },
+         { name = "Watch Later", path = "/playlist?list=WL" },
+     }
+
+     local urlEvents = {
+         { nil, "a", URL:new("https://amazon.com"), { "URL Events", "Amazon" } },
+         { nil, "f", Facebook, { "URL Events", "Facebook" } },
+         { nil, "g", Google, { "URL Events", "Google" } },
+         { nil, "h", HackerNews, { "URL Events", "Hacker News" } },
+         { nil, "l", LinkedIn, { "URL Events", "LinkedIn" } },
+         { nil, "m", URL:new("https://messenger.com"), { "URL Events", "Facebook Messenger" } },
+         { nil, "n", URL:new("https://netflix.com"), { "URL Events", "Netflix" } },
+         { nil, "r", URL:new("https://reddit.com"), { "URL Events", "Reddit" } },
+         { nil, "w", URL:new("https://wikipedia.org"), { "URL Events", "Wikipedia" } },
+         { nil, "y", YouTube, { "URL Events", "YouTube" } },
+         { nil, "z", URL:new("https://zillow.com"), { "URL Events", "Zillow" } },
+         { { "shift" }, "g", URL:new("https://github.com"), { "URL Events", "GitHub" } },
+         { { "shift" }, "m", URL:new("https://maps.google.com"), { "URL Events", "Google Maps" } },
+         { { "shift" }, "w", URL:new("https://weather.com"), { "URL Events", "Weather" } },
+         { { "shift" }, "y", URL:new("https://yelp.com"), { "URL Events", "Yelp" } },
+         { { "cmd", "shift" }, "m", URL:new("https://mail.google.com"), { "URL Events", "Gmail" } },
+     }
+
+     return urlEvents
 end
 
 --- Defaults.createVolumeEvents()
@@ -376,7 +427,7 @@ end
 ---   * A table containing events for `url`, `select`, `entity`, `volume`, `brightness`, and `normal` modes
 ---   * A table containing all default desktop entity objects
 function Defaults.create(Ki)
-    local urlEvents = Defaults.createUrlEvents()
+    local urlEvents = Defaults.createUrlEvents(Ki.URL)
     local entityEvents, entitySelectEvents = Defaults.createEntityEvents()
     local fileEvents = Defaults.createFileEvents()
     local volumeEvents = Defaults.createVolumeEvents()
