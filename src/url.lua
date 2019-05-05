@@ -79,8 +79,7 @@ URL.behaviors = Entity.behaviors + {
             return URL.behaviors.select(self, eventHandler)
         end
 
-        eventHandler(self.url)
-        return true
+        return self.behaviors.default(self, eventHandler)
     end,
 }
 
@@ -94,7 +93,7 @@ URL.behaviors = Entity.behaviors + {
 --- Returns:
 ---   * The string domain of the url or `nil`
 function URL.getDomain(url)
-    return url:match('^%w+://([^/]+)')
+    return url:match("[%w%.]*%.(%w+%.%w+)")
 end
 
 --- URL:getSelectionItems() -> table of choices or nil
