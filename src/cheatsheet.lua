@@ -103,8 +103,12 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
             return string.reverse(a.hotkey) < string.reverse(b.hotkey)
         end)
 
+        local used_shortcuts = {}
         for _, shortcut in pairs(shortcuts) do
-            table.insert(block, { name = shortcut.name, hotkey = shortcut.hotkey })
+            if used_shortcuts[shortcut.hotkey] == nil then
+                used_shortcuts[shortcut.hotkey] = true
+                table.insert(block, { name = shortcut.name, hotkey = shortcut.hotkey })
+            end
         end
 
         table.insert(shortcutBlocks, { shortcuts = block })
