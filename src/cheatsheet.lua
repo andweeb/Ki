@@ -105,8 +105,8 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
 
         local used_shortcuts = {}
         for _, shortcut in pairs(shortcuts) do
-            if used_shortcuts[shortcut.key] == nil then
-                used_shortcuts[shortcut.key] = true
+            if used_shortcuts[shortcut.hotkey] == nil then
+                used_shortcuts[shortcut.hotkey] = true
                 table.insert(block, { name = shortcut.name, hotkey = shortcut.hotkey })
             end
         end
