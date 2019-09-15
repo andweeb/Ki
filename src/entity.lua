@@ -200,11 +200,13 @@ end
 --- Returns:
 ---   * None
 function Entity.triggerAfterConfirmation(question, action)
-    hs.focus()
+    hs.timer.doAfter(0, function()
+        hs.focus()
 
-    local answer = hs.dialog.blockAlert(question, "", "Confirm", "Cancel")
+        local answer = hs.dialog.blockAlert(question, "", "Confirm", "Cancel")
 
-    if answer == "Confirm" then action() end
+        if answer == "Confirm" then action() end
+    end)
 end
 
 --- Entity.selectionModalShortcuts
