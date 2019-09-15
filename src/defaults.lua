@@ -154,6 +154,7 @@ function Defaults.createEntityEvents()
         { nil, "m", entities.Messages, { "Select Events", "Select a Messages conversation" } },
         { nil, "n", entities.Notes, { "Select Events", "Select a Note" } },
         { nil, "p", entities.Preview, { "Select Events", "Select a Preview window" } },
+        { nil, "q", entities.QuickTimePlayer, { "Select Events", "QuickTime Player" } },
         { nil, "s", entities.Safari, { "Select Events", "Select a Safari tab or window" } },
         { nil, "t", entities.Terminal, { "Select Events", "Select a Terminal window" } },
         { nil, ",", entities.SystemPreferences, { "Entities", "Select a System Preferences pane" } },
