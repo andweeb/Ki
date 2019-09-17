@@ -27,6 +27,7 @@
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
             <li><a href="#createMenuItemEvent">createMenuItemEvent</a></li>
+            <li><a href="#createMenuItemSelectionEvent">createMenuItemSelectionEvent</a></li>
             <li><a href="#focus">focus</a></li>
             <li><a href="#getApplication">getApplication</a></li>
             <li><a href="#getMenuItemList">getMenuItemList</a></li>
@@ -78,6 +79,38 @@
 <li><code>options</code> - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:<ul>
 <li><code>isRegex</code> - a boolean denoting whether there is a regular expression within the menu item name(s)</li>
 <li><code>isToggleable</code> - a boolean denoting whether the menu item parameter is passed in as a list of two items to toggle between, i.e., <code>{ "Play", "Pause" }</code></li>
+<li><code>focusBefore</code> - an optional boolean denoting whether to focus the application before the menu item is selected</li>
+<li><code>focusAfter</code> - an optional boolean denoting whether to focus the application after the menu item is selected</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="createMenuItemSelectionEvent">
+            <a name="//apple_ref/cpp/Method/createMenuItemSelectionEvent" class="dashAnchor"></a>
+            <h5><a href="#createMenuItemSelectionEvent">createMenuItemSelectionEvent</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application.createMenuItemSelectionEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Convenience method to create an event handler that presents a selection modal containing menu items that are nested/expandable underneath at the provided <code>menuItem</code> path, with optionally specified behavior on how the menu item selection occurs</p>
+<p>Parameters:</p>
+<ul>
+<li><code>menuItem</code> - a table list of strings that represent a path to a menu item that expands to menu item list, i.e., <code>{ "File", "Open Recent" }</code></li>
+<li><code>options</code> - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:<ul>
 <li><code>focusBefore</code> - an optional boolean denoting whether to focus the application before the menu item is selected</li>
 <li><code>focusAfter</code> - an optional boolean denoting whether to focus the application after the menu item is selected</li>
 </ul>

@@ -310,6 +310,11 @@ Ki.defaultTransitionEvents = {
             { "Entity Mode", "Exit to Normal Mode" },
         },
         {
+            {"cmd"}, "u",
+            function() Ki.state:enterUrlMode() end,
+            { "Entity Mode", "Transition to URL Mode" },
+        },
+        {
             {"cmd"}, "f",
             function() Ki.state:enterFileMode() end,
             { "Entity Mode", "Transition to File Mode" },
@@ -406,6 +411,7 @@ Ki._defaultStateEvents = {
     { name = "enterBrightnessControlMode", from = "normal", to = "brightness" },
     { name = "enterUrlMode", from = "normal", to = "url" },
     { name = "enterUrlMode", from = "select", to = "url" },
+    { name = "enterUrlMode", from = "entity", to = "url" },
     { name = "exitMode", from = "normal", to = "desktop" },
     { name = "exitMode", from = "entity", to = "desktop" },
     { name = "exitMode", from = "file", to = "desktop" },

@@ -21,7 +21,8 @@ if not _G.requirePackage then
 end
 -- luacov: enable
 
-local Entity = _G.requirePackage("Entity", true)
+local Util = _G.requirePackage("util", true)
+local Entity = _G.requirePackage("entity", true)
 local Application = Entity:subclass("Application")
 local ApplicationBehaviors = {}
 
@@ -118,6 +119,7 @@ function Application:getSelectionItems()
             text = window:title(),
             subText = "Window "..index.." "..state,
             windowId = window:id(),
+            windowIndex = index,
         })
     end
 
@@ -159,6 +161,53 @@ function Application.createMenuItemEvent(menuItem, options)
     end
 end
 
+--- Application.createMenuItemSelectionEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])
+--- Method
+--- Convenience method to create an event handler that presents a selection modal containing menu items that are nested/expandable underneath at the provided `menuItem` path, with optionally specified behavior on how the menu item selection occurs
+---
+--- Parameters:
+---  * `menuItem` - a table list of strings that represent a path to a menu item that expands to menu item list, i.e., `{ "File", "Open Recent" }`
+---  * `options` - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:
+---     * `focusBefore` - an optional boolean denoting whether to focus the application before the menu item is selected
+---     * `focusAfter` - an optional boolean denoting whether to focus the application after the menu item is selected
+---
+--- Returns:
+---  * None
+function Application.createMenuItemSelectionEvent(menuItem, options)
+    options = options or {}
+
+    return function(app, windowChoice)
+        local menuItemList = Application.getMenuItemList(app, menuItem)
+        local choices = {}
+
+        for _, item in pairs(menuItemList) do
+            if item.AXTitle and #item.AXTitle > 0 then
+                table.insert(choices, {
+                    text = item.AXTitle,
+                })
+            end
+        end
+
+        Application.showSelectionModal(choices, function(menuItemChoice)
+            if menuItemChoice then
+                if (options.focusBefore) then
+                    Application.focus(app, windowChoice)
+                end
+
+                local targetMenuItem = Util:clone(menuItem)
+
+                table.insert(targetMenuItem, menuItemChoice.text)
+
+                app:selectMenuItem(targetMenuItem)
+
+                if (options.focusAfter) then
+                    Application.focus(app, windowChoice)
+                end
+            end
+        end)
+    end
+end
+
 --- Application.getMenuItemList(app, menuItemPath) -> table or nil
 --- Method
 --- Gets a list of menu items from a hierarchical menu item path
@@ -177,7 +226,6 @@ function Application.getMenuItemList(app, menuItemPath)
         for _, menuItem in pairs(menuItems) do
             if menuItem.AXTitle == menuItemName then
                 menuItems = menuItem.AXChildren[1]
-
                 if menuItemName ~= menuItemPath[#menuItemPath] then
                     isFound = true
                 end

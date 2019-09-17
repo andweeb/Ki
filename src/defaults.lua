@@ -154,6 +154,7 @@ function Defaults.createEntityEvents()
         { nil, "m", entities.Messages, { "Select Events", "Select a Messages conversation" } },
         { nil, "n", entities.Notes, { "Select Events", "Select a Note" } },
         { nil, "p", entities.Preview, { "Select Events", "Select a Preview window" } },
+        { nil, "q", entities.QuickTimePlayer, { "Select Events", "QuickTime Player" } },
         { nil, "s", entities.Safari, { "Select Events", "Select a Safari tab or window" } },
         { nil, "t", entities.Terminal, { "Select Events", "Select a Terminal window" } },
         { nil, ",", entities.SystemPreferences, { "Entities", "Select a System Preferences pane" } },
@@ -365,11 +366,15 @@ function Defaults.createNormalEvents(Ki)
     function actions.logout()
         Ki.state:exitMode()
 
-        local answer = hs.dialog.blockAlert("Log out from your computer?", "", "Log out", "Cancel")
+        hs.timer.doAfter(0, function()
+            hs.focus()
 
-        if answer == "Log out" then
-            hs.osascript.applescript([[ tell application "System Events" to log out ]])
-        end
+            local answer = hs.dialog.blockAlert("Log out from your computer?", "", "Log out", "Cancel")
+
+            if answer == "Log out" then
+                hs.osascript.applescript([[ tell application "System Events" to log out ]])
+            end
+        end)
     end
 
     function actions.startScreenSaver()
@@ -388,21 +393,29 @@ function Defaults.createNormalEvents(Ki)
     function actions.restart()
         Ki.state:exitMode()
 
-        local answer = hs.dialog.blockAlert("Restart your computer?", "", "Restart", "Cancel")
+        hs.timer.doAfter(0, function()
+            hs.focus()
 
-        if answer == "Restart" then
-            hs.osascript.applescript([[ tell application "Finder" to restart ]])
-        end
+            local answer = hs.dialog.blockAlert("Restart your computer?", "", "Restart", "Cancel")
+
+            if answer == "Restart" then
+                hs.osascript.applescript([[ tell application "Finder" to restart ]])
+            end
+        end)
     end
 
     function actions.shutdown()
         Ki.state:exitMode()
 
-        local answer = hs.dialog.blockAlert("Shut down your computer?", "", "Shut Down", "Cancel")
+        hs.timer.doAfter(0, function()
+            hs.focus()
 
-        if answer == "Shut Down" then
-            hs.osascript.applescript([[ tell application "System Events" to shut down ]])
-        end
+            local answer = hs.dialog.blockAlert("Shut down your computer?", "", "Shut Down", "Cancel")
+
+            if answer == "Shut Down" then
+                hs.osascript.applescript([[ tell application "System Events" to shut down ]])
+            end
+        end)
     end
 
     local normalEvents = {

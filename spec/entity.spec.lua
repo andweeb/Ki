@@ -179,10 +179,14 @@ local function triggerAfterConfirmationTests()
             local mockDialog = {
                 blockAlert = function() return test.answer end,
             }
+            local mockTimer = {
+                doAfter = function(_, callback) callback() end
+            }
 
             _G.hs = mock(mockHs({
                 dialog = mockDialog,
                 focus = focusSpy,
+                timer = mockTimer,
             }))
 
             entity.triggerAfterConfirmation(table.unpack(test.args))

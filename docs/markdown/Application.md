@@ -9,6 +9,7 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
  * [behaviors](#behaviors)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [createMenuItemEvent](#createMenuItemEvent)
+ * [createMenuItemSelectionEvent](#createMenuItemSelectionEvent)
  * [focus](#focus)
  * [getApplication](#getApplication)
  * [getMenuItemList](#getMenuItemList)
@@ -34,6 +35,14 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Convenience method to create an event handler that selects a menu item, with optionally specified behavior on how the menu item selection occurs                                                                     |
 | **Parameters**                              | <ul><li>`menuItem` - the menu item to select, specified as either a string or a table</li><li>`options` - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:</li><li>   `isRegex` - a boolean denoting whether there is a regular expression within the menu item name(s)</li><li>   `isToggleable` - a boolean denoting whether the menu item parameter is passed in as a list of two items to toggle between, i.e., `{ "Play", "Pause" }`</li><li>   `focusBefore` - an optional boolean denoting whether to focus the application before the menu item is selected</li><li>   `focusAfter` - an optional boolean denoting whether to focus the application after the menu item is selected</li></ul> |
+| **Returns**                                 | <ul><li>None</li></ul>          |
+
+| [createMenuItemSelectionEvent](#createMenuItemSelectionEvent)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Application.createMenuItemSelectionEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Convenience method to create an event handler that presents a selection modal containing menu items that are nested/expandable underneath at the provided `menuItem` path, with optionally specified behavior on how the menu item selection occurs                                                                     |
+| **Parameters**                              | <ul><li>`menuItem` - a table list of strings that represent a path to a menu item that expands to menu item list, i.e., `{ "File", "Open Recent" }`</li><li>`options` - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:</li><li>   `focusBefore` - an optional boolean denoting whether to focus the application before the menu item is selected</li><li>   `focusAfter` - an optional boolean denoting whether to focus the application after the menu item is selected</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
 | [focus](#focus)         |                                                                                     |
