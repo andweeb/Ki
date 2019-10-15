@@ -64,7 +64,7 @@ Definitions of default events and entities
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Defines the initial set of actions with predefined keybindings for `url` mode                                                                     |
 | **Parameters**                              | <ul><li>None</li></ul> |
-| **Returns**                                 | <ul><li>A list of `url` workflow events</li></ul>          |
+| **Returns**                                 | <ul><li>A list of `url` workflow events</li><li>A table of `url` entities</li></ul>          |
 
 | [createVolumeEvents](#createVolumeEvents)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

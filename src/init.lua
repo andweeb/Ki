@@ -104,7 +104,7 @@ Ki.File = _G.requirePackage("file", true)
 Ki.URL = _G.requirePackage("url", true)
 
 local Defaults = _G.requirePackage("defaults", true)
-local defaultWorkflowEvents, defaultEntities = Defaults.create(Ki)
+local defaultWorkflowEvents, defaultEntities, defaultUrlEntities = Defaults.create(Ki)
 
 --- Ki.defaultWorkflowEvents
 --- Variable
@@ -115,6 +115,11 @@ Ki.defaultWorkflowEvents = defaultWorkflowEvents
 --- Variable
 --- A table containing the default automatable desktop entity instances in Ki.
 Ki.defaultEntities = defaultEntities
+
+--- Ki.defaultUrlEntities
+--- Variable
+--- A table containing the default automatable URL entity instances in Ki.
+Ki.defaultUrlEntities = defaultUrlEntities
 
 --- Ki.state
 --- Variable
