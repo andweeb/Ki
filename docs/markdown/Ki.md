@@ -46,6 +46,7 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
  * [Application](#Application)
  * [defaultEntities](#defaultEntities)
  * [defaultTransitionEvents](#defaultTransitionEvents)
+ * [defaultUrlEntities](#defaultUrlEntities)
  * [defaultWorkflowEvents](#defaultWorkflowEvents)
  * [Entity](#Entity)
  * [File](#File)
@@ -80,6 +81,12 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
 | **Signature**                               | `Ki.defaultTransitionEvents`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing the default transition events for all default modes in Ki.                                                                     |
+
+| [defaultUrlEntities](#defaultUrlEntities)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.defaultUrlEntities`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A table containing the default automatable URL entity instances in Ki.                                                                     |
 
 | [defaultWorkflowEvents](#defaultWorkflowEvents)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
