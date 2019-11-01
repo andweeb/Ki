@@ -120,28 +120,6 @@ local function getSelectionItemsTests()--{{{
             },
         },
         {
-            name = "returns basic url selection items with favicon images",
-            paths = {
-                "https://github.com/andweeb",
-                "https://github.com/aaparella",
-            },
-            domain = "github.com",
-            imageFromURL = "favicon",
-            displaySelectionModalIcons = true,
-            expectedResult = {
-                {
-                    text = "https://github.com/andweeb",
-                    url = "https://github.com/andweeb",
-                    image = "favicon",
-                },
-                {
-                    text = "https://github.com/aaparella",
-                    url = "https://github.com/aaparella",
-                    image = "favicon",
-                },
-            },
-        },
-        {
             name = "returns url selection items from sub-paths",
             url = "https://github.com",
             paths = { "/andweeb", "/aaparella" },
@@ -176,30 +154,6 @@ local function getSelectionItemsTests()--{{{
             },
         },
         {
-            name = "returns named url selection items with favicon images",
-            paths = {
-                { name = "Andrew's Github Profile", path = "https://github.com/andweeb" },
-                { name = "Alex's Github Profile", path = "https://github.com/aaparella" },
-            },
-            domain = "github.com",
-            imageFromURL = "favicon",
-            displaySelectionModalIcons = true,
-            expectedResult = {
-                {
-                    text = "Andrew's Github Profile",
-                    subText = "https://github.com/andweeb",
-                    url = "https://github.com/andweeb",
-                    image = "favicon",
-                },
-                {
-                    text = "Alex's Github Profile",
-                    subText = "https://github.com/aaparella",
-                    url = "https://github.com/aaparella",
-                    image = "favicon",
-                },
-            },
-        },
-        {
             name = "returns named url selection items from sub-paths",
             url = "https://github.com",
             paths = {
@@ -219,16 +173,79 @@ local function getSelectionItemsTests()--{{{
                 },
             },
         },
+        {
+            name = "does not set favicon when selection modal is not active",
+            url = "https://github.com",
+            domain = "github.com",
+            selectionModal = nil,
+            paths = {
+                { name = "Andrew's Github Profile", path = "/andweeb" },
+            },
+            displaySelectionModalIcons = true,
+            faviconCallbackArg = "favicon",
+            expectedResult = {
+                {
+                    text = "Andrew's Github Profile",
+                    subText = "https://github.com/andweeb",
+                    url = "https://github.com/andweeb",
+                },
+            },
+        },
+        {
+            name = "does not set favicon when choice index does not exist",
+            url = "https://github.com",
+            domain = "github.com",
+            selectionModal = { choices = function() end },
+            paths = {
+                { name = "Andrew's Github Profile", path = "/andweeb" },
+            },
+            deferFaviconCallback = false,
+            displaySelectionModalIcons = true,
+            faviconCallbackArg = "favicon",
+            expectedResult = {
+                {
+                    text = "Andrew's Github Profile",
+                    subText = "https://github.com/andweeb",
+                    url = "https://github.com/andweeb",
+                },
+            },
+        },
+        {
+            name = "sets favicon when selection modal is active",
+            url = "https://github.com",
+            domain = "github.com",
+            selectionModal = { choices = function() end },
+            paths = {
+                { name = "Andrew's Github Profile", path = "/andweeb" },
+            },
+            deferFaviconCallback = true,
+            displaySelectionModalIcons = true,
+            faviconCallbackArg = "favicon",
+            expectedResult = {
+                {
+                    text = "Andrew's Github Profile",
+                    subText = "https://github.com/andweeb",
+                    url = "https://github.com/andweeb",
+                    image = "favicon",
+                },
+            },
+        },
     }
 
     -- Run `getSelectionItems` method test cases
     for _, test in pairs(tests) do
         it(test.name, function()
+            local imageFromURLCallback = nil
             local mockHs = hammerspoonMocker()
             _G.hs = mock(mockHs({
                 image = {
-                    imageFromURL = function()
-                        return test.imageFromURL
+                    imageFromURL = function(_, callback)
+                        if test.faviconCallbackArg then
+                            imageFromURLCallback = function()
+                                callback(test.faviconCallbackArg)
+                            end
+                            callback(test.faviconCallbackArg)
+                        end
                     end
                 },
             }))
@@ -237,10 +254,15 @@ local function getSelectionItemsTests()--{{{
 
             URL.url = test.url
             URL.paths = test.paths
+            URL.selectionModal = test.selectionModal
             URL.getDomain = function() return test.domain end
             URL.displaySelectionModalIcons = test.displaySelectionModalIcons or false
 
             local result = URL:getSelectionItems()
+
+            if test.deferFaviconCallback then
+                imageFromURLCallback()
+            end
 
             assert.are.same(test.expectedResult, result)
         end)

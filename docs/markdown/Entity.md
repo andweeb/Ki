@@ -7,6 +7,7 @@ Entity class that represents some abstract automatable desktop entity
 ## API Overview
 * Variables - Configurable values
  * [behaviors](#behaviors)
+ * [selectionModal](#selectionModal)
  * [selectionModalShortcuts](#selectionModalShortcuts)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [dispatchAction](#dispatchAction)
@@ -28,6 +29,12 @@ Entity class that represents some abstract automatable desktop entity
 | **Signature**                               | `Entity.behaviors`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table keyed by mode name to define (optional) entity behavior contextual to the mode at the time of an event. The table values are functions that take in the following arguments to invoke the event handler in some mode-specific way:                                                                     |
+
+| [selectionModal](#selectionModal)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity.selectionModal`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | The selection modal [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.                                                                     |
 
 | [selectionModalShortcuts](#selectionModalShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

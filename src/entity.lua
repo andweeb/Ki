@@ -223,6 +223,11 @@ Entity.selectionModalShortcuts = {
     { { "ctrl" }, "u", function(modal) modal:selectedRow(modal:selectedRow() - modal:rows()) end },
 }
 
+--- Entity.selectionModal
+--- Variable
+--- The selection modal [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.
+Entity.selectionModal = nil
+
 --- Entity.showSelectionModal(choices, callback)
 --- Method
 --- Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.
@@ -235,7 +240,10 @@ Entity.selectionModalShortcuts = {
 ---  * None
 function Entity.showSelectionModal(choices, callback)
     local selectionListener = nil
+
     local modal = hs.chooser.new(function(choice)
+        Entity.selectionModal = nil
+
         -- Stop selection listener and invoke the event handler
         selectionListener:stop()
         callback(choice)
@@ -244,6 +252,8 @@ function Entity.showSelectionModal(choices, callback)
     modal:choices(choices)
     modal:searchSubText(true)
     modal:bgDark(true)
+
+    Entity.selectionModal = modal
 
     -- Create an event listener while the chooser is visible to select rows with ctrl+j/k
     selectionListener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)

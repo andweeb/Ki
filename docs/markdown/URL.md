@@ -51,7 +51,7 @@ URL class that subclasses [Entity](Entity.html) to represent some automatable UR
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `URL:getSelectionItems() -> table of choices or nil`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Generates a list of selection items using the instance's `self.paths` list                                                                     |
+| **Description**                             | Generates a list of selection items using the instance's `self.paths` list. Each path item will display the page favicon if the [`URL.displaySelectionModalIcons`](URL.html#displaySelectionModalIcons) option is set to `true`.                                                                     |
 | **Returns**                                 | <ul><li> A list of choice objects</li></ul>          |
 
 | [initialize](#initialize)         |                                                                                     |

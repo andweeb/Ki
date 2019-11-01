@@ -93,19 +93,19 @@ URL.behaviors = Entity.behaviors + {
 --- Returns:
 ---   * The string domain of the url or `nil`
 function URL.getDomain(url)
-    return url:match("[%w%.]*%.(%w+%.%w+)")
+    return url:match("[%w%.]*%.(%w+%.%w+)") or url:match("[%w%.]*%/(%w+%.%w+)")
 end
 
 --- URL:getSelectionItems() -> table of choices or nil
 --- Method
---- Generates a list of selection items using the instance's `self.paths` list
+--- Generates a list of selection items using the instance's `self.paths` list. Each path item will display the page favicon if the [`URL.displaySelectionModalIcons`](URL.html#displaySelectionModalIcons) option is set to `true`.
 ---
 --- Returns:
 ---   * A list of choice objects
 function URL:getSelectionItems()
     local choices = {}
 
-    for _, path in pairs(self.paths) do
+    for index, path in pairs(self.paths) do
         local pathStr = path.path or path
 
         if string.sub(pathStr, 1, 1) == "/" then
@@ -125,8 +125,21 @@ function URL:getSelectionItems()
 
         if self.displaySelectionModalIcons then
             local domain = self.getDomain(pathStr)
+
             if domain then
-                choice.image = hs.image.imageFromURL("http://www.google.com/s2/favicons?domain_url="..domain)
+                local favicon = "http://www.google.com/s2/favicons?domain_url="..domain
+
+                -- Asynchronously load favicon images individually per selection item
+                hs.image.imageFromURL(favicon, function(image)
+                    if not self.selectionModal then
+                        return
+                    end
+
+                    if choices[index] then
+                        choices[index].image = image
+                        self.selectionModal:choices(choices)
+                    end
+                end)
             end
         end
 
