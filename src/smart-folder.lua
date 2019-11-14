@@ -94,7 +94,7 @@ function SmartFolder:showFileSearchSelectionModal(path, callback)
     ]])
     local choices = self.createFileChoices(string.gmatch(output, "[^\n]+"))
 
-    self.showSelectionModal(choices, callback)
+    self:showSelectionModal(choices, callback)
 end
 
 --- SmartFolder:openFile(path)

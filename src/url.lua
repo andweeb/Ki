@@ -60,7 +60,7 @@ URL.behaviors = Entity.behaviors + {
                 end
             end
 
-            self.showSelectionModal(choices, onSelection)
+            self:showSelectionModal(choices, onSelection)
         end
 
         return true

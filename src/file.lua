@@ -320,7 +320,7 @@ function File:showFileSelectionModal(path, handler)
         image = self.getFileIcon(absolutePath),
     })
 
-    self.showSelectionModal(choices, function(choice)
+    self:showSelectionModal(choices, function(choice)
         if choice then
             handler(choice.filePath)
         end
@@ -407,7 +407,7 @@ function File:openWith(path)
 
     -- Defer execution to avoid conflicts with the prior selection modal that just closed
     hs.timer.doAfter(0, function()
-        self.showSelectionModal(choices, function(choice)
+        self:showSelectionModal(choices, function(choice)
             if not choice then return end
 
             self:runFileModeApplescript({

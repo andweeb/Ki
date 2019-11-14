@@ -60,7 +60,7 @@ function ApplicationBehaviors.select(self, eventHandler)
             end
         end
 
-        self.showSelectionModal(choices, onSelection)
+        self:showSelectionModal(choices, onSelection)
     end
 
     return true
@@ -188,7 +188,7 @@ function Application.createMenuItemSelectionEvent(menuItem, options)
             end
         end
 
-        Application.showSelectionModal(choices, function(menuItemChoice)
+        Application:showSelectionModal(choices, function(menuItemChoice)
             if menuItemChoice then
                 if (options.focusBefore) then
                     Application.focus(app, windowChoice)
