@@ -52,6 +52,8 @@ Entity.behaviors = {
 -- Allow behaviors to be overwritten
 setmetatable(Entity.behaviors, {
     __add = function(lhs, rhs)
+        lhs = util:clone(lhs)
+
         for mode, behavior in pairs(rhs) do
             lhs[mode] = behavior
         end
