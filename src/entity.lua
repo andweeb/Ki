@@ -191,21 +191,22 @@ function Entity:getSelectionItems() -- luacheck: ignore
 end
 -- luacov: enable
 
---- Entity.triggerAfterConfirmation(question, action)
+--- Entity.triggerAfterConfirmation(question, details, action)
 --- Method
 --- Opens a dialog block alert for user confirmation before triggering an action
 ---
 --- Parameters:
----  * `question` - Text to display in the block alert
+---  * `question` - Text to display in the block alert as the title
+---  * `details` - Text to display in the block alert as the description
 ---  * `action` - The callback function to be invoked after user confirmation
 ---
 --- Returns:
 ---   * None
-function Entity.triggerAfterConfirmation(question, action)
+function Entity.triggerAfterConfirmation(question, details, action)
     hs.timer.doAfter(0, function()
         hs.focus()
 
-        local answer = hs.dialog.blockAlert(question, "", "Confirm", "Cancel")
+        local answer = hs.dialog.blockAlert(question, details, "Confirm", "Cancel")
 
         if answer == "Confirm" then action() end
     end)
@@ -230,17 +231,21 @@ Entity.selectionModalShortcuts = {
 --- The selection modal [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.
 Entity.selectionModal = nil
 
---- Entity:showSelectionModal(choices, callback)
+--- Entity:showSelectionModal(choices, callback[, options])
 --- Method
 --- Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.
 ---
 --- Parameters:
 ---  * `choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal
 ---  * `callback` - The callback function invoked when a choice is selected from the modal
+---  * `options` - A table containing various options to configure the modal:
+---    * `placeholderText` - Set the placeholder text
 ---
 --- Returns:
 ---  * None
-function Entity:showSelectionModal(choices, callback)
+function Entity:showSelectionModal(choices, callback, options)
+    options = options or {}
+
     local selectionListener = nil
 
     local modal = hs.chooser.new(function(choice)
@@ -254,6 +259,15 @@ function Entity:showSelectionModal(choices, callback)
     modal:choices(choices)
     modal:searchSubText(true)
     modal:bgDark(true)
+
+    -- Dynamically configure the chooser with specified options
+    for methodName, args in pairs(options) do
+        if type(args) == "table" then
+            modal[methodName](modal, table.unpack(args))
+        else
+            modal[methodName](modal, args)
+        end
+    end
 
     self.selectionModal = modal
 

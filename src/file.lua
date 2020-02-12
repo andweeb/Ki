@@ -92,17 +92,27 @@ function File:initialize(path, shortcuts, options)
 
     local attributes = value
     local isDirectory = attributes.mode == "directory"
-    local openFileInFolder = self:createEvent(path, function(target) self.open(target) end)
+    local openFileInFolder = self:createEvent(path, "Open a file", function(target)
+        self.open(target)
+    end)
 
     local actions = {
         copy = function(target) self:copy(target) end,
         move = function(target) self:move(target) end,
         showCheatsheet = function() self.cheatsheet:show() end,
         openFileInFolder = openFileInFolder,
-        openFileInFolderWith = self:createEvent(path, function(target) self:openWith(target) end),
-        showInfoForFileInFolder = self:createEvent(path, function(target) self:openInfoWindow(target) end),
-        quickLookFileInFolder = self:createEvent(path, function(target) hs.execute("qlmanage -p "..target) end),
-        deleteFileInFolder = self:createEvent(path, function(target) self:moveToTrash(target) end),
+        openFileInFolderWith = self:createEvent(path, "Open file with application", function(target)
+            self:openWith(target)
+        end),
+        showInfoForFileInFolder = self:createEvent(path, "Show info for file", function(target)
+            self:openInfoWindow(target)
+        end),
+        quickLookFileInFolder = self:createEvent(path, "View file with QuickLook", function(target)
+            hs.execute("qlmanage -p "..target)
+        end),
+        deleteFileInFolder = self:createEvent(path, "Move file to trash", function(target)
+            self:moveToTrash(target)
+        end),
         open = function(target, shouldNavigate)
             if shouldNavigate then
                 return openFileInFolder(target)
@@ -145,18 +155,21 @@ function File:initialize(path, shortcuts, options)
     self.cheatsheet:init(self.path, cheatsheetDescription, mergedShortcuts)
 end
 
---- File:createEvent(path) -> function
+--- File:createEvent(path, placeholderText, handler) -> function
 --- Method
 --- Convenience method to create file events that share the similar behavior of allowing navigation before item selection
 ---
 --- Parameters:
 ---  * `path` - The path of a file
+---  * `placeholderText` - Text to display as a placeholder in the selection modal
+---  * `handler` - the selection event handler function that takes in the following arguments:
+---     * `path` - the selected target path
 ---
 --- Returns:
 ---   * An event handler function
-function File:createEvent(path, action)
+function File:createEvent(path, placeholderText, handler)
     return function()
-        self:navigate(path, action)
+        self:navigate(path, placeholderText, handler)
     end
 end
 
@@ -179,6 +192,22 @@ function File:runFileModeApplescript(viewModel)
         self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
     end
 end
+
+--- File:getFileName(path) -> string
+--- Method
+--- Extracts a filename from a file path
+---
+--- Parameters:
+---  * `path` - The path of a file
+---
+--- Returns:
+---   * The filename or nil
+function File.getFileName(path)
+    if not path then return end
+
+    return path:match("^.+/(.+)$")
+end
+
 
 --- File:getFileIcon(path) -> [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html)
 --- Method
@@ -204,35 +233,39 @@ function File.getFileIcon(path)
     return fileImage
 end
 
---- File:navigate(path, handler)
+--- File:navigate(path, placeholderText, handler)
 --- Method
 --- Recursively navigates through parent and child directories until a selection is made
 ---
 --- Parameters:
 ---  * `path` - the path of the target file
+---  * `placeholderText` - Text to display as a placeholder in the selection modal
 ---  * `handler` - the selection callback handler function invoked with the following arguments:
 ---    * `targetFilePath` - the target path of the selected file
 ---
 --- Returns:
 ---   * None
-function File:navigate(path, handler)
+function File:navigate(path, placeholderText, handler)
     local absolutePath = hs.fs.pathToAbsolute(path)
+    local function onSelection(targetPath, shouldTriggerAction)
+        local attributes = hs.fs.attributes(targetPath)
+
+        if attributes.mode == "directory" and not shouldTriggerAction then
+            self:navigate(targetPath, placeholderText, handler)
+        else
+            handler(targetPath)
+        end
+    end
 
     -- Defer execution to avoid conflicts with the selection modal that just previously closed
     hs.timer.doAfter(0, function()
-        self:showFileSelectionModal(absolutePath, function(targetPath, shouldTriggerAction)
-            local attributes = hs.fs.attributes(targetPath)
-
-            if attributes.mode == "directory" and not shouldTriggerAction then
-                self:navigate(targetPath, handler)
-            else
-                handler(targetPath)
-            end
-        end)
+        self:showFileSelectionModal(absolutePath, onSelection, {
+            placeholderText = placeholderText,
+        })
     end)
 end
 
---- File:showFileSelectionModal(path, handler) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list
+--- File:showFileSelectionModal(path, handler[, options]) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list
 --- Method
 --- Shows a selection modal with a list of files at a given path.
 ---
@@ -241,10 +274,11 @@ end
 ---  * `handler` - the selection event handler function that takes in the following arguments:
 ---     * `targetPath` - the selected target path
 ---     * `shouldTriggerAction` - a boolean value to ensure the action is triggered
+---  * `options` - TODO
 ---
 --- Returns:
 ---   * A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects
-function File:showFileSelectionModal(path, handler)
+function File:showFileSelectionModal(path, handler, options)
     local choices = {}
     local parentPathRegex = "^(.+)/.+$"
     local absolutePath = hs.fs.pathToAbsolute(path)
@@ -264,7 +298,7 @@ function File:showFileSelectionModal(path, handler)
 
         -- Defer execution to avoid conflicts with the prior selection modal that just closed
         hs.timer.doAfter(0, function()
-            self:showFileSelectionModal(path, handler)
+            self:showFileSelectionModal(path, handler, options)
         end)
     end
     local navigationShortcuts = {
@@ -320,11 +354,13 @@ function File:showFileSelectionModal(path, handler)
         image = self.getFileIcon(absolutePath),
     })
 
-    self:showSelectionModal(choices, function(choice)
+    local function onSelection(choice)
         if choice then
             handler(choice.filePath)
         end
-    end)
+    end
+
+    self:showSelectionModal(choices, onSelection, options)
 end
 
 --- File:open(path)
@@ -405,17 +441,21 @@ function File:openWith(path)
     local output = hs.execute(shellscript)
     local choices = self.createFileChoices(string.gmatch(output, "[^\n]+"))
 
+    local function onSelection(choice)
+        if not choice then return end
+
+        self:runFileModeApplescript({
+            operation = "open-with",
+            filePath1 = path,
+            filePath2 = choice.path,
+        })
+    end
+
     -- Defer execution to avoid conflicts with the prior selection modal that just closed
     hs.timer.doAfter(0, function()
-        self:showSelectionModal(choices, function(choice)
-            if not choice then return end
-
-            self:runFileModeApplescript({
-                operation = "open-with",
-                filePath1 = path,
-                filePath2 = choice.path,
-            })
-        end)
+        self:showSelectionModal(choices, onSelection, {
+            placeholderText = "Open with application",
+        })
     end)
 end
 
@@ -442,9 +482,11 @@ end
 --- Returns:
 ---   * None
 function File:moveToTrash(path)
-    local question = "Move \""..path.."\" to the Trash?"
+    local filename = self.getFileName(path)
+    local question = "Move \""..filename.."\" to the Trash?"
+    local details = "New file location:\n".."~/.Trash/"..filename
 
-    self.triggerAfterConfirmation(question, function()
+    self.triggerAfterConfirmation(question, details, function()
         self:runFileModeApplescript({ operation = "move-to-trash", filePath1 = path })
     end)
 end
@@ -454,16 +496,19 @@ end
 --- Method to move one file into a directory. Opens a navigation modal for selecting the target file, then on selection opens another navigation modal to select the destination path. A confirmation dialog is presented to proceed with moving the file to the target directory.
 ---
 --- Parameters:
----  * `path` - the initial directory path to select a target file to move
+---  * `path` - the initial directory path to select a target file to move from
 ---
 --- Returns:
 ---   * None
 function File:move(initialPath)
-    self:navigate(initialPath, function(targetPath)
-        self:navigate(initialPath, function(destinationPath)
-            local question = "Move \""..targetPath.."\" to \""..destinationPath.."\"?"
+    self:navigate(initialPath, "Select file to be moved", function(targetPath)
+        self:navigate(initialPath, "Select destination folder", function(destinationPath)
+            local targetFile = self.getFileName(targetPath)
+            local destinationFile = self.getFileName(destinationPath)
+            local question = "Move \""..targetFile.."\" to \""..destinationFile.."\"?"
+            local details = "New file location:\n"..destinationPath.."/"..targetFile
 
-            self.triggerAfterConfirmation(question, function()
+            self.triggerAfterConfirmation(question, details, function()
                 self:runFileModeApplescript({
                     operation = "move",
                     filePath1 = targetPath,
@@ -484,11 +529,14 @@ end
 --- Returns:
 ---   * None
 function File:copy(initialPath)
-    self:navigate(initialPath, function(targetPath)
-        self:navigate(initialPath, function(destinationPath)
-            local question = "Copy \""..targetPath.."\" to \""..destinationPath.."\"?"
+    self:navigate(initialPath, "Select file to be copied", function(targetPath)
+        self:navigate(initialPath, "Select destination folder", function(destinationPath)
+            local targetFile = self.getFileName(targetPath)
+            local destinationFile = self.getFileName(destinationPath)
+            local question = "Copy \""..targetFile.."\" to \""..destinationFile.."\"?"
+            local details = "New file location:\n"..destinationPath.."/"..targetFile
 
-            self.triggerAfterConfirmation(question, function()
+            self.triggerAfterConfirmation(question, details, function()
                 self:runFileModeApplescript({
                     operation = "copy",
                     filePath1 = targetPath,
