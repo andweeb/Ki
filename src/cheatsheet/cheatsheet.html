@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style type="text/css">
+            {{stylesheet}}
+        </style>
+    </head>
+    <body>
+        <div class="cheatsheet">
+            <div class="content">
+                <div id="columns"></div>
+            </div>
+            <hr>
+            <footer>
+                <div>
+                    {{#icon}}
+                    <img class="icon" src="{{icon}}"/>
+                    {{/icon}}
+                    <div class="title-section">
+                        <div class="title">{{title}}</div>
+                        <small class="subtitle">{{description}}</small>
+                    </div>
+                </div>
+                <input autofocus id="search" type="search">
+            </footer>
+        </div>
+        <script>window.SHORTCUT_BLOCKS = {{{data}}}</script>
+        <script>{{{javascript}}}</script>
+    </body>
+</html>

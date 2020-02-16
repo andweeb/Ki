@@ -21,7 +21,7 @@ if not _G.requirePackage then
 end
 -- luacov: enable
 
-local cheatsheet = _G.requirePackage("cheatsheet", true)
+local Cheatsheet = _G.requirePackage("cheatsheet", true)
 local Entity = _G.requirePackage("Entity", true)
 local URL = Entity:subclass("URL")
 
@@ -181,10 +181,9 @@ function URL:initialize(url, shortcuts)
 
     self.url = url
     self.shortcuts = mergedShortcuts
-    self.cheatsheet = cheatsheet
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for url: "..self.url
-    self.cheatsheet:init(self.path, cheatsheetDescription, mergedShortcuts)
+    self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, mergedShortcuts)
 end
 
 --- URL:open(url)

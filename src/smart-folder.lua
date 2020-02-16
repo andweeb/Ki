@@ -21,7 +21,7 @@ if not _G.requirePackage then
 end
 -- luacov: enable
 
-local cheatsheet = _G.requirePackage("cheatsheet", true)
+local Cheatsheet = _G.requirePackage("cheatsheet", true)
 local File = _G.requirePackage("File", true)
 local SmartFolder = File:subclass("File")
 
@@ -69,10 +69,9 @@ function SmartFolder:initialize(path, shortcuts)
 
     self.path = path
     self.shortcuts = mergedShortcuts
-    self.cheatsheet = cheatsheet
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for smart folder at "..self.path
-    self.cheatsheet:init(self.path, cheatsheetDescription, mergedShortcuts)
+    self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, mergedShortcuts)
 end
 
 --- SmartFolder:showFileSearchSelectionModal(path, callback)

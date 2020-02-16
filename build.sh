@@ -11,10 +11,11 @@ LINK_TARGET="$HOME/.hammerspoon/Spoons/$SPOON"
 
 build() {
     # Clear out dist folder
-    if [ ! -z "$DIST_DIR" ]; then
+    if [ -n "$DIST_DIR" ]; then
         rm -rf "${DIST_DIR:?}"/*
         echo "build.sh: Cleared out content in dist folder"
     fi
+
     mkdir -p "$BUILD_DIR"
 
     # Copy dependencies from root directory to folder
@@ -25,10 +26,11 @@ build() {
     echo "build.sh: Copied all project dependencies to deps folder"
 
     # Copy source files and generated docs from root directory to folder
-    (cd "$SRC_DIR" && for file in *.{lua,html,css}; do cp "$file" "$BUILD_DIR/$file"; done)
+    (cd "$SRC_DIR" && for file in *.lua; do cp "$file" "$BUILD_DIR/$file"; done)
+    cp -r "$WORKING_DIR/bin" "$BUILD_DIR/bin"
     cp -r "$WORKING_DIR/src/entities" "$BUILD_DIR/entities"
     cp -r "$WORKING_DIR/src/osascripts" "$BUILD_DIR/osascripts"
-    cp -r "$WORKING_DIR/bin" "$BUILD_DIR/bin"
+    mkdir -p "$BUILD_DIR/cheatsheet" && cp -r src/cheatsheet/*.{html,css,js} "$BUILD_DIR/cheatsheet"
     if [ -f "$WORKING_DIR/docs.json" ]; then
         cp "$WORKING_DIR/docs.json" "$BUILD_DIR/docs.json"
     fi

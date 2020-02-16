@@ -21,7 +21,7 @@ if not _G.requirePackage then
 end
 -- luacov: enable
 
-local cheatsheet = _G.requirePackage("cheatsheet", true)
+local Cheatsheet = _G.requirePackage("cheatsheet", true)
 local Entity = _G.requirePackage("Entity", true)
 local File = Entity:subclass("File")
 
@@ -147,12 +147,11 @@ function File:initialize(path, shortcuts, options)
 
     self.path = path
     self.shortcuts = mergedShortcuts
-    self.cheatsheet = cheatsheet
     self.showHiddenFiles = options.showHiddenFiles or false
     self.sortAttribute = options.sortAttribute or "modification"
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for file "..self.path
-    self.cheatsheet:init(self.path, cheatsheetDescription, mergedShortcuts)
+    self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, mergedShortcuts)
 end
 
 --- File:createEvent(path, placeholderText, handler) -> function

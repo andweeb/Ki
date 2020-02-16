@@ -79,6 +79,7 @@ _G.SHORTCUT_METADATA_INDEX = 4
 
 local fsm = _G.requirePackage("fsm")
 local util = _G.requirePackage("util", true)
+local Cheatsheet = _G.requirePackage("cheatsheet", true)
 
 -- Allow Spotlight to be used to find alternate names for applications
 hs.application.enableSpotlightForNameSearches(true)
@@ -631,8 +632,9 @@ function Ki:start()
         end
     end
 
-    -- Create Ki cheatsheet
-    self.cheatsheet = _G.requirePackage("cheatsheet", true)
+    -- Initialize cheat sheet with both default and/or custom transition and workflow events
+    local description = "Shortcuts for Ki modes, entities, and transition and workflow events"
+    self.cheatsheet = Cheatsheet:new("Ki", description, actions)
 
     local function showCheatsheet()
         self.cheatsheet:show()
@@ -643,10 +645,6 @@ function Ki:start()
     table.insert(self.workflowEvents.entity, {
         { "shift" }, "/", showCheatsheet, { "Entities", "Cheatsheet" },
     })
-
-    -- Initialize cheat sheet with both default and/or custom transition and workflow events
-    local description = "Shortcuts for Ki modes, entities, and transition and workflow events"
-    self.cheatsheet:init("Ki", description, actions)
 
     -- Start keydown event listener
     return self.listener:start()

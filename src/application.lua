@@ -263,11 +263,6 @@ function Application:initialize(name, shortcuts, autoExitMode)
         { nil, "h", self.createMenuItemEvent("Hide "..name), { name, "Hide Application" } },
         { nil, "q", self.createMenuItemEvent("Quit "..name), { name, "Quit Application" } },
         { nil, ",", self.createMenuItemEvent("Preferences...", true), { name, "Open Preferences" } },
-        {
-            { "shift" }, "/",
-            function() self.cheatsheet:show() end,
-            { name, "Show Cheatsheet" },
-        },
     }
 
     local mergedShortcuts = self.mergeShortcuts(shortcuts, commonShortcuts)

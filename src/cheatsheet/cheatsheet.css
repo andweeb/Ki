@@ -25,6 +25,7 @@ footer {
     padding: 10px 15px;
     align-items: center;
     background-color: #edf0f2;
+    justify-content: space-between;
 }
 
 .title-section {
@@ -59,7 +60,7 @@ footer {
     padding: 30px 20px 15px 20px;
 }
 
-.columns {
+#columns {
     border-left: none;
     column-rule: 1px solid #ddd;
     column-count: 4;

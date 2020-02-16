@@ -1,0 +1,16 @@
+{
+  "name": "cheatsheet",
+  "version": "1.0.0",
+  "description": "Cheatsheet shortcut block rendering and searching logic",
+  "main": "main.js",
+  "scripts": {
+    "build": "browserify main.js -o cheatsheet.js"
+  },
+  "dependencies": {
+    "browserify": "^16.5.0",
+    "fuse.js": "^3.4.6"
+  },
+  "engines": {
+    "node": ">=13.3.0"
+  }
+}

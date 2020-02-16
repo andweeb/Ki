@@ -3,3 +3,5 @@ luacov.*
 dist/build
 dist/Ki.spoon
 deps/
+node_modules/
+cheatsheet.js

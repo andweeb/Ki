@@ -25,7 +25,7 @@ end
 local class = _G.requirePackage("middleclass")
 local lustache = _G.requirePackage("lustache")
 local util = _G.requirePackage("util", true)
-local cheatsheet = _G.requirePackage("cheatsheet", true)
+local Cheatsheet = _G.requirePackage("cheatsheet", true)
 
 local Entity = class("Entity")
 
@@ -133,11 +133,12 @@ end
 function Entity:initialize(name, shortcuts, autoExitMode)
     self.name = name
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
-    self.shortcuts = shortcuts
-    self.cheatsheet = cheatsheet
+    self.shortcuts = self.mergeShortcuts(shortcuts, {
+        { { "shift" }, "/", function() self.cheatsheet:show() end, { name, "Show Cheatsheet" } },
+    })
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for "..self.name
-    self.cheatsheet:init(self.name, cheatsheetDescription, self.shortcuts)
+    self.cheatsheet = Cheatsheet:new(name, cheatsheetDescription, shortcuts)
 end
 
 --- Entity.mergeShortcuts(fromList, toList) -> table
@@ -242,7 +243,7 @@ Entity.selectionModal = nil
 ---    * `placeholderText` - Set the placeholder text
 ---
 --- Returns:
----  * None
+---  * The [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) object
 function Entity:showSelectionModal(choices, callback, options)
     options = options or {}
 
@@ -285,7 +286,7 @@ function Entity:showSelectionModal(choices, callback, options)
 
     -- Start row selection listener and show the modal
     selectionListener:start()
-    modal:show()
+    return modal:show()
 end
 
 --- Entity:getEventHandler(shortcuts, flags, keyName) -> function or nil

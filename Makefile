@@ -32,12 +32,12 @@ define generate-docs-command
 		cp $(wd)/docs/templates/docs.css $(wd)/docs/html/docs.css
 endef
 
-spoon:
+spoon: cheatsheet
 	$(call build-command)
 	cp -r $(wd)/dist/build $(wd)/dist/Ki.spoon
-	zip -r dist/Ki.spoon.zip $(wd)/dist/Ki.spoon
+	cd dist && zip -r Ki.spoon.zip Ki.spoon
 
-dev:
+dev: cheatsheet
 	$(call build-command)
 
 watch-dev:
@@ -60,6 +60,14 @@ docs: clean-docs
 
 watch-docs:
 	$(call monitor-file-changes,$(wd)/src,generate-docs-command)
+
+src/cheatsheet/node_modules:
+	cd $(wd)/src/cheatsheet && npm ci
+
+src/cheatsheet/cheatsheet.js: src/cheatsheet/node_modules
+	cd $(wd)/src/cheatsheet && npm run build
+
+cheatsheet: src/cheatsheet/cheatsheet.js src/cheatsheet/node_modules
 
 deps:
 	luarocks install --tree deps fsm 1.1.0-1
@@ -84,10 +92,14 @@ clean-spoon:
 	rm -rfv $(wd)/dist/Ki.spoon
 	rm -fv $(wd)/dist/Ki.spoon.zip
 
+clean-cheatsheet:
+	rm -fv $(wd)/src/cheatsheet/cheatsheet.js
+	rm -rf $(wd)/src/cheatsheet/node_modules/
+
 clean-docs:
 	rm -rfv $(wd)/docs/markdown $(wd)/docs/html
 
 clean-test:
 	rm -fv $(wd)/luacov.*
 
-clean: clean-spoon clean-test
+clean: clean-spoon clean-test clean-cheatsheet

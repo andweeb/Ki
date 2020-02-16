@@ -3,10 +3,6 @@
 --- Cheatsheet modal used to display keyboard shortcuts
 ---
 
-local Cheatsheet = {}
-Cheatsheet.__index = Cheatsheet
-Cheatsheet.__name = "Cheatsheet"
-
 local luaVersion = _VERSION:match("%d+%.%d+")
 
 -- luacov: disable
@@ -26,7 +22,11 @@ if not _G.requirePackage then
 end
 -- luacov: enable
 
+local class = _G.requirePackage("middleclass")
 local lustache = _G.requirePackage("lustache")
+
+local basePath =  _G.getSpoonPath()
+local Cheatsheet = class("Cheatsheet")
 
 local MODIFIER_GLYPHS = {
     cmd = "⌘",
@@ -54,10 +54,14 @@ local KEY_GLYPHS = {
 
 -- Generate a view model of shortcuts partitioned into categories
 function Cheatsheet._createShortcutBlocks(shortcutList)
+    shortcutList = shortcutList or {}
+
     local shortcutBlocks = {}
+    local nonModeShortcutBlocks = {}
+    local modeShortcutBlocks = {}
     local shortcutCategories = {}
 
-    for _, shortcut in pairs(shortcutList) do
+    for id, shortcut in pairs(shortcutList) do
         local shortcutModifierKeys = shortcut[_G.SHORTCUT_MODKEY_INDEX] or {}
         local shortcutKey = shortcut[_G.SHORTCUT_HOTKEY_INDEX] or ""
         local shortcutMetadata = shortcut[_G.SHORTCUT_METADATA_INDEX]
@@ -88,6 +92,7 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
             table.insert(shortcutCategories[category], {
                 hotkey = hotkey,
                 name = name,
+                id = id,
             })
         end
     end
@@ -107,17 +112,25 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
         for _, shortcut in pairs(shortcuts) do
             if used_shortcuts[shortcut.hotkey] == nil then
                 used_shortcuts[shortcut.hotkey] = true
-                table.insert(block, { name = shortcut.name, hotkey = shortcut.hotkey })
+                table.insert(block, shortcut)
             end
         end
 
-        table.insert(shortcutBlocks, { shortcuts = block })
+        if category == "Desktop Mode" or category == "Normal Mode" then
+            table.insert(shortcutBlocks, block)
+        elseif category:lower():find("mode") then
+            table.insert(modeShortcutBlocks, block)
+        else
+            table.insert(nonModeShortcutBlocks, block)
+        end
     end
 
-    -- Sort shortcut blocks by category name
-    table.sort(shortcutBlocks, function(a, b)
-        return a.shortcuts[1].name < b.shortcuts[1].name
-    end)
+    -- Sort shortcut blocks by their title names
+    table.sort(shortcutBlocks, function(a, b) return a[1].name < b[1].name end)
+    table.sort(modeShortcutBlocks, function(a, b) return a[1].name < b[1].name end)
+    table.sort(nonModeShortcutBlocks, function(a, b) return a[1].name < b[1].name end)
+    for _, block in pairs(modeShortcutBlocks) do table.insert(shortcutBlocks, block) end
+    for _, block in pairs(nonModeShortcutBlocks) do table.insert(shortcutBlocks, block) end
 
     local glyphMapBlock = {{
         isTitle = true,
@@ -143,8 +156,7 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
     table.insert(glyphMapBlock, { hotkey = "⇥", name = "Tab" })
     table.insert(glyphMapBlock, { hotkey = "⎋", name = "Escape" })
     table.insert(glyphMapBlock, { hotkey = "␣", name = "Space" })
-
-    table.insert(shortcutBlocks, { shortcuts = glyphMapBlock })
+    table.insert(shortcutBlocks, glyphMapBlock)
 
     return shortcutBlocks
 end
@@ -159,12 +171,24 @@ end
 --- Returns:
 ---  * None
 function Cheatsheet:show()
-    local cssFilePath = _G.getSpoonPath().."/cheatsheet.css"
+    if not self.shortcuts then
+        return nil
+    end
+
+    -- Store current frontmost window to restore after cheatsheet is dismissed
+    local frontmostWindow = hs.window.frontmostWindow()
+
+    local javascriptFilePath = basePath.."/cheatsheet/cheatsheet.js"
+    local javascriptFile = assert(io.open(javascriptFilePath, "rb"))
+    local javascript = javascriptFile:read("*all")
+    javascriptFile:close()
+
+    local cssFilePath = basePath.."/cheatsheet/cheatsheet.css"
     local cssFile = assert(io.open(cssFilePath, "rb"))
     local css = cssFile:read("*all")
     cssFile:close()
 
-    local htmlFilePath = _G.getSpoonPath().."/cheatsheet.html"
+    local htmlFilePath = basePath.."/cheatsheet/cheatsheet.html"
     local htmlFile = assert(io.open(htmlFilePath, "rb"))
     local html = htmlFile:read("*all")
     htmlFile:close()
@@ -181,10 +205,11 @@ function Cheatsheet:show()
     local title = self.name.." Cheat Sheet"
     local viewModel = {
         title = title,
-        stylesheet = css,
         icon = appIconUri,
         description = self.description,
-        shortcutBlocks = self._createShortcutBlocks(self.shortcuts),
+        data = hs.json.encode(self.shortcutBlocks),
+        javascript = javascript,
+        stylesheet = css,
     }
 
     self.view:windowTitle(title)
@@ -200,7 +225,10 @@ function Cheatsheet:show()
     local cheatsheetHtml = lustache:render(html, viewModel)
     self.view:html(cheatsheetHtml)
 
+    -- Show webview and focus Hammerspoon
     self.view:show()
+    hs.focus()
+
     self.cheatsheetListener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
         local flags = event:getFlags()
         local keyName = hs.keycodes.map[event:getKeyCode()]
@@ -208,8 +236,10 @@ function Cheatsheet:show()
         if flags:containExactly({}) and keyName == "escape" then
             self.view:hide(0.5)
             self.cheatsheetListener:stop()
+            frontmostWindow:focus()
         end
     end)
+
     self.cheatsheetListener:start()
 end
 
@@ -240,15 +270,17 @@ end
 ---
 --- Returns:
 ---  * None
-function Cheatsheet:init(name, description, shortcuts, view)
+function Cheatsheet:initialize(name, description, shortcuts, view)
     self.name = name
     self.description = description
     self.shortcuts = shortcuts
+    self.shortcutBlocks = self._createShortcutBlocks(shortcuts)
 
     if not view then
         view = hs.webview.new({ x = 0, y = 0, w = 0, h = 0 })
         view:windowStyle({ "utility", "titled", "closable" })
         view:level(hs.drawing.windowLevels.modalPanel)
+        view:allowTextEntry(true)
         view:darkMode(true)
         view:shadow(true)
     end
