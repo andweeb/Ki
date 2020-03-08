@@ -2,30 +2,10 @@
 ---
 --- Entity class that represents some abstract automatable desktop entity
 ---
-
-local luaVersion = _VERSION:match("%d+%.%d+")
-
--- luacov: disable
-if not _G.getSpoonPath then
-    function _G.getSpoonPath()
-        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-    end
-end
-
-if not _G.requirePackage then
-    function _G.requirePackage(name, isInternal)
-        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
-        local packagePath = _G.getSpoonPath()..location..name..".lua"
-
-        return dofile(packagePath)
-    end
-end
--- luacov: enable
-
-local class = _G.requirePackage("middleclass")
-local lustache = _G.requirePackage("lustache")
-local util = _G.requirePackage("util", true)
-local Cheatsheet = _G.requirePackage("cheatsheet", true)
+local class = require("middleclass")
+local lustache = require("lustache")
+local Cheatsheet = require("cheatsheet")
+local util = require("util")
 
 local Entity = class("Entity")
 
@@ -93,7 +73,8 @@ function Entity.renderScriptTemplate(script, viewModel)
     local scriptPath = script
 
     if not scriptPath:match("/") then
-        local localScriptPath = _G.getSpoonPath().."/osascripts/"..script..".applescript"
+        local spoonPath = hs.spoons.scriptPath()
+        local localScriptPath = spoonPath.."osascripts/"..script..".applescript"
         scriptPath = string.match(script, "/") and script or localScriptPath
     end
 
@@ -133,12 +114,9 @@ end
 function Entity:initialize(name, shortcuts, autoExitMode)
     self.name = name
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
-    self.shortcuts = self.mergeShortcuts(shortcuts, {
+    self:registerShortcuts(self.mergeShortcuts(shortcuts or {}, {
         { { "shift" }, "/", function() self.cheatsheet:show() end, { name, "Show Cheatsheet" } },
-    })
-
-    local cheatsheetDescription = "Ki shortcut keybindings registered for "..self.name
-    self.cheatsheet = Cheatsheet:new(name, cheatsheetDescription, shortcuts)
+    }))
 end
 
 --- Entity.mergeShortcuts(fromList, toList) -> table
@@ -178,6 +156,25 @@ function Entity.mergeShortcuts(fromList, toList)
     end
 
     return toList
+end
+
+--- Entity:registerShortcuts(shortcuts, override) -> table of shortcuts
+--- Method
+--- Registers and updates the entity cheatsheet with a list of shortcuts with the option of merging with the existing default or previously initialized shortcuts.
+---
+--- Parameters:
+---  * `shortcuts` - The list of shortcut objects
+---  * `override` - A boolean denoting to whether to override the existing shortcuts
+---
+--- Returns:
+---   * `shortcuts` - Returns the list of registered shortcuts
+function Entity:registerShortcuts(shortcuts, override)
+    local cheatsheetDescription = "Ki shortcut keybindings registered for "..self.name
+
+    self.shortcuts = override and shortcuts or self.mergeShortcuts(shortcuts, self.shortcuts or {})
+    self.cheatsheet = Cheatsheet:new(self.name, cheatsheetDescription, shortcuts)
+
+    return self.shortcuts
 end
 
 --- Entity:getSelectionItems() -> table of choices or nil

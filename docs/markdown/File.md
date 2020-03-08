@@ -12,6 +12,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
  * [createEvent](#createEvent)
  * [createFileChoices](#createFileChoices)
  * [getFileIcon](#getFileIcon)
+ * [getFileName](#getFileName)
  * [initialize](#initialize)
  * [move](#move)
  * [moveToTrash](#moveToTrash)
@@ -44,10 +45,10 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 
 | [createEvent](#createEvent)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:createEvent(path) -> function`                                                                    |
+| **Signature**                               | `File:createEvent(path, placeholderText, handler) -> function`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Convenience method to create file events that share the similar behavior of allowing navigation before item selection                                                                     |
-| **Parameters**                              | <ul><li>`path` - The path of a file</li></ul> |
+| **Parameters**                              | <ul><li>`path` - The path of a file</li><li>`placeholderText` - Text to display as a placeholder in the selection modal</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `path` - the selected target path</li></ul> |
 | **Returns**                                 | <ul><li> An event handler function</li></ul>          |
 
 | [createFileChoices](#createFileChoices)         |                                                                                     |
@@ -66,6 +67,14 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Parameters**                              | <ul><li>`path` - The path of a file</li></ul> |
 | **Returns**                                 | <ul><li> The file icon [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html) object</li></ul>          |
 
+| [getFileName](#getFileName)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `File:getFileName(path) -> string`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Extracts a filename from a file path                                                                     |
+| **Parameters**                              | <ul><li>`path` - The path of a file</li></ul> |
+| **Returns**                                 | <ul><li> The filename or nil</li></ul>          |
+
 | [initialize](#initialize)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `File:initialize(path, shortcuts)`                                                                    |
@@ -79,7 +88,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Signature**                               | `File:move(path)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Method to move one file into a directory. Opens a navigation modal for selecting the target file, then on selection opens another navigation modal to select the destination path. A confirmation dialog is presented to proceed with moving the file to the target directory.                                                                     |
-| **Parameters**                              | <ul><li>`path` - the initial directory path to select a target file to move</li></ul> |
+| **Parameters**                              | <ul><li>`path` - the initial directory path to select a target file to move from</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [moveToTrash](#moveToTrash)         |                                                                                     |
@@ -92,10 +101,10 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 
 | [navigate](#navigate)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:navigate(path, handler)`                                                                    |
+| **Signature**                               | `File:navigate(path, placeholderText, handler)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Recursively navigates through parent and child directories until a selection is made                                                                     |
-| **Parameters**                              | <ul><li>`path` - the path of the target file</li><li>`handler` - the selection callback handler function invoked with the following arguments:</li><li>  `targetFilePath` - the target path of the selected file</li></ul> |
+| **Parameters**                              | <ul><li>`path` - the path of the target file</li><li>`placeholderText` - Text to display as a placeholder in the selection modal</li><li>`handler` - the selection callback handler function invoked with the following arguments:</li><li>  `targetFilePath` - the target path of the selected file</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [open](#open)         |                                                                                     |
@@ -132,9 +141,9 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 
 | [showFileSelectionModal](#showFileSelectionModal)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:showFileSelectionModal(path, handler) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list`                                                                    |
+| **Signature**                               | `File:showFileSelectionModal(path, handler[, options]) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Shows a selection modal with a list of files at a given path.                                                                     |
-| **Parameters**                              | <ul><li>`path` - the path of the directory that should have its file contents listed in the selection modal</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `targetPath` - the selected target path</li><li>   `shouldTriggerAction` - a boolean value to ensure the action is triggered</li></ul> |
+| **Parameters**                              | <ul><li>`path` - the path of the directory that should have its file contents listed in the selection modal</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `targetPath` - the selected target path</li><li>   `shouldTriggerAction` - a boolean value to ensure the action is triggered</li><li>`options` - A table containing various options to configure the underlying [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance</li></ul> |
 | **Returns**                                 | <ul><li> A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li></ul>          |
 

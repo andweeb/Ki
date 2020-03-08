@@ -2,27 +2,8 @@
 ---
 --- URL class that subclasses [Entity](Entity.html) to represent some automatable URL entity
 ---
-
-local luaVersion = _VERSION:match("%d+%.%d+")
-
--- luacov: disable
-if not _G.getSpoonPath then
-    function _G.getSpoonPath()
-        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-    end
-end
-if not _G.requirePackage then
-    function _G.requirePackage(name, isInternal)
-        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
-        local packagePath = _G.getSpoonPath()..location..name..".lua"
-
-        return dofile(packagePath)
-    end
-end
--- luacov: enable
-
-local Cheatsheet = _G.requirePackage("cheatsheet", true)
-local Entity = _G.requirePackage("Entity", true)
+local Entity = require("entity")
+local Cheatsheet = require("cheatsheet")
 local URL = Entity:subclass("URL")
 
 --- URL.paths

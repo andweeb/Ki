@@ -50,6 +50,7 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
  * [defaultWorkflowEvents](#defaultWorkflowEvents)
  * [Entity](#Entity)
  * [File](#File)
+ * [SmartFolder](#SmartFolder)
  * [state](#state)
  * [stateEvents](#stateEvents)
  * [statusDisplay](#statusDisplay)
@@ -59,6 +60,7 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
 * Methods - API calls which can only be made on an object returned by a constructor
  * [start](#start)
  * [stop](#stop)
+ * [useDefaultConfig](#useDefaultConfig)
 
 ## API Documentation
 
@@ -105,6 +107,12 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
 | **Signature**                               | `Ki.File`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some file or directory at an existing file path. Class methods and properties are documented [here](File.html).                                                                     |
+
+| [SmartFolder](#SmartFolder)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.SmartFolder`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some [smart folder](https://support.apple.com/kb/PH25589) at an existing file path. Class methods and properties are documented [here](SmartFolder.html).                                                                     |
 
 | [state](#state)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -159,4 +167,11 @@ The boolean return value of the event handler or an entity's `dispatchAction` fu
 | **Description**                             | Stops the input event listener                                                                     |
 | **Parameters**                              | <ul><li>None</li></ul> |
 | **Returns**                                 | <ul><li> An [`hs.eventtap`](https://www.hammerspoon.org/docs/hs.eventtap.html) object</li></ul>          |
+
+| [useDefaultConfig](#useDefaultConfig)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki:useDefaultConfig([options])`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Loads the default config                                                                     |
+| **Parameters**                              | <ul><li>`options` - A table containing options that configures which default configs to load</li><li>  `include` - A list of entity filenames to load, in which all unspecified entities will not be loaded</li><li>  `exclude` - A list of entity filenames to exclude from loading, in which all unspecified filenames will be loaded</li></ul> |
 

@@ -2,27 +2,8 @@
 ---
 --- SmartFolder class that subclasses [File](File.html) to represent a [smart folder](https://support.apple.com/kb/PH25589) to be automated
 ---
-
-local luaVersion = _VERSION:match("%d+%.%d+")
-
--- luacov: disable
-if not _G.getSpoonPath then
-    function _G.getSpoonPath()
-        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-    end
-end
-if not _G.requirePackage then
-    function _G.requirePackage(name, isInternal)
-        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
-        local packagePath = _G.getSpoonPath()..location..name..".lua"
-
-        return dofile(packagePath)
-    end
-end
--- luacov: enable
-
-local Cheatsheet = _G.requirePackage("cheatsheet", true)
-local File = _G.requirePackage("File", true)
+local File = require("file")
+local Cheatsheet = require("cheatsheet")
 local SmartFolder = File:subclass("File")
 
 --- SmartFolder:initialize(path, shortcuts)

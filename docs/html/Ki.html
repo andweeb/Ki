@@ -65,6 +65,7 @@
             <li><a href="#defaultWorkflowEvents">defaultWorkflowEvents</a></li>
             <li><a href="#Entity">Entity</a></li>
             <li><a href="#File">File</a></li>
+            <li><a href="#SmartFolder">SmartFolder</a></li>
             <li><a href="#state">state</a></li>
             <li><a href="#stateEvents">stateEvents</a></li>
             <li><a href="#statusDisplay">statusDisplay</a></li>
@@ -76,6 +77,7 @@
           <ul>
             <li><a href="#start">start</a></li>
             <li><a href="#stop">stop</a></li>
+            <li><a href="#useDefaultConfig">useDefaultConfig</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
@@ -209,6 +211,25 @@
               <tr>
                 <th>Description</th>
                 <td><p>A <a href="https://github.com/kikito/middleclass/wiki">middleclass</a> class that represents some file or directory at an existing file path. Class methods and properties are documented <a href="File.html">here</a>.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="SmartFolder">
+            <a name="//apple_ref/cpp/Variable/SmartFolder" class="dashAnchor"></a>
+            <h5><a href="#SmartFolder">SmartFolder</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki.SmartFolder</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A <a href="https://github.com/kikito/middleclass/wiki">middleclass</a> class that represents some <a href="https://support.apple.com/kb/PH25589">smart folder</a> at an existing file path. Class methods and properties are documented <a href="SmartFolder.html">here</a>.</p>
 </td>
               </tr>
             </table>
@@ -447,6 +468,33 @@ Ki.transitionEvents = {
 <p>Returns:</p>
 <ul>
 <li>An <a href="https://www.hammerspoon.org/docs/hs.eventtap.html"><code>hs.eventtap</code></a> object</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="useDefaultConfig">
+            <a name="//apple_ref/cpp/Method/useDefaultConfig" class="dashAnchor"></a>
+            <h5><a href="#useDefaultConfig">useDefaultConfig</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki:useDefaultConfig([options])</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Loads the default config</p>
+<p>Parameters:</p>
+<ul>
+<li><code>options</code> - A table containing options that configures which default configs to load<ul>
+<li><code>include</code> - A list of entity filenames to load, in which all unspecified entities will not be loaded</li>
+<li><code>exclude</code> - A list of entity filenames to exclude from loading, in which all unspecified filenames will be loaded</li>
+</ul>
+</li>
 </ul>
 </td>
               </tr>

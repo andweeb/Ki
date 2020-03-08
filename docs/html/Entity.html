@@ -34,6 +34,7 @@
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#mergeShortcuts">mergeShortcuts</a></li>
             <li><a href="#notifyError">notifyError</a></li>
+            <li><a href="#registerShortcuts">registerShortcuts</a></li>
             <li><a href="#renderScriptTemplate">renderScriptTemplate</a></li>
             <li><a href="#showSelectionModal">showSelectionModal</a></li>
             <li><a href="#triggerAfterConfirmation">triggerAfterConfirmation</a></li>
@@ -293,6 +294,34 @@
               </tr>
             </table>
           </section>
+          <section id="registerShortcuts">
+            <a name="//apple_ref/cpp/Method/registerShortcuts" class="dashAnchor"></a>
+            <h5><a href="#registerShortcuts">registerShortcuts</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:registerShortcuts(shortcuts, override) -&gt; table of shortcuts</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Registers and updates the entity cheatsheet with a list of shortcuts with the option of merging with the existing default or previously initialized shortcuts.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>shortcuts</code> - The list of shortcut objects</li>
+<li><code>override</code> - A boolean denoting to whether to override the existing shortcuts</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li><code>shortcuts</code> - Returns the list of registered shortcuts</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="renderScriptTemplate">
             <a name="//apple_ref/cpp/Method/renderScriptTemplate" class="dashAnchor"></a>
             <h5><a href="#renderScriptTemplate">renderScriptTemplate</a></h5>
@@ -327,7 +356,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity.showSelectionModal(choices, callback)</code></td>
+                <td><code>Entity:showSelectionModal(choices, callback[, options])</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -340,10 +369,14 @@
 <ul>
 <li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display on the chooser modal</li>
 <li><code>callback</code> - The callback function invoked when a choice is selected from the modal</li>
+<li><code>options</code> - A table containing various options to configure the modal:<ul>
+<li><code>placeholderText</code> - Set the placeholder text</li>
+</ul>
+</li>
 </ul>
 <p>Returns:</p>
 <ul>
-<li>None</li>
+<li>The <a href="https://www.hammerspoon.org/docs/hs.chooser.html"><code>hs.chooser</code></a> object</li>
 </ul>
 </td>
               </tr>
@@ -355,7 +388,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity.triggerAfterConfirmation(question, action)</code></td>
+                <td><code>Entity.triggerAfterConfirmation(question, details, action)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -366,7 +399,8 @@
                 <td><p>Opens a dialog block alert for user confirmation before triggering an action</p>
 <p>Parameters:</p>
 <ul>
-<li><code>question</code> - Text to display in the block alert</li>
+<li><code>question</code> - Text to display in the block alert as the title</li>
+<li><code>details</code> - Text to display in the block alert as the description</li>
 <li><code>action</code> - The callback function to be invoked after user confirmation</li>
 </ul>
 <p>Returns:</p>

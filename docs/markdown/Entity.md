@@ -16,6 +16,7 @@ Entity class that represents some abstract automatable desktop entity
  * [initialize](#initialize)
  * [mergeShortcuts](#mergeShortcuts)
  * [notifyError](#notifyError)
+ * [registerShortcuts](#registerShortcuts)
  * [renderScriptTemplate](#renderScriptTemplate)
  * [showSelectionModal](#showSelectionModal)
  * [triggerAfterConfirmation](#triggerAfterConfirmation)
@@ -91,6 +92,14 @@ Entity class that represents some abstract automatable desktop entity
 | **Parameters**                              | <ul><li>`message` - The main notification message</li><li>`details` - The textual body of the notification containing details of the error</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
+| [registerShortcuts](#registerShortcuts)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity:registerShortcuts(shortcuts, override) -> table of shortcuts`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Registers and updates the entity cheatsheet with a list of shortcuts with the option of merging with the existing default or previously initialized shortcuts.                                                                     |
+| **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects</li><li>`override` - A boolean denoting to whether to override the existing shortcuts</li></ul> |
+| **Returns**                                 | <ul><li> `shortcuts` - Returns the list of registered shortcuts</li></ul>          |
+
 | [renderScriptTemplate](#renderScriptTemplate)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Entity.renderScriptTemplate(script[, viewModel]) -> string`                                                                    |
@@ -101,17 +110,17 @@ Entity class that represents some abstract automatable desktop entity
 
 | [showSelectionModal](#showSelectionModal)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity.showSelectionModal(choices, callback)`                                                                    |
+| **Signature**                               | `Entity:showSelectionModal(choices, callback[, options])`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.                                                                     |
-| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal</li><li>`callback` - The callback function invoked when a choice is selected from the modal</li></ul> |
-| **Returns**                                 | <ul><li>None</li></ul>          |
+| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal</li><li>`callback` - The callback function invoked when a choice is selected from the modal</li><li>`options` - A table containing various options to configure the modal:</li><li>  `placeholderText` - Set the placeholder text</li></ul> |
+| **Returns**                                 | <ul><li>The [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) object</li></ul>          |
 
 | [triggerAfterConfirmation](#triggerAfterConfirmation)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity.triggerAfterConfirmation(question, action)`                                                                    |
+| **Signature**                               | `Entity.triggerAfterConfirmation(question, details, action)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Opens a dialog block alert for user confirmation before triggering an action                                                                     |
-| **Parameters**                              | <ul><li>`question` - Text to display in the block alert</li><li>`action` - The callback function to be invoked after user confirmation</li></ul> |
+| **Parameters**                              | <ul><li>`question` - Text to display in the block alert as the title</li><li>`details` - Text to display in the block alert as the description</li><li>`action` - The callback function to be invoked after user confirmation</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 

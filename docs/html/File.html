@@ -30,6 +30,7 @@
             <li><a href="#createEvent">createEvent</a></li>
             <li><a href="#createFileChoices">createFileChoices</a></li>
             <li><a href="#getFileIcon">getFileIcon</a></li>
+            <li><a href="#getFileName">getFileName</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#move">move</a></li>
             <li><a href="#moveToTrash">moveToTrash</a></li>
@@ -101,7 +102,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>File:createEvent(path) -&gt; function</code></td>
+                <td><code>File:createEvent(path, placeholderText, handler) -&gt; function</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -113,6 +114,11 @@ Currently supported behaviors:</p>
 <p>Parameters:</p>
 <ul>
 <li><code>path</code> - The path of a file</li>
+<li><code>placeholderText</code> - Text to display as a placeholder in the selection modal</li>
+<li><code>handler</code> - the selection event handler function that takes in the following arguments:<ul>
+<li><code>path</code> - the selected target path</li>
+</ul>
+</li>
 </ul>
 <p>Returns:</p>
 <ul>
@@ -184,6 +190,33 @@ Currently supported behaviors:</p>
               </tr>
             </table>
           </section>
+          <section id="getFileName">
+            <a name="//apple_ref/cpp/Method/getFileName" class="dashAnchor"></a>
+            <h5><a href="#getFileName">getFileName</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>File:getFileName(path) -&gt; string</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Extracts a filename from a file path</p>
+<p>Parameters:</p>
+<ul>
+<li><code>path</code> - The path of a file</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The filename or nil</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="initialize">
             <a name="//apple_ref/cpp/Method/initialize" class="dashAnchor"></a>
             <h5><a href="#initialize">initialize</a></h5>
@@ -245,7 +278,7 @@ Currently supported behaviors:</p>
                 <td><p>Method to move one file into a directory. Opens a navigation modal for selecting the target file, then on selection opens another navigation modal to select the destination path. A confirmation dialog is presented to proceed with moving the file to the target directory.</p>
 <p>Parameters:</p>
 <ul>
-<li><code>path</code> - the initial directory path to select a target file to move</li>
+<li><code>path</code> - the initial directory path to select a target file to move from</li>
 </ul>
 <p>Returns:</p>
 <ul>
@@ -288,7 +321,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>File:navigate(path, handler)</code></td>
+                <td><code>File:navigate(path, placeholderText, handler)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -300,6 +333,7 @@ Currently supported behaviors:</p>
 <p>Parameters:</p>
 <ul>
 <li><code>path</code> - the path of the target file</li>
+<li><code>placeholderText</code> - Text to display as a placeholder in the selection modal</li>
 <li><code>handler</code> - the selection callback handler function invoked with the following arguments:<ul>
 <li><code>targetFilePath</code> - the target path of the selected file</li>
 </ul>
@@ -427,7 +461,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>File:showFileSelectionModal(path, handler) -&gt; <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> object list</code></td>
+                <td><code>File:showFileSelectionModal(path, handler[, options]) -&gt; <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> object list</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -444,6 +478,7 @@ Currently supported behaviors:</p>
 <li><code>shouldTriggerAction</code> - a boolean value to ensure the action is triggered</li>
 </ul>
 </li>
+<li><code>options</code> - A table containing various options to configure the underlying <a href="https://www.hammerspoon.org/docs/hs.chooser.html"><code>hs.chooser</code></a> instance</li>
 </ul>
 <p>Returns:</p>
 <ul>

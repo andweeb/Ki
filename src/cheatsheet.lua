@@ -3,29 +3,10 @@
 --- Cheatsheet modal used to display keyboard shortcuts
 ---
 
-local luaVersion = _VERSION:match("%d+%.%d+")
+local class = require("middleclass")
+local lustache = require("lustache")
 
--- luacov: disable
-if not _G.getSpoonPath then
-    function _G.getSpoonPath()
-        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-    end
-end
-
-if not _G.requirePackage then
-    function _G.requirePackage(name, isInternal)
-        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
-        local packagePath = _G.getSpoonPath()..location..name..".lua"
-
-        return dofile(packagePath)
-    end
-end
--- luacov: enable
-
-local class = _G.requirePackage("middleclass")
-local lustache = _G.requirePackage("lustache")
-
-local basePath =  _G.getSpoonPath()
+local spoonPath = hs.spoons.scriptPath()
 local Cheatsheet = class("Cheatsheet")
 
 local MODIFIER_GLYPHS = {
@@ -178,17 +159,17 @@ function Cheatsheet:show()
     -- Store current frontmost window to restore after cheatsheet is dismissed
     local frontmostWindow = hs.window.frontmostWindow()
 
-    local javascriptFilePath = basePath.."/cheatsheet/cheatsheet.js"
+    local javascriptFilePath = spoonPath.."/cheatsheet/cheatsheet.js"
     local javascriptFile = assert(io.open(javascriptFilePath, "rb"))
     local javascript = javascriptFile:read("*all")
     javascriptFile:close()
 
-    local cssFilePath = basePath.."/cheatsheet/cheatsheet.css"
+    local cssFilePath = spoonPath.."/cheatsheet/cheatsheet.css"
     local cssFile = assert(io.open(cssFilePath, "rb"))
     local css = cssFile:read("*all")
     cssFile:close()
 
-    local htmlFilePath = basePath.."/cheatsheet/cheatsheet.html"
+    local htmlFilePath = spoonPath.."/cheatsheet/cheatsheet.html"
     local htmlFile = assert(io.open(htmlFilePath, "rb"))
     local html = htmlFile:read("*all")
     htmlFile:close()

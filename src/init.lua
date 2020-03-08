@@ -49,37 +49,21 @@ Ki.author = "Andrew Kwon"
 Ki.homepage = "https://github.com/andweeb/ki"
 Ki.license = "MIT - https://opensource.org/licenses/MIT"
 
+local spoonPath = hs.spoons.scriptPath()
 local luaVersion = _VERSION:match("%d+%.%d+")
 
-if not _G.getSpoonPath then
-    function _G.getSpoonPath()
-        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-    end
-end
-
-_G.spoonPath = _G.getSpoonPath()
-package.cpath = _G.spoonPath.."/deps/lib/lua/"..luaVersion.."/?.so;"..package.cpath
-package.path = _G.spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
-
--- luacov: disable
-if not _G.requirePackage then
-    function _G.requirePackage(name, isInternal)
-        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
-        local packagePath = _G.spoonPath..location..name..".lua"
-
-        return dofile(packagePath)
-    end
-end
--- luacov: enable
+package.path = package.path..";"..spoonPath.."?.lua"
+package.cpath = spoonPath.."/deps/lib/lua/"..luaVersion.."/?.so;"..package.cpath
+package.path = spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
 
 _G.SHORTCUT_MODKEY_INDEX = 1
 _G.SHORTCUT_HOTKEY_INDEX = 2
 _G.SHORTCUT_EVENT_HANDLER_INDEX = 3
 _G.SHORTCUT_METADATA_INDEX = 4
 
-local fsm = _G.requirePackage("fsm")
-local util = _G.requirePackage("util", true)
-local Cheatsheet = _G.requirePackage("cheatsheet", true)
+local FSM = require("fsm")
+local Util = require("util")
+local Cheatsheet = require("cheatsheet")
 
 -- Allow Spotlight to be used to find alternate names for applications
 hs.application.enableSpotlightForNameSearches(true)
@@ -87,40 +71,42 @@ hs.application.enableSpotlightForNameSearches(true)
 --- Ki.Entity
 --- Variable
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some generic automatable desktop entity. Class methods and properties are documented [here](Entity.html).
-Ki.Entity = _G.requirePackage("entity", true)
+Ki.Entity = require("entity")
 
 --- Ki.Application
 --- Variable
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that subclasses [Entity](Entity.html) to represent some automatable desktop application. Class methods and properties are documented [here](Application.html).
-Ki.Application = _G.requirePackage("application", true)
+Ki.Application = require("application")
 
 --- Ki.File
 --- Variable
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some file or directory at an existing file path. Class methods and properties are documented [here](File.html).
-Ki.File = _G.requirePackage("file", true)
+Ki.File = require("file")
+
+--- Ki.SmartFolder
+--- Variable
+--- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some [smart folder](https://support.apple.com/kb/PH25589) at an existing file path. Class methods and properties are documented [here](SmartFolder.html).
+Ki.SmartFolder = require("smart-folder")
 
 --- Ki.URL
 --- Variable
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some url. Class methods and properties are documented [here](URL.html).
-Ki.URL = _G.requirePackage("url", true)
-
-local Defaults = _G.requirePackage("defaults", true)
-local defaultWorkflowEvents, defaultEntities, defaultUrlEntities = Defaults.create(Ki)
+Ki.URL = require("url")
 
 --- Ki.defaultWorkflowEvents
 --- Variable
 --- A table containing the default workflow events for all default modes in Ki.
-Ki.defaultWorkflowEvents = defaultWorkflowEvents
+Ki.defaultWorkflowEvents = nil
 
 --- Ki.defaultEntities
 --- Variable
 --- A table containing the default automatable desktop entity instances in Ki.
-Ki.defaultEntities = defaultEntities
+Ki.defaultEntities = nil
 
 --- Ki.defaultUrlEntities
 --- Variable
 --- A table containing the default automatable URL entity instances in Ki.
-Ki.defaultUrlEntities = defaultUrlEntities
+Ki.defaultUrlEntities = nil
 
 --- Ki.state
 --- Variable
@@ -163,7 +149,7 @@ function Ki._mergeEvents(mode, lhs, rhs, overrideLHS)
         local rhsEventModifiers = rhsEvent[_G.SHORTCUT_MODKEY_INDEX] or {}
         local eventKeyName = rhsEvent[_G.SHORTCUT_HOTKEY_INDEX]
         local eventModifiers = lhsHotkeys[eventKeyName] and lhsHotkeys[eventKeyName].modifiers or nil
-        local hasHotkeyConflict = util.areListsEqual(eventModifiers, rhsEventModifiers)
+        local hasHotkeyConflict = Util.areListsEqual(eventModifiers, rhsEventModifiers)
 
         if not hasHotkeyConflict then
             table.insert(lhs, rhsEvent)
@@ -211,9 +197,6 @@ function Ki:_createEventsMetatable(overrideLHS)
         end,
     }
 end
-
--- Allow default events to be overridden
-setmetatable(Ki.defaultWorkflowEvents, Ki:_createEventsMetatable(true))
 
 --- Ki.transitionEvents
 --- Variable
@@ -599,6 +582,88 @@ function Ki:init()
     self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, eventHandler)
 end
 
+--- Ki:useDefaultConfig([options])
+--- Method
+--- Loads the default config
+---
+--- Parameters:
+---  * `options` - A table containing options that configures which default configs to load
+---    * `include` - A list of entity filenames to load, in which all unspecified entities will not be loaded
+---    * `exclude` - A list of entity filenames to exclude from loading, in which all unspecified filenames will be loaded
+function Ki:useDefaultConfig(options)
+    options = options or {}
+
+    local defaultShortcuts = {}
+    local defaultConfig = require("default-config")
+
+    -- Validate options and skip if possible
+    if options.exclude and options.include then
+        local details = "Specify either the `include` or `exclude` option (not both)"
+        self.Entity.notifyError("Invalid default config options", details)
+        return
+    elseif not options.exclude and not options.include then
+        self.defaultWorkflowEvents = defaultConfig.shortcuts
+        self.defaultEntities = defaultConfig.entities
+        return
+    end
+
+    -- Memoize include and exclude lists
+    local function memoize(t)
+        local memo = {}
+
+        for mode, item in pairs(t or {}) do
+            if type(item) == "table" then
+                for _, key in pairs(item) do
+                    memo[mode.."."..key] = true
+                end
+            else
+                memo[item] = true
+            end
+        end
+
+        return memo
+    end
+    local includes = memoize(options.include)
+    local excludes = memoize(options.exclude)
+
+    for mode, shortcuts in pairs(defaultConfig.shortcuts) do
+        defaultShortcuts[mode] = {}
+
+        for _, shortcut in pairs(shortcuts) do
+            local entity = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+
+            if type(entity) == "table" then
+                if options.include and (
+                    includes[entity.url] or
+                    includes[entity.path] or
+                    includes[entity.name] or
+                    (entity.url and includes[mode.."."..entity.url]) or
+                    (entity.path and includes[mode.."."..entity.path]) or
+                    (entity.name and includes[mode.."."..entity.name])
+                ) then
+                    table.insert(defaultShortcuts[mode], shortcut)
+                end
+                if options.exclude and (
+                    not excludes[entity.url] and
+                    not excludes[entity.path] and
+                    not excludes[entity.name] and
+                    (not excludes[mode.."."..(entity.url or "")]) and
+                    (not excludes[mode.."."..(entity.path or "")]) and
+                    (not excludes[mode.."."..(entity.name or "")])
+                ) then
+                    table.insert(defaultShortcuts[mode], shortcut)
+                end
+            end
+        end
+    end
+
+    self.defaultWorkflowEvents = defaultShortcuts
+    self.defaultEntities = defaultConfig.entities
+
+    -- Allow default events to be overridden
+    setmetatable(self.defaultWorkflowEvents, self:_createEventsMetatable(true))
+end
+
 --- Ki:start() -> hs.eventtap
 --- Method
 --- Sets the status display, creates all transition and workflow events, and starts the input event listener
@@ -610,10 +675,10 @@ end
 ---   * An [`hs.eventtap`](https://www.hammerspoon.org/docs/hs.eventtap.html) object
 function Ki:start()
     -- Set default status display if not provided
-    self.statusDisplay = self.statusDisplay or dofile(_G.spoonPath.."/status-display.lua")
+    self.statusDisplay = self.statusDisplay or require("status-display")
 
     -- Recreate the internal finite state machine if custom state events are provided
-    self.state = fsm.create({
+    self.state = FSM.create({
         initial = "desktop",
         events = self._defaultStateEvents + self.stateEvents,
         callbacks = self:_createFsmCallbacks()

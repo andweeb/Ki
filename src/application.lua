@@ -3,31 +3,13 @@
 --- Application class that subclasses [Entity](Entity.html) to represent some automatable desktop application
 ---
 
-local luaVersion = _VERSION:match("%d+%.%d+")
-
--- luacov: disable
-if not _G.getSpoonPath then
-    function _G.getSpoonPath()
-        return debug.getinfo(2, "S").source:sub(2):match("(.*/)"):sub(1, -2)
-    end
-end
-if not _G.requirePackage then
-    function _G.requirePackage(name, isInternal)
-        local location = not isInternal and "/deps/share/lua/"..luaVersion.."/" or "/"
-        local packagePath = _G.getSpoonPath()..location..name..".lua"
-
-        return dofile(packagePath)
-    end
-end
--- luacov: enable
-
-local Util = _G.requirePackage("util", true)
-local Entity = _G.requirePackage("entity", true)
+local Util = require("util")
+local Entity = require("entity")
 local Application = Entity:subclass("Application")
-local ApplicationBehaviors = {}
+local Behaviors = {}
 
 -- Default application behavior function
-function ApplicationBehaviors.default(self, eventHandler)
+function Behaviors.default(self, eventHandler)
     local app = self.name and self:getApplication() or nil
 
     if not app then
@@ -44,7 +26,7 @@ function ApplicationBehaviors.default(self, eventHandler)
 end
 
 -- Application behavior function for select mode
-function ApplicationBehaviors.select(self, eventHandler)
+function Behaviors.select(self, eventHandler)
     local app = self.name and self:getApplication() or nil
 
     if not app then
@@ -67,7 +49,7 @@ function ApplicationBehaviors.select(self, eventHandler)
 end
 
 -- Application behavior function for entity mode
-function ApplicationBehaviors.entity(self, eventHandler, _, _, workflow)
+function Behaviors.entity(self, eventHandler, _, _, workflow)
     local shouldSelect = false
     local app = self.name and self:getApplication() or nil
 
@@ -83,7 +65,7 @@ function ApplicationBehaviors.entity(self, eventHandler, _, _, workflow)
     end
 
     if shouldSelect then
-        return ApplicationBehaviors.select(self, eventHandler, _, _, workflow)
+        return Behaviors.select(self, eventHandler, _, _, workflow)
     end
 
     local _, autoExit = eventHandler(app, shouldSelect)
@@ -94,7 +76,7 @@ end
 --- Application.behaviors
 --- Variable
 --- Application [behaviors](Entity.html#behaviors) defined to invoke event handlers with `hs.application`.
-Application.behaviors = Entity.behaviors + ApplicationBehaviors
+Application.behaviors = Entity.behaviors + Behaviors
 
 --- Application:getSelectionItems()
 --- Method
