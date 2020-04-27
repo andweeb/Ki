@@ -49,6 +49,7 @@ function SmartFolder:initialize(path, shortcuts)
     local mergedShortcuts = self.mergeShortcuts(shortcuts, commonShortcuts)
 
     self.path = path
+    self.name = path
     self.shortcuts = mergedShortcuts
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for smart folder at "..self.path

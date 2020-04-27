@@ -169,7 +169,7 @@ end
 --- Returns:
 ---   * `shortcuts` - Returns the list of registered shortcuts
 function Entity:registerShortcuts(shortcuts, override)
-    local cheatsheetDescription = "Ki shortcut keybindings registered for "..self.name
+    local cheatsheetDescription = self.name and "Ki shortcut keybindings registered for "..self.name or "Ki shortcut keybindings"
 
     self.shortcuts = override and shortcuts or self.mergeShortcuts(shortcuts, self.shortcuts or {})
     self.cheatsheet = Cheatsheet:new(self.name, cheatsheetDescription, shortcuts)
@@ -223,6 +223,26 @@ Entity.selectionModalShortcuts = {
     { { "ctrl" }, "d", function(modal) modal:selectedRow(modal:selectedRow() + modal:rows()) end },
     { { "ctrl" }, "u", function(modal) modal:selectedRow(modal:selectedRow() - modal:rows()) end },
 }
+
+--- Entity:registerSelectionModalShortcuts(shortcuts, override) -> table of registered shortcuts
+--- Method
+--- Registers a list of selection modal shortcuts with the option of merging with the existing [default](#selectionModalShortcuts) or previously initialized modal shortcuts.
+---
+--- Parameters:
+---  * `shortcuts` - The list of shortcut objects. Shortcut event handlers will be invoked with the [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance:
+---    ```
+---    { { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },
+---    { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },
+---    ```
+---  * `override` - A boolean denoting to whether to override the existing selection modal shortcuts
+---
+--- Returns:
+---   * `shortcuts` - Returns the list of registered selection modal shortcuts
+function Entity:registerSelectionModalShortcuts(shortcuts, override)
+    local existingShortcuts = self.selectionModalShortcuts or {}
+    self.selectionModalShortcuts = override and shortcuts or self.mergeShortcuts(shortcuts, existingShortcuts)
+    return self.selectionModalShortcuts
+end
 
 --- Entity.selectionModal
 --- Variable

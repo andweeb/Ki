@@ -6,18 +6,27 @@
 
 ### What's that?
 
-Ki introduces a novel approach to automating macOS. Inspired by the [vi text editor](https://en.wikipedia.org/wiki/Vi#Interface), Ki enables modal hotkeys to execute desktop tasks to determine whether it can be effective in a desktop environment.
+Ki introduces a [modal paradigm](http://vimcasts.org/episodes/modal-editing-undo-redo-and-repeat) to automating macOS: as you would edit text objects with operators in [vi](https://en.wikipedia.org/wiki/Vi#Interface), you would automate entities with actions in Ki.
 
-The default state of macOS could be considered to be in `desktop` mode. Ki binds a `Command` `Escape` <kbd>⌘⎋</kbd> hotkey that transitions to `normal` mode, in which an extensive set of command chains can be initiated.
+The default state of macOS could be considered to be in `desktop` mode. Ki binds the `Command` `Escape` <kbd>⌘⎋</kbd> hotkey to enter `normal` mode, in which an extensive set of keyboard shortcuts are available when using the [default config](src/default-config.lua).
 
-To view all Ki shortcuts, a cheatsheet modal can be activated with <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>?</kbd>. To see all shortcuts for actions that an entity implements, an entity-specific cheatsheet modal can be activated with <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>?</kbd><kbd>(entity hotkey)</kbd>.
+To view all shortcuts, a cheatsheet can be activated with <kbd>⌘⎋</kbd><kbd>⌘e</kbd><kbd>?</kbd>.
+* <kbd>⌘⎋</kbd> to enter `normal` mode
+* <kbd>⌘e</kbd> to enter `entity` mode
+* <kbd>?</kbd> to activate the `cheatsheet` entity
+
+To see all shortcuts for actions that an entity implements, a cheatsheet can be activated with <kbd>⌘⎋</kbd><kbd>⌘a</kbd><kbd>?</kbd><kbd>(entity hotkey)</kbd>.
+* <kbd>⌘⎋</kbd> to enter `normal` mode
+* <kbd>⌘a</kbd> to enter `action` mode
+* <kbd>?</kbd> to use the `open cheatsheet` action
+* <kbd>(entity hotkey)</kbd> to apply the action to some target entity
 
 <details>
- <summary>Click to view example workflows and their modal keybindings with accompanying descriptions.</summary>
+ <summary>Click to view more example workflows and their modal keyboard shortcuts with accompanying descriptions.</summary>
 
 <br>
 
-We can use `entity`, `action`, and `select` mode to achieve various common tasks from `desktop` mode:
+We can use `entity`, `action`, and `select` mode to achieve various repetitive tasks starting from `desktop` mode:
 
 Intent | Keybindings | Translation
 :--- | :---: | :---
@@ -49,15 +58,37 @@ Install [Hammerspoon](http://www.hammerspoon.org) and extract [Ki.spoon.zip](htt
 
 ## Usage and Configuration
 
+### Usage
+
 Load, configure, and start the plugin in `~/.hammerspoon/init.lua`:
 
 ```lua
-hs.loadSpoon('Ki')                 -- initialize the plugin
-spoon.Ki.workflowEvents = {...}    -- configure `spoon.Ki` here
+hs.loadSpoon('Ki')                 -- load the plugin
+spoon.Ki:useDefaultConfig()        -- use the default config (optional)
 spoon.Ki:start()                   -- enable keyboard shortcuts
 ```
 
-Nearly everything in Ki is customizable! API documentation can be found [here](https://andweeb.github.io/ki/html/Ki.html) and usage examples [here](docs/usage-examples).
+By default, Ki ships with predefined shortcuts for almost all native macOS applications, common directory files, and popular websites with preconfigured modes using a [default config](src/default-config.lua).
+
+### Configuration
+
+Nearly everything in Ki is configurable! Everyone uses their computer differently, so Ki provides an API to use the default config with particular options, register custom entities and their shortcuts, and even create custom modes and their modal shortcuts:
+
+```lua
+hs.loadSpoon('Ki')                             -- load the plugin
+spoon.Ki:useDefaultConfig({                    -- use the default config with options as a base
+    include = {                                -- include only the following default entities
+        "google-chrome",
+        "spotify",
+        ...
+    },
+})
+spoon.Ki:registerModes(transitions, shortcuts) -- register custom modes
+spoon.Ki:registerShortcuts(shortcuts)          -- register custom shortcuts
+spoon.Ki:start()                               -- enable keyboard shortcuts
+```
+
+API documentation can be found [here](https://andweeb.github.io/ki/html/Ki.html) and usage examples [here](docs/usage-examples).
 
 ## Development
 

@@ -1,9 +1,10 @@
 ----------------------------------------------------------------------------------------------------
 -- Default config
 --
--- Definitions and configuration of default entities and worfklow events
+-- Definitions and configuration of default entities and their shortcuts
 --
 -- luacov: disable
+local Ki = spoon.Ki
 local File = spoon.Ki.File
 local spoonPath = hs.spoons.scriptPath()
 
@@ -13,7 +14,76 @@ local function requireEntity(type, filename)
     return require(type.."."..filename)
 end
 
--- Initialize entities and assign shortcuts
+-- Define all state transitions between modes in Ki
+local stateTransitions = {
+    -- SELECT --
+    { name = "enterEntityMode", from = "select", to = "entity" },
+    { name = "enterSelectMode", from = "entity", to = "select" },
+    { name = "enterSelectMode", from = "normal", to = "select" },
+    { name = "exitMode", from = "select", to = "desktop" },
+    -- FILE --
+    { name = "enterFileMode", from = "normal", to = "file" },
+    { name = "enterFileMode", from = "entity", to = "file" },
+    { name = "enterFileMode", from = "select", to = "file" },
+    { name = "enterSelectMode", from = "file", to = "select" },
+    { name = "exitMode", from = "file", to = "desktop" },
+    -- URL --
+    { name = "enterUrlMode", from = "normal", to = "url" },
+    { name = "enterUrlMode", from = "select", to = "url" },
+    { name = "enterUrlMode", from = "entity", to = "url" },
+    { name = "exitMode", from = "url", to = "desktop" },
+    -- VOLUME --
+    { name = "enterVolumeMode", from = "normal", to = "volume" },
+    { name = "exitMode", from = "volume", to = "desktop" },
+    -- BRIGHTNESS --
+    { name = "enterBrightnessMode", from = "normal", to = "brightness" },
+    { name = "exitMode", from = "brightness", to = "desktop" },
+}
+
+-- Define transition shortcuts based on state transitions defined above
+local normalTransitionShortcuts = {
+    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Normal Mode", "Transition to File Mode" } },
+    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Normal Mode", "Transition to URL Mode" } },
+    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Normal Mode", "Transition to Select Mode" } },
+    { {"cmd"}, "b", function() Ki.state:enterBrightnessMode() end, { "Normal Mode", "Transition to Brightness Mode" } },
+    { {"cmd"}, "v", function() Ki.state:enterVolumeMode() end, { "Normal Mode", "Transition to Volume Mode" } },
+}
+local entityTransitionShortcuts = {
+    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Entity Mode", "Transition to URL Mode" } },
+    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Entity Mode", "Transition to File Mode" } },
+    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Entity Mode", "Transition to Select Mode" } },
+}
+local selectTransitionShortcuts = {
+    { nil, "escape", function() Ki.state:exitMode() end, { "Select Mode", "Exit to Desktop Mode" } },
+    { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Select Mode", "Transition to Entity Mode" } },
+    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Select Mode", "Transition to File Mode" } },
+    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Select Mode", "Transition to URL Mode" } },
+}
+local fileTransitionShortcuts = {
+    { nil, "escape", function() Ki.state:exitMode() end, { "File Mode", "Exit to Desktop Mode" } },
+}
+local urlTransitionShortcuts =  {
+    { nil, "escape", function() Ki.state:exitMode() end, { "URL Mode", "Exit to Desktop Mode" } },
+}
+local volumeTransitionShortcuts =  {
+    { nil, "escape", function() Ki.state:exitMode() end, { "Volume Control Mode", "Exit to Desktop Mode" } },
+}
+local brightnessTransitionShortcuts =  {
+    { nil, "escape", function() Ki.state:exitMode() end, { "Brightness Control Mode", "Exit to Desktop Mode" } },
+}
+
+-- Register mode transition shortcuts
+Ki:registerModes(stateTransitions, {
+    normal = normalTransitionShortcuts,
+    entity = entityTransitionShortcuts,
+    select = selectTransitionShortcuts,
+    file = fileTransitionShortcuts,
+    url = urlTransitionShortcuts,
+    volume = volumeTransitionShortcuts,
+    brightness = brightnessTransitionShortcuts,
+})
+
+-- Initialize entities and assign shortcuts for entity and entity select mode
 local entities = {
     ActivityMonitor = requireEntity("application", "activity-monitor"),
     AppStore = requireEntity("application", "app-store"),
@@ -66,7 +136,7 @@ local entityShortcuts = {
     { nil, "v", entities.VoiceMemos, { "Entities", "Voice Memos" } },
     { nil, ",", entities.SystemPreferences, { "Entities", "System Preferences" } },
     { { "cmd" }, "d", entities.DiskUtility, { "Entities", "Disk Utility" } },
-    { { "option", "cmd" }, "s", entities.Siri, { "Entities", "Siri" } },
+    { { "alt", "cmd" }, "s", entities.Siri, { "Entities", "Siri" } },
     { { "shift" }, "a", entities.ActivityMonitor, { "Entities", "Activity Monitor" } },
     { { "shift" }, "c", entities.Calculator, { "Entities", "Calculator" } },
     { { "shift" }, "f", entities.FaceTime, { "Entities", "FaceTime" } },
@@ -94,7 +164,7 @@ local selectEntityShortcuts = {
     { { "shift" }, "t", entities.TextEdit, { "Select Events", "Select a Text Edit window" } },
 }
 
--- Initialize file entities and assign shortcuts
+-- Initialize file entities and assign file mode shortcuts
 local function openFinderApplicationEvent(name)
     return function()
         hs.application.launchOrFocus(name)
@@ -136,7 +206,7 @@ local fileShortcuts = {
     { { "cmd", "shift" }, "d", files.Documents, { "Files", "Documents" } },
 }
 
--- Initialize URL entities and assign shortcuts
+-- Initialize URL entities and assign URL mode shortcuts
 local urls = {
     Amazon = requireEntity("url", "amazon"),
     Facebook = requireEntity("url", "facebook"),
@@ -181,7 +251,16 @@ local System = requireEntity("entity", "system")
 local Volume = requireEntity("entity", "volume")
 local Brightness = requireEntity("entity", "brightness")
 
-local shortcuts = {
+Ki.defaultEntities = {
+    normal = System,
+    volume = Volume,
+    brightness = Brightness,
+    entity = entities,
+    file = files,
+    url = urls,
+}
+
+Ki:registerShortcuts({
     normal = System.shortcuts,
     volume = Volume.shortcuts,
     brightness = Brightness.shortcuts,
@@ -189,16 +268,4 @@ local shortcuts = {
     select = selectEntityShortcuts,
     file = fileShortcuts,
     url = urlShortcuts,
-}
-
-return {
-    shortcuts = shortcuts,
-    entities = {
-        normal = System,
-        volume = Volume,
-        brightness = Brightness,
-        entity = entities,
-        file = files,
-        url = urls,
-    },
-}
+})

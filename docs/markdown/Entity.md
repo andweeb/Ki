@@ -16,6 +16,7 @@ Entity class that represents some abstract automatable desktop entity
  * [initialize](#initialize)
  * [mergeShortcuts](#mergeShortcuts)
  * [notifyError](#notifyError)
+ * [registerSelectionModalShortcuts](#registerSelectionModalShortcuts)
  * [registerShortcuts](#registerShortcuts)
  * [renderScriptTemplate](#renderScriptTemplate)
  * [showSelectionModal](#showSelectionModal)
@@ -91,6 +92,14 @@ Entity class that represents some abstract automatable desktop entity
 | **Description**                             | Displays error details in a notification and logs to the Hammerspoon console                                                                     |
 | **Parameters**                              | <ul><li>`message` - The main notification message</li><li>`details` - The textual body of the notification containing details of the error</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
+
+| [registerSelectionModalShortcuts](#registerSelectionModalShortcuts)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity:registerSelectionModalShortcuts(shortcuts, override) -> table of registered shortcuts`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Registers a list of selection modal shortcuts with the option of merging with the existing [default](#selectionModalShortcuts) or previously initialized modal shortcuts.                                                                     |
+| **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects. Shortcut event handlers will be invoked with the [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance:</li><li>   ```</li><li>   { { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },</li><li>   { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },</li><li>   ```</li><li>`override` - A boolean denoting to whether to override the existing selection modal shortcuts</li></ul> |
+| **Returns**                                 | <ul><li> `shortcuts` - Returns the list of registered selection modal shortcuts</li></ul>          |
 
 | [registerShortcuts](#registerShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

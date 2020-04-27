@@ -125,15 +125,16 @@ function File:initialize(path, shortcuts, options)
         end
     end
 
-    local mergedShortcuts = self.mergeShortcuts(shortcuts, commonShortcuts)
-
+    self.name = path
     self.path = path
-    self.shortcuts = mergedShortcuts
     self.showHiddenFiles = options.showHiddenFiles or false
     self.sortAttribute = options.sortAttribute or "modification"
 
+    self:registerShortcuts(commonShortcuts)
+    self:registerShortcuts(shortcuts, true)
+
     local cheatsheetDescription = "Ki shortcut keybindings registered for file "..self.path
-    self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, mergedShortcuts)
+    self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, self.shortcuts)
 end
 
 --- File:createEvent(path, placeholderText, handler) -> function

@@ -161,6 +161,7 @@ function URL:initialize(url, shortcuts)
     local mergedShortcuts = self.mergeShortcuts(shortcuts, commonShortcuts)
 
     self.url = url
+    self.name = url
     self.shortcuts = mergedShortcuts
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for url: "..self.url

@@ -34,6 +34,7 @@
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#mergeShortcuts">mergeShortcuts</a></li>
             <li><a href="#notifyError">notifyError</a></li>
+            <li><a href="#registerSelectionModalShortcuts">registerSelectionModalShortcuts</a></li>
             <li><a href="#registerShortcuts">registerShortcuts</a></li>
             <li><a href="#renderScriptTemplate">renderScriptTemplate</a></li>
             <li><a href="#showSelectionModal">showSelectionModal</a></li>
@@ -289,6 +290,37 @@
 <p>Returns:</p>
 <ul>
 <li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="registerSelectionModalShortcuts">
+            <a name="//apple_ref/cpp/Method/registerSelectionModalShortcuts" class="dashAnchor"></a>
+            <h5><a href="#registerSelectionModalShortcuts">registerSelectionModalShortcuts</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:registerSelectionModalShortcuts(shortcuts, override) -&gt; table of registered shortcuts</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Registers a list of selection modal shortcuts with the option of merging with the existing <a href="#selectionModalShortcuts">default</a> or previously initialized modal shortcuts.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>shortcuts</code> - The list of shortcut objects. Shortcut event handlers will be invoked with the <a href="https://www.hammerspoon.org/docs/hs.chooser.html"><code>hs.chooser</code></a> instance:
+<pre><code>{ { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },
+{ { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },</code></pre>
+</li>
+<li><code>override</code> - A boolean denoting to whether to override the existing selection modal shortcuts</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li><code>shortcuts</code> - Returns the list of registered selection modal shortcuts</li>
 </ul>
 </td>
               </tr>
