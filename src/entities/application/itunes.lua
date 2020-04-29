@@ -4,11 +4,11 @@
 local Application = spoon.Ki.Application
 local iTunes = Application:new("iTunes")
 
-local focusAfter = { focusAfter = true }
-iTunes.previousSong = Application.createMenuItemEvent("Previous", focusAfter)
-iTunes.nextSong = Application.createMenuItemEvent("Next", focusAfter)
-iTunes.stop = Application.createMenuItemEvent("Stop", focusAfter)
-iTunes.goToCurrentSong = Application.createMenuItemEvent("Go to Current Song", focusAfter)
+-- Initialize menu item events
+iTunes.previousSong = Application.createMenuItemEvent("Previous", { focusAfter = true })
+iTunes.nextSong = Application.createMenuItemEvent("Next", { focusAfter = true })
+iTunes.stop = Application.createMenuItemEvent("Stop", { focusAfter = true })
+iTunes.goToCurrentSong = Application.createMenuItemEvent("Go to Current Song", { focusAfter = true })
 iTunes.toggleSong = Application.createMenuItemEvent({ "Play", "Pause" }, { isToggleable = true })
 
 iTunes:registerShortcuts({

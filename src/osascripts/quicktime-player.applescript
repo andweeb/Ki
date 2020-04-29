@@ -1,13 +1,13 @@
--- AppleScript template for various QuickTime Player options
--- `option` - the name of the option
+-- AppleScript template for various QuickTime Player actions
+-- `action` - the name of the action
 -- `targetDocument` - the target QuickTime Player document
-set option to "{{option}}"
+set action to "{{action}}"
 
 tell application "QuickTime Player"
 
     set target to {{target}}
 
-	if option is "toggle-play" then
+	if action is "toggle-play" then
 
         if target is playing then
 
@@ -19,11 +19,11 @@ tell application "QuickTime Player"
 
         end if
 
-    else if option is "stop" then
+    else if action is "stop" then
 
         stop target
 
-    else if option is "toggle-looping" then
+    else if action is "toggle-looping" then
 
         if the first document is looping then
 

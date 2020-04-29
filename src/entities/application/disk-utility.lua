@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local DiskUtility = Application:new("Disk Utility")
 
+-- Initialize menu item events
 DiskUtility.newBlankImage = Application.createMenuItemEvent("Blank Image...", { focusAfter = true })
 DiskUtility.newImageFromFolder = Application.createMenuItemEvent("Image From Folder...", {
     focusAfter = true,

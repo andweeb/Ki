@@ -4,17 +4,18 @@
 local Application = spoon.Ki.Application
 local Messages = Application:new("Messages")
 
+-- Initialize menu item events
 Messages.find = Application.createMenuItemEvent("Find...", { focusBefore = true })
 Messages.newMessage = Application.createMenuItemEvent("New Message", { focusBefore = true })
 
+-- Implement method to support selection of tab titles in select mode
 function Messages.getSelectionItems()
     local choices = {}
-    local isOk, conversations, rawTable =
-        hs.osascript.applescript(Application.renderScriptTemplate("messages-conversations"))
+    local script = Application.renderScriptTemplate("messages", { action = "get-conversations" })
+    local isOk, conversations, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
         Application.notifyError("Error fetching Messages conversations", rawTable.NSLocalizedFailureReason)
-
         return {}
     end
 
@@ -31,11 +32,15 @@ function Messages.getSelectionItems()
     return choices
 end
 
+-- Action to activate the Messages app or a particular conversation
 function Messages.focus(app, choice)
     app:activate()
 
     if choice then
-        local script = Application.renderScriptTemplate("select-messages-conversation", { index = choice.index })
+        local script = Application.renderScriptTemplate("messages", {
+            action = "select-conversation",
+            index = choice.index,
+        })
         local isOk, _, rawTable = hs.osascript.applescript(script)
 
         if not isOk then

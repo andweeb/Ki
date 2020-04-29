@@ -38,7 +38,7 @@
             <li><a href="#open">open</a></li>
             <li><a href="#openInfoWindow">openInfoWindow</a></li>
             <li><a href="#openWith">openWith</a></li>
-            <li><a href="#runFileModeApplescript">runFileModeApplescript</a></li>
+            <li><a href="#runApplescriptAction">runApplescriptAction</a></li>
             <li><a href="#showFileSelectionModal">showFileSelectionModal</a></li>
           </ul>
       </ul>
@@ -302,7 +302,7 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the operation.</p>
+                <td><p>Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the action.</p>
 <p>Parameters:</p>
 <ul>
 <li><code>path</code> - the path of the target file to move to the trash</li>
@@ -428,13 +428,13 @@ Currently supported behaviors:</p>
               </tr>
             </table>
           </section>
-          <section id="runFileModeApplescript">
-            <a name="//apple_ref/cpp/Method/runFileModeApplescript" class="dashAnchor"></a>
-            <h5><a href="#runFileModeApplescript">runFileModeApplescript</a></h5>
+          <section id="runApplescriptAction">
+            <a name="//apple_ref/cpp/Method/runApplescriptAction" class="dashAnchor"></a>
+            <h5><a href="#runApplescriptAction">runApplescriptAction</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>File:runFileModeApplescript(viewModel)</code></td>
+                <td><code>File:runApplescriptAction(viewModel)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -442,7 +442,7 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Convenience method to render and run the <code>file-mode-operations.applescript</code> file and notify on execution errors. Refer to the applescript template file itself to see available view model records.</p>
+                <td><p>Convenience method to render and run the <code>file.applescript</code> file and notify on execution errors. Refer to the applescript template file itself to see available view model records.</p>
 <p>Parameters:</p>
 <ul>
 <li><code>viewModel</code> - The view model object used to render the template</li>

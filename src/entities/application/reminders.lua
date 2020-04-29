@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local Reminders = Application:new("Reminders")
 
+-- Initialize menu item events
 Reminders.find = Application.createMenuItemEvent("Find", { focusBefore = true })
 Reminders.newReminder = Application.createMenuItemEvent("New Reminder", { focusBefore = true })
 Reminders.newReminderList = Application.createMenuItemEvent("New List", { focusBefore = true })

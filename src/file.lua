@@ -74,14 +74,11 @@ function File:initialize(path, shortcuts, options)
 
     local attributes = value
     local isDirectory = attributes.mode == "directory"
-    local openFileInFolder = self:createEvent(path, "Open a file", function(target)
-        self.open(target)
+    local openFileInFolder = self:createEvent(path, "Open a file", function(...)
+        self.open(...)
     end)
 
     local actions = {
-        copy = function(target) self:copy(target) end,
-        move = function(target) self:move(target) end,
-        showCheatsheet = function() self.cheatsheet:show() end,
         openFileInFolder = openFileInFolder,
         openFileInFolderWith = self:createEvent(path, "Open file with application", function(target)
             self:openWith(target)
@@ -105,17 +102,17 @@ function File:initialize(path, shortcuts, options)
     }
     local commonShortcuts = {
         { nil, nil, actions.open, { path, "Activate/Focus" } },
-        { { "shift" }, "/", actions.showCheatsheet, { path, "Show Cheatsheet" } },
+        { { "shift" }, "/", function() self.cheatsheet:show() end, { path, "Show Cheatsheet" } },
     }
 
     -- Append directory shortcuts if the file entity is representing a directory path
     if isDirectory then
         local commonDirectoryShortcuts = {
-            { nil, "c", actions.copy, { path, "Copy File to Folder" } },
+            { nil, "c", function(...) self:copy(...) end, { path, "Copy File to Folder" } },
             { nil, "d", actions.deleteFileInFolder, { path, "Move File in Folder to Trash" } },
             { nil, "i", actions.showInfoForFileInFolder, { path, "Open File Info Window" } },
-            { nil, "m", actions.move, { path, "Move File to Folder" } },
-            { nil, "o", actions.openFileInFolder, { path, "Open File in Folder" } },
+            { nil, "m", function(...) self:move(...) end, { path, "Move File to Folder" } },
+            { nil, "o", openFileInFolder, { path, "Open File in Folder" } },
             { nil, "space", actions.quickLookFileInFolder, { path, "Quick Look" } },
             { { "shift" }, "o", actions.openFileInFolderWith, { path, "Open File in Folder with App" } },
         }
@@ -155,22 +152,22 @@ function File:createEvent(path, placeholderText, handler)
     end
 end
 
---- File:runFileModeApplescript(viewModel)
+--- File:runApplescriptAction(viewModel)
 --- Method
---- Convenience method to render and run the `file-mode-operations.applescript` file and notify on execution errors. Refer to the applescript template file itself to see available view model records.
+--- Convenience method to render and run the `file.applescript` file and notify on execution errors. Refer to the applescript template file itself to see available view model records.
 ---
 --- Parameters:
 ---  * `viewModel` - The view model object used to render the template
 ---
 --- Returns:
 ---   * None
-function File:runFileModeApplescript(viewModel)
-    local script = self.renderScriptTemplate("file-mode-operations", viewModel)
+function File:runApplescriptAction(viewModel)
+    local script = self.renderScriptTemplate("file", viewModel)
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        local operationName = viewModel and "\""..viewModel.operation.."\"" or "unknown"
-        local errorMessage = "Error executing the "..operationName.." file operation"
+        local actionName = viewModel and "\""..viewModel.action.."\"" or "unknown"
+        local errorMessage = "Error executing the "..actionName.." file action"
         self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
     end
 end
@@ -426,8 +423,8 @@ function File:openWith(path)
     local function onSelection(choice)
         if not choice then return end
 
-        self:runFileModeApplescript({
-            operation = "open-with",
+        self:runApplescriptAction({
+            action = "open-with",
             filePath1 = path,
             filePath2 = choice.path,
         })
@@ -451,12 +448,12 @@ end
 --- Returns:
 ---   * None
 function File:openInfoWindow(path)
-    self:runFileModeApplescript({ operation = "open-info-window", filePath1 = path })
+    self:runApplescriptAction({ action = "open-info-window", filePath1 = path })
 end
 
 --- File:moveToTrash(path)
 --- Method
---- Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the operation.
+--- Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the action.
 ---
 --- Parameters:
 ---  * `path` - the path of the target file to move to the trash
@@ -469,7 +466,7 @@ function File:moveToTrash(path)
     local details = "New file location:\n".."~/.Trash/"..filename
 
     self.triggerAfterConfirmation(question, details, function()
-        self:runFileModeApplescript({ operation = "move-to-trash", filePath1 = path })
+        self:runApplescriptAction({ action = "move-to-trash", filePath1 = path })
     end)
 end
 
@@ -491,8 +488,8 @@ function File:move(initialPath)
             local details = "New file location:\n"..destinationPath.."/"..targetFile
 
             self.triggerAfterConfirmation(question, details, function()
-                self:runFileModeApplescript({
-                    operation = "move",
+                self:runApplescriptAction({
+                    action = "move",
                     filePath1 = targetPath,
                     filePath2 = destinationPath,
                 })
@@ -519,8 +516,8 @@ function File:copy(initialPath)
             local details = "New file location:\n"..destinationPath.."/"..targetFile
 
             self.triggerAfterConfirmation(question, details, function()
-                self:runFileModeApplescript({
-                    operation = "copy",
+                self:runApplescriptAction({
+                    action = "copy",
                     filePath1 = targetPath,
                     filePath2 = destinationPath,
                 })

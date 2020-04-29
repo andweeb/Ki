@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local Dictionary = Application:new("Dictionary")
 
+-- Initialize menu item events
 Dictionary.newWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
 Dictionary.newTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
 Dictionary.search = Application.createMenuItemEvent("Search For a New Word...", { focusAfter = true })

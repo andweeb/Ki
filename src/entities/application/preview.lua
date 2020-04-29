@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local Preview = Application:new("Preview")
 
+-- Initialize menu item events
 Preview.close = Application.createMenuItemEvent("Close Window", { focusBefore = true })
 Preview.find = Application.createMenuItemEvent({ "Find", "Find..." }, { focusAfter = true })
 Preview.open = Application.createMenuItemEvent("Open...", { focusAfter = true })

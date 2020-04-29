@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local TextEdit = Application:new("TextEdit")
 
+-- Initialize menu item events
 TextEdit.newDocument = Application.createMenuItemEvent("New", { focusAfter = true })
 TextEdit.saveDocument = Application.createMenuItemEvent("Save", { focusAfter = true })
 TextEdit.openDocument = Application.createMenuItemEvent("Open...", { focusAfter = true })

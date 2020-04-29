@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local Safari = Application:new("Safari")
 
+-- Initialize menu item events
 Safari.addBookmark = Application.createMenuItemEvent("Add Bookmark...", { focusBefore = true })
 Safari.openLocation = Application.createMenuItemEvent("Open Location...", { focusBefore = true })
 Safari.moveTabToNewWindow = Application.createMenuItemEvent("Move Tab to New Window", { focusBefore = true })
@@ -19,7 +20,8 @@ Safari.showWebInspector = Application.createMenuItemEvent({ "Show Web Inspector"
     focusBefore = true,
 })
 
-function Safari.createMediaEvent(command, errorMessage)
+-- Use a helper method to create various media actions
+function Safari:createMediaAction(command, errorMessage)
     return function (_, choice)
         local viewModel = {
             browser = "Safari",
@@ -29,29 +31,30 @@ function Safari.createMediaEvent(command, errorMessage)
                 or "front document",
             ["is-safari"] = true,
         }
-        local script = Application.renderScriptTemplate("browser-media", viewModel)
+        local script = self.renderScriptTemplate("browser-media", viewModel)
         local isOk, _, rawTable = hs.osascript.applescript(script)
 
         if not isOk then
-            Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
+            self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
         end
     end
 end
-Safari.toggleMute = Safari.createMediaEvent("toggle-mute", "Error (un)muting video")
-Safari.toggleMedia = Safari.createMediaEvent("toggle-play", "Error toggling media")
-Safari.nextMedia = Safari.createMediaEvent("next", "Error going to the next media")
-Safari.previousMedia = Safari.createMediaEvent("previous", "Error going back to the previous media")
-Safari.toggleCaptions = Safari.createMediaEvent("toggle-captions", "Error toggling captions")
-Safari.skipMedia = Safari.createMediaEvent("skip", "Error skipping media")
+Safari.toggleMute = Safari:createMediaAction("toggle-mute", "Error (un)muting video")
+Safari.toggleMedia = Safari:createMediaAction("toggle-play", "Error toggling media")
+Safari.nextMedia = Safari:createMediaAction("next", "Error going to the next media")
+Safari.previousMedia = Safari:createMediaAction("previous", "Error going back to the previous media")
+Safari.toggleCaptions = Safari:createMediaAction("toggle-captions", "Error toggling captions")
+Safari.skipMedia = Safari:createMediaAction("skip", "Error skipping media")
 
+-- Implement method to support selection of tab titles in select mode
 function Safari.getSelectionItems()
     local choices = {}
-    local script = Application.renderScriptTemplate("application-tab-titles", { application = "Safari" })
+    local script = Application.renderScriptTemplate("application-tabs", { application = "Safari" })
     local isOk, tabList, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Application.notifyError("Error fetching browser tab information", rawTable.NSLocalizedFailureReason)
-
+        local errorMessage = "Error fetching browser tab information"
+        Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
         return {}
     end
 
@@ -77,41 +80,87 @@ function Safari.getSelectionItems()
     return choices
 end
 
-function Safari.reload(_, choice)
-    local target = choice
-        and "tab "..choice.tabIndex.." of front window"
-        or "front document"
-    local script = Application.renderScriptTemplate("reload-safari", { target = target })
+-- Helper method to run AppleScript actions available in `osascripts/safari.applescript`
+function Safari:runApplescriptAction(errorMessage, viewModel)
+    local script = self.renderScriptTemplate("safari", viewModel)
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Application.notifyError("Error reloading active window", rawTable.NSLocalizedFailureReason)
+        self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
     end
 end
 
-function Safari.close(_, choice)
-    local viewModel = choice
-        and { target = "tab "..choice.tabIndex.." of window id "..choice.windowId }
-        or { target = "current tab of front window" }
-    local script = Application.renderScriptTemplate("close-safari", viewModel)
-    local isOk, _, rawTable = hs.osascript.applescript(script)
+-- Action to reload a Safari tab or window
+function Safari:reload(_, choice)
+    local viewModel = {
+        action = "reload",
+        target = "front document",
+    }
 
-    if not isOk then
-        Application.notifyError("Error closing Safari tab", rawTable.NSLocalizedFailureReason)
+    if choice then
+        viewModel.target = "tab "..choice.tabIndex.." of window id "..choice.windowId
+    end
+
+    self:runApplescriptAction("Error reloading Safari tab", viewModel)
+end
+
+-- Action to close a Safari tab or window
+function Safari:close(_, choice)
+    local viewModel = {
+        action = "close",
+        target = "current tab of front window",
+    }
+
+    if choice then
+        viewModel.target = "tab "..choice.tabIndex.." of window id "..choice.windowId
+    end
+
+    self:runApplescriptAction("Error closing Safari tab", viewModel)
+end
+
+-- Action to focus a Safari tab for some window id
+function Safari:focusTab(windowId, tabIndex)
+    self:runApplescriptAction("Error focusing Safari tab", {
+        action = "focus-tab",
+        windowId = windowId,
+        tabIndex = tabIndex,
+    })
+end
+
+-- Action to focus a Safari tab or window
+--
+-- Override `Application.focus` since there has been a `hs.window:focusTab` issue for
+-- Safari after the v10.14.3 macOS update: https://github.com/Hammerspoon/hammerspoon/issues/2080
+function Safari:focus(app, choice)
+    if choice then
+        local windowId = choice.windowId
+        local tabIndex = choice.tabIndex
+
+        if tabIndex then
+            self:focusTab(windowId, tabIndex)
+        end
+
+        local window = hs.window(tonumber(windowId))
+        if windowId and window then
+            window:focus()
+        end
+    elseif app then
+        app:activate()
     end
 end
 
 Safari:registerShortcuts({
+    { nil, nil, function(...) Safari:focus(...) end, { "Bookmarks", "Add bookmark" } },
     { nil, "d", Safari.addBookmark, { "Bookmarks", "Add bookmark" } },
     { nil, "i", Safari.showWebInspector, { "Develop", "Toggle Web Inspector" } },
     { nil, "l", Safari.openLocation, { "File", "Open Location..." } },
     { nil, "m", Safari.toggleMute, { "Media", "Toggle Mute" } },
     { nil, "n", Safari.openNewWindow, { "File", "Open New Window" } },
     { nil, "o", Safari.openFile, { "File", "Open File" } },
-    { nil, "r", Safari.reload, { "View", "Reload Page" } },
+    { nil, "r", function(...) Safari:reload(...) end, { "View", "Reload Page" } },
     { nil, "t", Safari.openNewTab, { "File", "Open New Tab" } },
     { nil, "u", Safari.undoCloseTab, { "File", "Undo Close Tab" } },
-    { nil, "w", Safari.close, { "File", "Close Tab/Window" } },
+    { nil, "w", function(...) Safari:close(...) end, { "File", "Close Tab or Window" } },
     { nil, "y", Safari.showHistory, { "History", "Show History" } },
     { nil, "space", Safari.toggleMedia, { "Media", "Play/Pause Media" } },
     { { "ctrl" }, "c", Safari.toggleCaptions, { "Media", "Toggle Media Captions" } },

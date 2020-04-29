@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local Terminal = Application:new("Terminal")
 
+-- Initialize menu item events
 Terminal.find = Application.createMenuItemEvent("Find...", { focusBefore = true })
 Terminal.newWindow = Application.createMenuItemEvent("New Window with Profile .+$", {
     focusBefore = true,

@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local Calendar = Application:new("Calendar")
 
+-- Initialize menu item events
 Calendar.find = Application.createMenuItemEvent("Find", { focusAfter = true })
 Calendar.newEvent = Application.createMenuItemEvent("New Event", { focusAfter = true })
 Calendar.newCalendar = Application.createMenuItemEvent("New Calendar", { focusAfter = true })

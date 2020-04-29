@@ -20,7 +20,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
  * [open](#open)
  * [openInfoWindow](#openInfoWindow)
  * [openWith](#openWith)
- * [runFileModeApplescript](#runFileModeApplescript)
+ * [runApplescriptAction](#runApplescriptAction)
  * [showFileSelectionModal](#showFileSelectionModal)
 
 ## API Documentation
@@ -95,7 +95,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `File:moveToTrash(path)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the operation.                                                                     |
+| **Description**                             | Moves a file or directory at the given path to the Trash. A dialog block alert opens to confirm before proceeding with the action.                                                                     |
 | **Parameters**                              | <ul><li>`path` - the path of the target file to move to the trash</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
@@ -131,11 +131,11 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Parameters**                              | <ul><li>`path` - the path of the target file to open</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
-| [runFileModeApplescript](#runFileModeApplescript)         |                                                                                     |
+| [runApplescriptAction](#runApplescriptAction)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:runFileModeApplescript(viewModel)`                                                                    |
+| **Signature**                               | `File:runApplescriptAction(viewModel)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Convenience method to render and run the `file-mode-operations.applescript` file and notify on execution errors. Refer to the applescript template file itself to see available view model records.                                                                     |
+| **Description**                             | Convenience method to render and run the `file.applescript` file and notify on execution errors. Refer to the applescript template file itself to see available view model records.                                                                     |
 | **Parameters**                              | <ul><li>`viewModel` - The view model object used to render the template</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 

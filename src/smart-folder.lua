@@ -114,7 +114,7 @@ function SmartFolder:copy(path)
 
                 self.triggerAfterConfirmation(question, function()
                     self:runFileModeApplescript({
-                        operation = "copy",
+                        action = "copy",
                         filePath1 = targetPath,
                         filePath2 = destinationPath,
                     })
@@ -160,7 +160,7 @@ function SmartFolder:move(path)
 
                 self.triggerAfterConfirmation(question, function()
                     self:runFileModeApplescript({
-                        operation = "move",
+                        action = "move",
                         filePath1 = targetPath,
                         filePath2 = destinationPath,
                     })

@@ -4,11 +4,13 @@
 local Application = spoon.Ki.Application
 local SystemPreferences = Application:new("System Preferences")
 
+-- Initialize menu item events
 SystemPreferences.search = Application.createMenuItemEvent("Search", { focusBefore = true })
 SystemPreferences.showAllPreferences = Application.createMenuItemEvent("Show All Preferences", {
     focusBefore = true,
 })
 
+-- Implement method to support selection of system preferences in select mode
 function SystemPreferences.getSelectionItems()
     local choices = {}
     local script = Application.renderScriptTemplate("system-preferences", { option = "fetch-panes" })
@@ -33,6 +35,7 @@ function SystemPreferences.getSelectionItems()
     return choices
 end
 
+-- Action to activate System Preferences app or with a specific system preference pane
 function SystemPreferences.focus(app, choice)
     app:activate()
 

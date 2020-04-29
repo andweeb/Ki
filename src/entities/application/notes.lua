@@ -4,6 +4,7 @@
 local Application = spoon.Ki.Application
 local Notes = Application:new("Notes")
 
+-- Initialize menu item events
 Notes.search = Application.createMenuItemEvent("Search", { focusAfter = true })
 Notes.newNote = Application.createMenuItemEvent("New Note", { focusAfter = true })
 Notes.newFolder = Application.createMenuItemEvent("New Folder", { focusAfter = true })
@@ -16,6 +17,7 @@ Notes.toggleAttachmentsBrowser = Application.createMenuItemEvent({
     "Hide Attachments Browser"
 }, { isToggleable = true })
 
+-- Implement method to support selection of notes in select mode
 function Notes.getSelectionItems()
     local choices = {}
     local isOk, notes, rawTable =
@@ -42,6 +44,7 @@ function Notes.getSelectionItems()
     return choices
 end
 
+-- Action to activate the Notes app or open a particular note
 function Notes.focus(app, choice)
     app:activate()
 
