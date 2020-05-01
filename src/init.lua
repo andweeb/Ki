@@ -10,8 +10,7 @@
 ---
 --- Ki ships with the following core modes:
 --- * `DESKTOP` the default state of macOS
---- * `NORMAL` a mode in which system and mode transition shortcuts are available
---- * `ACTION` a mode in which actions can be specified and applied to some entity
+--- * `NORMAL` a mode in which modes can be entered or actions can be specified
 --- * `ENTITY` a mode in which entities are available to be launched or activated
 
 local Ki = {}
@@ -140,10 +139,6 @@ Ki.stateTransitions = {
     -- ENTITY --
     { name = "enterEntityMode", from = "normal", to = "entity" },
     { name = "exitMode", from = "entity", to = "desktop" },
-    -- ACTION --
-    { name = "enterActionMode", from = "normal", to = "action" },
-    { name = "enterEntityMode", from = "action", to = "entity" },
-    { name = "exitMode", from = "action", to = "desktop" },
 }
 
 -- A table containing lists of shortcuts keyed by mode name.
@@ -154,10 +149,6 @@ Ki.shortcuts = {
     normal = {
         { nil, "escape", function() Ki.state:exitMode() end, { "Normal Mode", "Exit to Desktop Mode" } },
         { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Transition to Entity Mode" } },
-        { {"cmd"}, "a", function() Ki.state:enterActionMode() end, { "Normal Mode", "Transition to Action Mode" } },
-    },
-    action = {
-        { nil, "escape", function() Ki.state:exitMode() end, { "Action Mode", "Exit to Desktop Mode" } },
     },
     entity = {
         { nil, "escape", function() Ki.state:exitMode() end, { "Entity Mode", "Exit to Desktop Mode" } },
@@ -250,7 +241,7 @@ function Ki:_handleKeyDown(event)
     end
 
     -- Create action handlers at runtime to automatically enter entity mode with the intended event
-    if mode == "action" and not handler then
+    if mode == "normal" and not handler then
         handler = function(actionFlags, actionKeyName)
             local action = {
                 flags = actionFlags,

@@ -11,8 +11,7 @@ Ki provides an API for configuring custom modes and keyboard shortcuts to allow 
 
 Ki ships with the following core modes:
 * `DESKTOP` the default state of macOS
-* `NORMAL` a mode in which system and mode transition shortcuts are available
-* `ACTION` a mode in which actions can be specified and applied to some entity
+* `NORMAL` a mode in which modes can be entered or actions can be specified
 * `ENTITY` a mode in which entities are available to be launched or activated
 
 ## API Overview
