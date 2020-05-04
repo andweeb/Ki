@@ -48,6 +48,7 @@
           <ul>
             <li><a href="#registerModes">registerModes</a></li>
             <li><a href="#registerShortcuts">registerShortcuts</a></li>
+            <li><a href="#remapShortcuts">remapShortcuts</a></li>
             <li><a href="#start">start</a></li>
             <li><a href="#stop">stop</a></li>
             <li><a href="#useDefaultConfig">useDefaultConfig</a></li>
@@ -223,7 +224,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki:registerModes(stateTransitions, transitionShortcuts) -&gt; table of state transition events, table of transition shortcuts</code></td>
+                <td><code>Ki:registerModes(modeTransitionEvents, transitionShortcuts) -&gt; table of state transition events, table of transition shortcuts</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -234,21 +235,21 @@
                 <td><p>Registers state events that transition between modes and their assigned keyboard shortcuts.</p>
 <p>Parameters:</p>
 <ul>
-<li><p><code>stateTransitions</code> - A table containing the <a href="https://github.com/unindented/lua-fsm#usage">state transition events</a> for the finite state machine set to <a href="#state"><code>Ki.state</code></a>.</p>
+<li><p><code>modeTransitionEvents</code> - A table containing the <a href="https://github.com/unindented/lua-fsm#usage">transition events</a> for the finite state machine set to <a href="#state"><code>Ki.state</code></a>.</p>
 <p>The example state events below create methods on <code>Ki.state</code> to enter and exit entity mode from normal mode:</p>
 
 <pre><code> { { name = "enterEntityMode", from = "normal", to = "entity" }
    { name = "exitMode", from = "entity", to = "normal" } }</code></pre>
 <p><strong>Note</strong>: these events will only <em>initialize and expose</em> methods on <a href="#state"><code>Ki.state</code></a>. For example, the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods will only be <em>initialized</em> with the example state events above, in which they can be used in the handler functions for the <code>transitionShortcuts</code> in the second argument.</p>
 </li>
-<li><p><code>transitionShortcuts</code> - Lists of shortcut objects keyed by mode name, with each shortcut allowing the transition from and to the modes specified in the <code>stateTransitions</code> events.</p>
+<li><p><code>transitionShortcuts</code> - Lists of shortcut objects keyed by mode name, with each shortcut allowing the transition from and to the modes specified in the <code>modeTransitionEvents</code> events.</p>
 <p>Continuing with the example above, we can reference the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods initialized by the state transitions to define the shortcuts that enter and exit entity mode:</p>
 
 <pre><code> {
      -- For when in `normal` mode
      normal = {
          -- Register &lt;cmd&gt; + e as the shortcut to enter `entity` mode
-         { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Transition to Entity Mode" } },
+         { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Enter Entity Mode" } },
      },
      -- For when in `entity` mode
      entity = {
@@ -294,6 +295,79 @@
 <ul>
 <li><code>shortcuts</code> - The list of shortcut objects</li>
 <li><code>override</code> - A boolean denoting whether to override existing shortcuts</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="remapShortcuts">
+            <a name="//apple_ref/cpp/Method/remapShortcuts" class="dashAnchor"></a>
+            <h5><a href="#remapShortcuts">remapShortcuts</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki:remapShortcuts(shortcuts) -&gt; table of categorized shortcut mappings</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Remaps a categorized set of shortcuts, each matching the argument list for <a href="https://www.hammerspoon.org/docs/hs.hotkey.html#bind">hotkey bindings</a> in Hammerspoon: modifier keys list and key name (i.e. <code>{ {"cmd", "shift"}, "s" }</code>).</p>
+<p>The remapped shortcuts table can be constructed as either:</p>
+<ul>
+<li><p>a mapping of the shortcut descriptions to hotkeys keyed by category name (as shown in the cheatsheet)</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="c1">-- Remap the following application shortcuts using their metadata</span>
+  <span class="c1">-- { { &quot;shift&quot; }, &quot;s&quot;, entities.Spotify, { &quot;Entities&quot;, &quot;Spotify&quot; } },</span>
+  <span class="c1">-- { nil, &quot;g&quot;, entities.GoogleChrome, { &quot;Entities&quot;, &quot;Google Chrome&quot; } },</span>
+  <span class="n">Entities</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="n">Spotify</span> <span class="o">=</span> <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span> <span class="p">},</span>
+      <span class="p">[</span><span class="s2">&quot;Google Chrome&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;g&quot;</span> <span class="p">},</span>
+  <span class="p">},</span>
+  <span class="c1">-- Remap the following URL shortcuts using their metadata</span>
+  <span class="c1">-- { nil, &quot;f&quot;, urls.Facebook, { &quot;URL Events&quot;, &quot;Facebook&quot; } },</span>
+  <span class="c1">-- { nil, &quot;m&quot;, urls.Messenger, { &quot;URL Events&quot;, &quot;Facebook Messenger&quot; } },</span>
+  <span class="p">[</span><span class="s2">&quot;URL Events&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="n">Facebook</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;f&quot;</span> <span class="p">},</span>
+      <span class="p">[</span><span class="s2">&quot;Facebook Messenger&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;m&quot;</span> <span class="p">},</span>
+  <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+<li><p>a mapping of entity names to hotkeys keyed by mode name</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="c1">-- Remap the following application entities available in entity mode:</span>
+  <span class="c1">-- Ki.defaultEntities.entity.Spotify.name == &quot;Spotify&quot;</span>
+  <span class="c1">-- Ki.defaultEntities.entity.GoogleChrome.name == &quot;Google Chrome&quot;</span>
+  <span class="n">entity</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="n">Spotify</span> <span class="o">=</span> <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span> <span class="p">},</span>
+      <span class="p">[</span><span class="s2">&quot;Google Chrome&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;g&quot;</span> <span class="p">},</span>
+  <span class="p">},</span>
+  <span class="c1">-- Remap the following URL entities available in url mode:</span>
+  <span class="c1">-- Ki.defaultEntities.url.Facebook.name == &quot;https://facebook.com&quot;</span>
+  <span class="c1">-- Ki.defaultEntities.url.Messenger.name == &quot;https://messenger.com&quot;</span>
+  <span class="n">url</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="p">[</span><span class="s2">&quot;https://facebook.com&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;f&quot;</span> <span class="p">},</span>
+      <span class="p">[</span><span class="s2">&quot;https://messenger.com&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;m&quot;</span> <span class="p">},</span>
+  <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+</ul>
+<p>Note: if a shortcut is already in use in a given mode or category, it will need to be manually remapped to a different unused shortcut, or unmapped using a <code>{ unmap = true }</code> value</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="c1">-- Remap the following application entities available in entity mode:</span>
+    <span class="n">entity</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="n">Spotify</span> <span class="o">=</span> <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span> <span class="p">},</span>     <span class="c1">-- assign the registered Safari shortcut to Spotify</span>
+       <span class="n">Safari</span> <span class="o">=</span> <span class="p">{</span> <span class="n">unmap</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">},</span>  <span class="c1">-- unmap Safari&#39;s shortcut since it conflicts with Spotify now</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+<p>Parameters:</p>
+<ul>
+<li><code>shortcuts</code> - A set of shortcuts categorized by either the shortcut category and description (used in the cheatsheet) or by mode and entity name</li>
 </ul>
 </td>
               </tr>
@@ -368,7 +442,7 @@
               <tr>
                 <th>Description</th>
                 <td><p>Loads the default config</p>
-<p>The default config initializes and assigns preset keybindings for (almost) all native macOS applications, common directory files, and popular websites, and achieves this by including the following preconfigured modes:</p>
+<p>The default config initializes and assigns preset keybindings for almost all native macOS applications, common directory files, and popular websites, and achieves this by including the following preconfigured modes:</p>
 <ul>
 <li><code>URL</code> a mode in which URLs can be selected and opened</li>
 <li><code>FILE</code> a mode in which files and directories can be automated</li>

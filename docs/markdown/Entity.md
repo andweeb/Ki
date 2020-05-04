@@ -103,10 +103,10 @@ Entity class that represents some abstract automatable desktop entity
 
 | [registerShortcuts](#registerShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity:registerShortcuts(shortcuts, override) -> table of shortcuts`                                                                    |
+| **Signature**                               | `Entity:registerShortcuts(shortcuts[, override]) -> table of shortcuts`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Registers and updates the entity cheatsheet with a list of shortcuts with the option of merging with the existing default or previously initialized shortcuts.                                                                     |
-| **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects</li><li>`override` - A boolean denoting to whether to override the existing shortcuts</li></ul> |
+| **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects</li><li>`override` - A boolean denoting to whether to override the existing set of shortcuts</li></ul> |
 | **Returns**                                 | <ul><li> `shortcuts` - Returns the list of registered shortcuts</li></ul>          |
 
 | [renderScriptTemplate](#renderScriptTemplate)         |                                                                                     |

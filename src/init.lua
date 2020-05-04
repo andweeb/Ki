@@ -131,8 +131,8 @@ function Ki._mergeEvents(mode, lhs, rhs, overrideLHS)
     end
 end
 
--- A table containing [state transition events](https://github.com/unindented/lua-fsm#usage)
-Ki.stateTransitions = {
+-- A table containing [state transition events](https://github.com/unindented/lua-fsm#usage) that allow transitions between different modes in Ki.
+Ki.modeTransitionEvents = {
     -- NORMAL --
     { name = "enterNormalMode", from = "desktop", to = "normal" },
     { name = "exitMode", from = "normal", to = "desktop" },
@@ -144,11 +144,11 @@ Ki.stateTransitions = {
 -- A table containing lists of shortcuts keyed by mode name.
 Ki.shortcuts = {
     desktop = {
-        { {"cmd"}, "escape", function() Ki.state:enterNormalMode() end, { "Desktop Mode", "Transition to Normal Mode" } },
+        { {"cmd"}, "escape", function() Ki.state:enterNormalMode() end, { "Desktop Mode", "Enter Normal Mode" } },
     },
     normal = {
         { nil, "escape", function() Ki.state:exitMode() end, { "Normal Mode", "Exit to Desktop Mode" } },
-        { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Transition to Entity Mode" } },
+        { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Enter Entity Mode" } },
     },
     entity = {
         { nil, "escape", function() Ki.state:exitMode() end, { "Entity Mode", "Exit to Desktop Mode" } },
@@ -248,17 +248,17 @@ function Ki:_handleKeyDown(event)
                 keyName = actionKeyName,
             }
 
-            Ki.history.action = action
-            Ki.state:enterEntityMode(nil, nil, action)
+            self.history.action = action
+            self.state:enterEntityMode(_, _, action)
         end
     end
 
     -- Avoid propagating existing handler or non-existent handler in any mode besides normal mode
     if handler then
-        Ki.history:recordEvent(mode, keyName, flags)
+        self.history:recordEvent(mode, keyName, flags)
 
         if type(handler) == "table" and handler.dispatchAction then
-            local shouldAutoExit = handler:dispatchAction(mode, Ki.history.action, Ki.history.workflow)
+            local shouldAutoExit = handler:dispatchAction(mode, self.history.action, self.history.workflow)
 
             if shouldAutoExit then
                 self.state:exitMode()
@@ -293,12 +293,12 @@ function Ki:init()
     self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, eventHandler)
 end
 
---- Ki:registerModes(stateTransitions, transitionShortcuts) -> table of state transition events, table of transition shortcuts
+--- Ki:registerModes(modeTransitionEvents, transitionShortcuts) -> table of state transition events, table of transition shortcuts
 --- Method
 --- Registers state events that transition between modes and their assigned keyboard shortcuts.
 ---
 --- Parameters:
----  * `stateTransitions` - A table containing the [state transition events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to [`Ki.state`](#state).
+---  * `modeTransitionEvents` - A table containing the [transition events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to [`Ki.state`](#state).
 ---
 ---     The example state events below create methods on `Ki.state` to enter and exit entity mode from normal mode:
 ---     ```
@@ -308,7 +308,7 @@ end
 ---
 ---     **Note**: these events will only _initialize and expose_ methods on [`Ki.state`](#state). For example, the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods will only be _initialized_ with the example state events above, in which they can be used in the handler functions for the `transitionShortcuts` in the second argument.
 ---
----  * `transitionShortcuts` - Lists of shortcut objects keyed by mode name, with each shortcut allowing the transition from and to the modes specified in the `stateTransitions` events.
+---  * `transitionShortcuts` - Lists of shortcut objects keyed by mode name, with each shortcut allowing the transition from and to the modes specified in the `modeTransitionEvents` events.
 ---
 ---     Continuing with the example above, we can reference the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods initialized by the state transitions to define the shortcuts that enter and exit entity mode:
 ---     ```
@@ -316,7 +316,7 @@ end
 ---         -- For when in `normal` mode
 ---         normal = {
 ---             -- Register <cmd> + e as the shortcut to enter `entity` mode
----             { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Transition to Entity Mode" } },
+---             { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Enter Entity Mode" } },
 ---         },
 ---         -- For when in `entity` mode
 ---         entity = {
@@ -325,14 +325,14 @@ end
 ---         },
 ---     }
 ---     ```
-function Ki:registerModes(stateTransitions, transitionShortcuts)
+function Ki:registerModes(modeTransitionEvents, transitionShortcuts)
     -- Register FSM state transition events
-    for _, transitionEvent in pairs(stateTransitions) do
-        table.insert(self.stateTransitions, transitionEvent)
+    for _, modeTransition in pairs(modeTransitionEvents) do
+        table.insert(self.modeTransitionEvents, modeTransition)
     end
 
     -- Register transition shortcuts
-    return self.stateTransitions, self:registerShortcuts(transitionShortcuts)
+    return self.modeTransitionEvents, self:registerShortcuts(transitionShortcuts, true)
 end
 
 --- Ki:registerShortcuts(shortcuts[, override]) -> table of registered shortcuts
@@ -372,11 +372,127 @@ function Ki:registerShortcuts(shortcuts, override)
     return self.shortcuts
 end
 
+--- Ki:remapShortcuts(shortcuts) -> table of categorized shortcut mappings
+--- Method
+--- Remaps a categorized set of shortcuts, each matching the argument list for [hotkey bindings](https://www.hammerspoon.org/docs/hs.hotkey.html#bind) in Hammerspoon: modifier keys list and key name (i.e. `{ {"cmd", "shift"}, "s" }`).
+---
+--- The remapped shortcuts table can be constructed as either:
+--- * a mapping of the shortcut descriptions to hotkeys keyed by category name (as shown in the cheatsheet)
+--- ```lua
+--- {
+---     -- Remap the following application shortcuts using their metadata
+---     -- { { "shift" }, "s", entities.Spotify, { "Entities", "Spotify" } },
+---     -- { nil, "g", entities.GoogleChrome, { "Entities", "Google Chrome" } },
+---     Entities = {
+---         Spotify = { nil, "s" },
+---         ["Google Chrome"] = { {"cmd", "shift"}, "g" },
+---     },
+---     -- Remap the following URL shortcuts using their metadata
+---     -- { nil, "f", urls.Facebook, { "URL Events", "Facebook" } },
+---     -- { nil, "m", urls.Messenger, { "URL Events", "Facebook Messenger" } },
+---     ["URL Events"] = {
+---         Facebook = { { "shift" }, "f" },
+---         ["Facebook Messenger"] = { { "shift" }, "m" },
+---     },
+--- }
+--- ```
+---
+--- * a mapping of entity names to hotkeys keyed by mode name
+--- ```lua
+--- {
+---     -- Remap the following application entities available in entity mode:
+---     -- Ki.defaultEntities.entity.Spotify.name == "Spotify"
+---     -- Ki.defaultEntities.entity.GoogleChrome.name == "Google Chrome"
+---     entity = {
+---         Spotify = { nil, "s" },
+---         ["Google Chrome"] = { {"cmd", "shift"}, "g" },
+---     },
+---     -- Remap the following URL entities available in url mode:
+---     -- Ki.defaultEntities.url.Facebook.name == "https://facebook.com"
+---     -- Ki.defaultEntities.url.Messenger.name == "https://messenger.com"
+---     url = {
+---         ["https://facebook.com"] = { {"shift"}, "f" },
+---         ["https://messenger.com"] = { {"shift"}, "m" },
+---     },
+--- }
+--- ```
+---
+--- Note: if a shortcut is already in use in a given mode or category, it will need to be manually remapped to a different unused shortcut, or unmapped using a `{ unmap = true }` value
+--- ```lua
+--- {
+---     -- Remap the following application entities available in entity mode:
+---     entity = {
+---        Spotify = { nil, "s" },     -- assign the registered Safari shortcut to Spotify
+---        Safari = { unmap = true },  -- unmap Safari's shortcut since it conflicts with Spotify now
+---     },
+--- }
+--- ```
+---
+--- Parameters:
+---  * `shortcuts` - A set of shortcuts categorized by either the shortcut category and description (used in the cheatsheet) or by mode and entity name
+function Ki:remapShortcuts(categories)
+    -- Memoize shortcuts using contatenated category and shortcut name keys delimited by "."
+    local memo = {}
+    for categoryName, shortcuts in pairs(categories) do
+        for shortcutName, shortcut in pairs(shortcuts) do
+            local key = categoryName.."."..shortcutName
+            memo[key] = shortcut
+        end
+    end
+
+    -- Iterate through modal shortcuts to either remap or unmap
+    local unmappedModes = {}
+    for mode, modeShortcuts in pairs(self.shortcuts) do
+        for i, shortcut in pairs(modeShortcuts) do
+            local remappedKeys = {}
+            local modkeyIndex = _G.SHORTCUT_MODKEY_INDEX
+            local hotkeyIndex = _G.SHORTCUT_HOTKEY_INDEX
+            local metaIndex = _G.SHORTCUT_METADATA_INDEX
+
+            -- Find shortcut using shortcut metadata
+            local categoryName, shortcutName = table.unpack(shortcut[metaIndex] or {})
+            if categoryName and shortcutName and memo[categoryName.."."..shortcutName] then
+                remappedKeys = memo[categoryName.."."..shortcutName]
+            end
+
+            -- Find shortcut using the mode and entity name
+            local entity = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+            if type(entity) == "table" and entity.name and memo[mode.."."..entity.name] then
+                remappedKeys = memo[mode.."."..entity.name]
+            end
+
+            -- Remap the shortcut if found
+            if remappedKeys.unmap then
+                modeShortcuts[i] = nil
+                unmappedModes[mode] = true
+            elseif #remappedKeys ~= 0 then
+                shortcut[modkeyIndex], shortcut[hotkeyIndex] = table.unpack(remappedKeys)
+            end
+        end
+    end
+
+    -- Compact the nil values in modes that had shortcuts unmapped
+    for mode in pairs(unmappedModes) do
+        local compactedList = {}
+        local shortcuts = self.shortcuts[mode]
+
+        for i = 1, #shortcuts do
+            local shortcut = shortcuts[i]
+
+            if shortcut ~= nil then
+                table.insert(compactedList, shortcut)
+            end
+        end
+
+        self.shortcuts[mode] = compactedList
+    end
+end
+
 --- Ki:useDefaultConfig([options])
 --- Method
 --- Loads the default config
 ---
---- The default config initializes and assigns preset keybindings for (almost) all native macOS applications, common directory files, and popular websites, and achieves this by including the following preconfigured modes:
+--- The default config initializes and assigns preset keybindings for almost all native macOS applications, common directory files, and popular websites, and achieves this by including the following preconfigured modes:
 --- * `URL` a mode in which URLs can be selected and opened
 --- * `FILE` a mode in which files and directories can be automated
 --- * `SELECT` the mode in which tabs or windows of entities can be selected
@@ -471,11 +587,16 @@ function Ki:start()
     -- Set default status display if not provided
     self.statusDisplay = self.statusDisplay or require("status-display")
 
-    -- Recreate the internal finite state machine if custom state events are provided
+    -- Create the internal finite state machine
     self.state = FSM.create({
         initial = "desktop",
-        events = self.stateTransitions,
+        events = self.modeTransitionEvents,
         callbacks = self:_createFsmCallbacks()
+    })
+
+    -- Make the cheatsheet available in entity mode
+    table.insert(self.shortcuts.entity, {
+        { "shift" }, "/", function() self.cheatsheet:show() return true end, { "Entities", "Cheatsheet" },
     })
 
     -- Collect all shortcuts in a flattened list
@@ -487,13 +608,8 @@ function Ki:start()
     end
 
     -- Initialize cheat sheet with both default and/or custom transition and workflow events
-    local description = "Shortcuts for Ki modes, entities, and transition and workflow events"
-    self.cheatsheet = Cheatsheet:new("Ki", description, shortcuts)
-
-    -- Add show cheatsheet entity event into workflow entity events
-    table.insert(self.shortcuts.entity, {
-        { "shift" }, "/", function() self.cheatsheet:show() return true end, { "Entities", "Cheatsheet" },
-    })
+    local description = "Shortcuts for Ki modes and entities"
+    self.cheatsheet = Cheatsheet:new(self.name, description, shortcuts)
 
     -- Start keydown event listener
     return self.listener:start()

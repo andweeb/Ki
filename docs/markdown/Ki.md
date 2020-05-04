@@ -28,6 +28,7 @@ Ki ships with the following core modes:
 * Methods - API calls which can only be made on an object returned by a constructor
  * [registerModes](#registerModes)
  * [registerShortcuts](#registerShortcuts)
+ * [remapShortcuts](#remapShortcuts)
  * [start](#start)
  * [stop](#stop)
  * [useDefaultConfig](#useDefaultConfig)
@@ -90,10 +91,10 @@ Ki ships with the following core modes:
 
 | [registerModes](#registerModes)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki:registerModes(stateTransitions, transitionShortcuts) -> table of state transition events, table of transition shortcuts`                                                                    |
+| **Signature**                               | `Ki:registerModes(modeTransitionEvents, transitionShortcuts) -> table of state transition events, table of transition shortcuts`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Registers state events that transition between modes and their assigned keyboard shortcuts.                                                                     |
-| **Parameters**                              | <ul><li>`stateTransitions` - A table containing the [state transition events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to [`Ki.state`](#state).</li></ul> |
+| **Parameters**                              | <ul><li>`modeTransitionEvents` - A table containing the [transition events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to [`Ki.state`](#state).</li></ul> |
 
 | [registerShortcuts](#registerShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -101,6 +102,13 @@ Ki ships with the following core modes:
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Registers a list of shortcuts for one or more modes.                                                                     |
 | **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects</li><li>`override` - A boolean denoting whether to override existing shortcuts</li></ul> |
+
+| [remapShortcuts](#remapShortcuts)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki:remapShortcuts(shortcuts) -> table of categorized shortcut mappings`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Remaps a categorized set of shortcuts, each matching the argument list for [hotkey bindings](https://www.hammerspoon.org/docs/hs.hotkey.html#bind) in Hammerspoon: modifier keys list and key name (i.e. `{ {"cmd", "shift"}, "s" }`).                                                                     |
+| **Parameters**                              | <ul><li>`shortcuts` - A set of shortcuts categorized by either the shortcut category and description (used in the cheatsheet) or by mode and entity name</li></ul> |
 
 | [start](#start)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

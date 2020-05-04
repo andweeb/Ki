@@ -15,7 +15,7 @@ local function requireEntity(type, filename)
 end
 
 -- Define custom modes and specify all state transitions between those modes
-local stateTransitions = {
+local modeTransitionEvents = {
     -- URL --
     { name = "enterUrlMode", from = "normal", to = "url" },
     { name = "enterUrlMode", from = "select", to = "url" },
@@ -42,24 +42,24 @@ local stateTransitions = {
 
 -- Add normal mode shortcuts to transition to different modes
 local normalModeShortcuts = {
-    { {"cmd"}, "b", function() Ki.state:enterBrightnessMode() end, { "Normal Mode", "Transition to Brightness Mode" } },
-    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Normal Mode", "Transition to File Mode" } },
-    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Normal Mode", "Transition to Select Mode" } },
-    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Normal Mode", "Transition to URL Mode" } },
-    { {"cmd"}, "v", function() Ki.state:enterVolumeMode() end, { "Normal Mode", "Transition to Volume Mode" } },
+    { {"cmd"}, "b", function() Ki.state:enterBrightnessMode() end, { "Normal Mode", "Enter Brightness Mode" } },
+    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Normal Mode", "Enter File Mode" } },
+    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Normal Mode", "Enter Select Mode" } },
+    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Normal Mode", "Enter URL Mode" } },
+    { {"cmd"}, "v", function() Ki.state:enterVolumeMode() end, { "Normal Mode", "Enter Volume Mode" } },
 }
 -- Add entity mode shortcuts to transition to url and select mode
 local entityModeShortcuts = {
-    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Entity Mode", "Transition to File Mode" } },
-    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Entity Mode", "Transition to Select Mode" } },
-    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Entity Mode", "Transition to URL Mode" } },
+    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Entity Mode", "Enter File Mode" } },
+    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Entity Mode", "Enter Select Mode" } },
+    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Entity Mode", "Enter URL Mode" } },
 }
 -- Add select mode shortcuts to exit to desktop mode and enter entity, file, and url mode
 local selectModeShortcuts = {
     { nil, "escape", function() Ki.state:exitMode() end, { "Select Mode", "Exit to Desktop Mode" } },
-    { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Select Mode", "Transition to Entity Mode" } },
-    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Select Mode", "Transition to File Mode" } },
-    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Select Mode", "Transition to URL Mode" } },
+    { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Select Mode", "Enter Entity Mode" } },
+    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Select Mode", "Enter File Mode" } },
+    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Select Mode", "Enter URL Mode" } },
 }
 -- Add file mode shortcut to exit to desktop mode
 local fileModeShortcuts = {
@@ -79,7 +79,7 @@ local brightnessModeShortcuts =  {
 }
 
 -- Register mode shortcuts
-Ki:registerModes(stateTransitions, {
+Ki:registerModes(modeTransitionEvents, {
     normal = normalModeShortcuts,
     entity = entityModeShortcuts,
     select = selectModeShortcuts,
@@ -159,7 +159,7 @@ local entityShortcuts = {
     { { "shift", "cmd" }, "s", entities.Stickies, { "Entities", "Stickies" } },
 }
 local selectEntityShortcuts = {
-    { nil, "d", entities.Dictionary, { "Entities", "Select a Dictionary window" } },
+    { nil, "d", entities.Dictionary, { "Select Events", "Select a Dictionary window" } },
     { nil, "f", entities.Finder, { "Select Events", "Select a Finder window" } },
     { nil, "g", entities.GoogleChrome, { "Select Events", "Select a Google Chrome tab or window" } },
     { nil, "m", entities.Messages, { "Select Events", "Select a Messages conversation" } },
@@ -168,7 +168,7 @@ local selectEntityShortcuts = {
     { nil, "q", entities.QuickTimePlayer, { "Select Events", "QuickTime Player" } },
     { nil, "s", entities.Safari, { "Select Events", "Select a Safari tab or window" } },
     { nil, "t", entities.Terminal, { "Select Events", "Select a Terminal window" } },
-    { nil, ",", entities.SystemPreferences, { "Entities", "Select a System Preferences pane" } },
+    { nil, ",", entities.SystemPreferences, { "Select Events", "Select a System Preferences pane" } },
     { { "shift" }, "t", entities.TextEdit, { "Select Events", "Select a Text Edit window" } },
 }
 

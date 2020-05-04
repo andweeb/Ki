@@ -158,13 +158,13 @@ function Entity.mergeShortcuts(fromList, toList)
     return toList
 end
 
---- Entity:registerShortcuts(shortcuts, override) -> table of shortcuts
+--- Entity:registerShortcuts(shortcuts[, override]) -> table of shortcuts
 --- Method
 --- Registers and updates the entity cheatsheet with a list of shortcuts with the option of merging with the existing default or previously initialized shortcuts.
 ---
 --- Parameters:
 ---  * `shortcuts` - The list of shortcut objects
----  * `override` - A boolean denoting to whether to override the existing shortcuts
+---  * `override` - A boolean denoting to whether to override the existing set of shortcuts
 ---
 --- Returns:
 ---   * `shortcuts` - Returns the list of registered shortcuts
@@ -172,7 +172,7 @@ function Entity:registerShortcuts(shortcuts, override)
     local cheatsheetDescription = self.name and "Ki shortcut keybindings registered for "..self.name or "Ki shortcut keybindings"
 
     self.shortcuts = override and shortcuts or self.mergeShortcuts(shortcuts, self.shortcuts or {})
-    self.cheatsheet = Cheatsheet:new(self.name, cheatsheetDescription, shortcuts)
+    self.cheatsheet = Cheatsheet:new(self.name, cheatsheetDescription, self.shortcuts)
 
     return self.shortcuts
 end
