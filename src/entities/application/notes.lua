@@ -5,9 +5,9 @@ local Application = spoon.Ki.Application
 local Notes = Application:new("Notes")
 
 -- Initialize menu item events
-Notes.search = Application.createMenuItemEvent("Search", { focusAfter = true })
-Notes.newNote = Application.createMenuItemEvent("New Note", { focusAfter = true })
-Notes.newFolder = Application.createMenuItemEvent("New Folder", { focusAfter = true })
+Notes.search = Application.createMenuItemEvent("Search", { focusBefore = true })
+Notes.newNote = Application.createMenuItemEvent("New Note", { focusBefore = true })
+Notes.newFolder = Application.createMenuItemEvent("New Folder", { focusBefore = true })
 Notes.toggleFolderView = Application.createMenuItemEvent({ "Show Folders", "Hide Folders" }, {
     isToggleable = true,
     focusBefore = true,

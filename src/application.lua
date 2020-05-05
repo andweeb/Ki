@@ -5,58 +5,15 @@
 
 local Util = require("util")
 local Entity = require("entity")
+local ApplicationWatcher = require("application-watcher")
+
 local Application = Entity:subclass("Application")
 local Behaviors = {}
 
--- Default application behavior function
-function Behaviors.default(self, eventHandler)
-    local app = self.name and self:getApplication() or nil
-
-    if not app then
-        return self.autoExitMode
-    end
-
-    local autoFocus, autoExit = eventHandler(app)
-
-    if app and autoFocus == true then
-        self.focus(app)
-    end
-
-    return autoExit == nil and self.autoExitMode or autoExit
-end
-
--- Application behavior function for select mode
-function Behaviors.select(self, eventHandler)
-    local app = self.name and self:getApplication() or nil
-
-    if not app then
-        return self.autoExitMode
-    end
-
-    local choices = self:getSelectionItems()
-
-    if choices and #choices > 0 then
-        local function onSelection(choice)
-            if choice then
-                eventHandler(app, choice)
-            end
-        end
-
-        self:showSelectionModal(choices, onSelection)
-    end
-
-    return true
-end
-
 -- Application behavior function for entity mode
 function Behaviors.entity(self, eventHandler, _, _, workflow)
+    -- Determine whether the workflow includes select mode
     local shouldSelect = false
-    local app = self.name and self:getApplication() or nil
-
-    if not app then
-        return self.autoExitMode
-    end
-
     for _, event in pairs(workflow) do
         if event.mode == "select" then
             shouldSelect = true
@@ -64,13 +21,78 @@ function Behaviors.entity(self, eventHandler, _, _, workflow)
         end
     end
 
+    -- Execute the select behavior if the workflow includes select mode
     if shouldSelect then
-        return Behaviors.select(self, eventHandler, _, _, workflow)
+        return Behaviors.select(self, eventHandler)
     end
 
-    local _, autoExit = eventHandler(app, shouldSelect)
+    -- Create local action execution function to either defer or immediately invoke
+    local function executeAction(appInstance)
+        local _, autoExit = eventHandler(appInstance, shouldSelect)
+        return autoExit == nil and self.autoExitMode or autoExit
+    end
 
-    return autoExit == nil and self.autoExitMode or autoExit
+    return Behaviors.dispatchAction(self, executeAction)
+end
+
+-- Application behavior function for select mode
+function Behaviors.select(self, eventHandler)
+    -- Create local action execution function to either defer or immediately invoke
+    local function executeAction(appInstance)
+        local choices = self:getSelectionItems()
+
+        if choices and #choices > 0 then
+            self:showSelectionModal(choices, function (choice)
+                if choice then
+                    eventHandler(appInstance, choice)
+                end
+            end)
+        end
+    end
+
+    return Behaviors.dispatchAction(self, executeAction)
+end
+
+-- Use the entity mode behavior as the default behavior
+Behaviors.default = Behaviors.entity
+
+-- Dispatch action behavior for application entities to defer action execution after launch
+function Behaviors.dispatchAction(self, action)
+    local appState = ApplicationWatcher.states[self.name]
+    local app = self:getApplication()
+    local status = nil
+
+    if appState then
+        app = appState.app
+        status = appState.status
+    end
+
+    -- Determine whether the application is currently open
+    local isActivated = status == ApplicationWatcher.statusTypes.activated
+    local isLaunched = status == ApplicationWatcher.statusTypes.launched
+    local isUnhidden = status == ApplicationWatcher.statusTypes.unhidden
+    local isApplicationOpen = isActivated or isLaunched or isUnhidden
+
+    -- Execute the action if the application is already running
+    if app and app:isRunning() or isApplicationOpen then
+        return action(app)
+    end
+
+    -- Determine the target event based on the current application status
+    local targetEvent = ApplicationWatcher.statusTypes.launched
+    if status == ApplicationWatcher.statusTypes.deactivated then
+        targetEvent = ApplicationWatcher.statusTypes.activated
+    elseif status == ApplicationWatcher.statusTypes.hidden then
+        targetEvent = ApplicationWatcher.statusTypes.unhidden
+    end
+
+    -- Defer the action execution to until the application has opened
+    ApplicationWatcher:registerEventCallback(self.name, targetEvent, action)
+
+    -- Launch the application
+    hs.application.open(self.name)
+
+    return self.autoExitMode
 end
 
 --- Application.behaviors
@@ -80,7 +102,9 @@ Application.behaviors = Entity.behaviors + Behaviors
 
 --- Application:getSelectionItems()
 --- Method
---- Returns choice objects containing application window information.
+--- Default implementation of [`Entity:getSelectionItems()`](Entity.html#getSelectionItems) to returns choice objects containing application window information.
+---
+--- This can be overridden for instances to return selection items particular for specific Application entities, i.e. override this function to return conversation choices for the Messages instance.
 ---
 --- Parameters:
 ---  * None
@@ -254,7 +278,7 @@ end
 
 --- Application:getApplication() -> hs.application object or nil
 --- Method
---- Gets the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object from the entity name
+--- Gets the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object from the instance name
 ---
 --- Parameters:
 ---  * None
@@ -262,15 +286,7 @@ end
 --- Returns:
 ---   * An `hs.application` object or `nil` if the application could not be found
 function Application:getApplication()
-    local applicationName = self.name
-    local app = hs.application.get(applicationName)
-
-    if not app then
-        hs.application.launchOrFocus(applicationName)
-        app = hs.appfinder.appFromName(applicationName)
-    end
-
-    return app
+    return hs.application.get(self.name)
 end
 
 --- Application:focus(app[, choice])

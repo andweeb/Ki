@@ -1,0 +1,156 @@
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Ki docs: ApplicationWatcher</title>
+    <style type="text/css">
+      a { text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      th { background-color: #DDDDDD; vertical-align: top; padding: 3px; }
+      td { width: 100%; background-color: #EEEEEE; vertical-align: top; padding: 3px; }
+      table { width: 100% ; border: 1px solid #0; text-align: left; }
+      section > table table td { width: 0; }
+    </style>
+    <link rel="stylesheet" href="docs.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <header>
+      <h1><a href="./index.html">docs</a> &raquo; ApplicationWatcher</h1>
+      <p>A module that wraps <a href="http://www.hammerspoon.org/docs/hs.application.watcher.html"><code>hs.application.watcher</code></a> to track application states</p>
+
+      </header>
+      <h3>API Overview</h3>
+      <ul>
+        <li>Constants - Useful values which cannot be changed</li>
+          <ul>
+            <li><a href="#actions">actions</a></li>
+            <li><a href="#states">states</a></li>
+            <li><a href="#statusTypes">statusTypes</a></li>
+          </ul>
+        <li>Methods - API calls which can only be made on an object returned by a constructor</li>
+          <ul>
+            <li><a href="#registerEventCallback">registerEventCallback</a></li>
+            <li><a href="#start">start</a></li>
+          </ul>
+      </ul>
+      <h3>API Documentation</h3>
+        <h4 class="documentation-section">Constants</h4>
+          <section id="actions">
+            <a name="//apple_ref/cpp/Constant/actions" class="dashAnchor"></a>
+            <h5><a href="#actions">actions</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>ApplicationWatcher.actions</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Constant</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A table of actions awaiting invocation keyed by application name. Each value will be a table of callbacks keyed by <a href="#statusTypes">status type</a>.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="states">
+            <a name="//apple_ref/cpp/Constant/states" class="dashAnchor"></a>
+            <h5><a href="#states">states</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>ApplicationWatcher.states</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Constant</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A table of status information keyed by application name, with each status information table containing the following keys:</p>
+<ul>
+<li><code>status</code> - The application status, one of the <a href="http://www.hammerspoon.org/docs/hs.application.watcher.html"><code>hs.application.watcher</code></a> state constants documented <a href="http://www.hammerspoon.org/docs/hs.application.watcher.html#activated">here</a></li>
+<li><code>app</code> - An <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object representing the application, or nil if the application couldn't be found</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="statusTypes">
+            <a name="//apple_ref/cpp/Constant/statusTypes" class="dashAnchor"></a>
+            <h5><a href="#statusTypes">statusTypes</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>ApplicationWatcher.statusTypes</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Constant</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>A table containing the <a href="http://www.hammerspoon.org/docs/hs.application.watcher.html"><code>hs.application.watcher</code></a> status type constants defined <a href="http://www.hammerspoon.org/docs/hs.application.watcher.html#activated">here</a>.</p>
+</td>
+              </tr>
+            </table>
+          </section>
+        <h4 class="documentation-section">Methods</h4>
+          <section id="registerEventCallback">
+            <a name="//apple_ref/cpp/Method/registerEventCallback" class="dashAnchor"></a>
+            <h5><a href="#registerEventCallback">registerEventCallback</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>ApplicationWatcher:registerEventCallback(name, event, callback)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Registers a callback to be invoked upon some event for a particular application</p>
+<p>Parameters:</p>
+<ul>
+<li><code>name</code> - A string containing the name of the application</li>
+<li><code>event</code> - An event type (one of <a href="#statusTypes"><code>statusTypes</code></a>)</li>
+<li><code>callback</code> - The callback to be invoked upon the event for the application</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="start">
+            <a name="//apple_ref/cpp/Method/start" class="dashAnchor"></a>
+            <h5><a href="#start">start</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>ApplicationWatcher:start()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Starts the application watcher</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The started <a href="http://www.hammerspoon.org/docs/hs.application.watcher.html"><code>hs.application.watcher</code></a> instance</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+  </body>
+</html>

@@ -350,9 +350,9 @@ function Entity:dispatchAction(mode, shortcut, workflow)
     local eventHandler = self.getEventHandler(self.shortcuts, flags, keyName)
 
     if eventHandler then
-        local behaviorFunc = self.behaviors[mode] or self.behaviors.default
+        local executeBehavior = self.behaviors[mode] or self.behaviors.default
 
-        return behaviorFunc(self, eventHandler, flags, keyName, workflow)
+        return executeBehavior(self, eventHandler, flags, keyName, workflow)
     else
         return self.autoExitMode
     end

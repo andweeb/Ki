@@ -57,7 +57,7 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Application:getApplication() -> hs.application object or nil`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Gets the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object from the entity name                                                                     |
+| **Description**                             | Gets the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object from the instance name                                                                     |
 | **Parameters**                              | <ul><li>None</li></ul> |
 | **Returns**                                 | <ul><li> An `hs.application` object or `nil` if the application could not be found</li></ul>          |
 
@@ -73,7 +73,7 @@ Application class that subclasses [Entity](Entity.html) to represent some automa
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Application:getSelectionItems()`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Returns choice objects containing application window information.                                                                     |
+| **Description**                             | Default implementation of [`Entity:getSelectionItems()`](Entity.html#getSelectionItems) to returns choice objects containing application window information.                                                                     |
 | **Parameters**                              | <ul><li>None</li></ul> |
 | **Returns**                                 | <ul><li> A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li></ul>          |
 

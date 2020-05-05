@@ -17,6 +17,7 @@ Ki ships with the following core modes:
 ## API Overview
 * Constants - Useful values which cannot be changed
  * [Application](#Application)
+ * [ApplicationWatcher](#ApplicationWatcher)
  * [Entity](#Entity)
  * [File](#File)
  * [SmartFolder](#SmartFolder)
@@ -42,6 +43,12 @@ Ki ships with the following core modes:
 | **Signature**                               | `Ki.Application`                                                                    |
 | **Type**                                    | Constant                                                                     |
 | **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that subclasses [Entity](Entity.html) to represent some automatable desktop application. Class methods and properties are documented [here](Application.html).                                                                     |
+
+| [ApplicationWatcher](#ApplicationWatcher)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.ApplicationWatcher`                                                                    |
+| **Type**                                    | Constant                                                                     |
+| **Description**                             | A module that wraps [`hs.application.watcher`](http://www.hammerspoon.org/docs/hs.application.watcher.html) to track application states. Methods and properties are documented [here](ApplicationWatcher.html).                                                                     |
 
 | [Entity](#Entity)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

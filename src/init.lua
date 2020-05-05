@@ -66,6 +66,11 @@ Ki.SmartFolder = require("smart-folder")
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some url. Class methods and properties are documented [here](URL.html).
 Ki.URL = require("url")
 
+--- Ki.ApplicationWatcher
+--- Constant
+--- A module that wraps [`hs.application.watcher`](http://www.hammerspoon.org/docs/hs.application.watcher.html) to track application states. Methods and properties are documented [here](ApplicationWatcher.html).
+Ki.ApplicationWatcher = require("application-watcher")
+
 --- Ki.state
 --- Constant
 --- The [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki.
@@ -610,6 +615,9 @@ function Ki:start()
     -- Initialize cheat sheet with both default and/or custom transition and workflow events
     local description = "Shortcuts for Ki modes and entities"
     self.cheatsheet = Cheatsheet:new(self.name, description, shortcuts)
+
+    -- Start the application watcher
+    self.ApplicationWatcher:start()
 
     -- Start keydown event listener
     return self.listener:start()

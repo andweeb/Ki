@@ -166,7 +166,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Gets the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object from the entity name</p>
+                <td><p>Gets the <a href="https://www.hammerspoon.org/docs/hs.application.html"><code>hs.application</code></a> object from the instance name</p>
 <p>Parameters:</p>
 <ul>
 <li>None</li>
@@ -221,7 +221,8 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Returns choice objects containing application window information.</p>
+                <td><p>Default implementation of <a href="Entity.html#getSelectionItems"><code>Entity:getSelectionItems()</code></a> to returns choice objects containing application window information.</p>
+<p>This can be overridden for instances to return selection items particular for specific Application entities, i.e. override this function to return conversation choices for the Messages instance.</p>
 <p>Parameters:</p>
 <ul>
 <li>None</li>
