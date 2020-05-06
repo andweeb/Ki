@@ -4,38 +4,23 @@
 ---
 
 local StatusDisplay = {}
-StatusDisplay.__index = StatusDisplay
-StatusDisplay.__name = "status-display"
+local spoonPath = hs.spoons.scriptPath()
 
-StatusDisplay.DEFAULT_WIDTH = 500
-StatusDisplay.DEFAULT_HEIGHT = 18
-StatusDisplay.DEFAULT_FADE_TIMEOUT = 0.8
+StatusDisplay.timer = nil
+StatusDisplay.isDefault = true
+StatusDisplay.menubar = hs.menubar.new()
 
-StatusDisplay.displays = {}
+--- Ki.isDarkMode
+--- Variable
+--- A boolean value indicating whether the menu bar style is in dark mode. This value will be determined automatically.
+StatusDisplay.isDarkMode = false
 
-local _, inDarkMode = hs.osascript.applescript([[
-    tell application "System Events" to tell appearance preferences to return dark mode
-]])
-
--- Create the canvas text element
-function StatusDisplay:createTextElement(text)
-    return {
-        type = "text",
-        frame = {
-            x = 0,
-            y = 0,
-            w = self.DEFAULT_WIDTH,
-            h = self.DEFAULT_HEIGHT,
-        },
-        text = hs.styledtext.new(text, {
-            color = inDarkMode
-                and { red = 0.8, blue = 0.8, green = 0.8 }
-                or { red = 0, blue = 0, green = 0 },
-            font = { name = "Menlo", size = 10 },
-            paragraphStyle = { alignment = "center" },
-        }),
-    }
-end
+-- Text styles
+local smallMenlo = { name = "Menlo", size = 9 }
+local darkColor = { red = 0.2, blue = 0.2, green = 0.2 }
+local darkTextStyle = { color = darkColor, font = smallMenlo }
+local lightColor = { red = 0.8, blue = 0.8, green = 0.8 }
+local lightTextStyle = { color = lightColor, font = smallMenlo }
 
 --- StatusDisplay:show(status[, parenthetical])
 --- Method
@@ -47,33 +32,49 @@ end
 ---
 --- Returns:
 ---  * None
-function StatusDisplay:show(status, parenthetical)
-    -- Clear any pre-existing status display canvases
-    for state, display in pairs(self.displays) do
-        if display ~= nil then
-            display:delete()
-            self.displays[state] = nil
-        end
+function StatusDisplay:show(status)
+    -- Interrupt fade-out timer if running
+    if self.timer and self.timer:running() then
+        self.timer:stop()
     end
 
-    local screenFrame = hs.screen.mainScreen():frame()
-    local dimensions = {
-        x = screenFrame.x + (screenFrame.w / 2) - (self.DEFAULT_WIDTH / 2),
-        y = screenFrame.y - self.DEFAULT_HEIGHT,
-        h = self.DEFAULT_HEIGHT,
-        w = self.DEFAULT_WIDTH,
-    }
-    local statusText = status:upper()
-    local text = parenthetical and statusText.." ("..parenthetical..")" or statusText
-    local textElement = self:createTextElement("-- "..text.." --", inDarkMode)
-    local display = hs.canvas.new(dimensions):appendElements({ textElement }):show()
+    local fadedTextStyle = self.isDarkMode and lightTextStyle or darkTextStyle
+    local normalTextStyle = self.isDarkMode and darkTextStyle or lightTextStyle
 
-    self.displays[status] = display
+    -- Stylize text and update in menu bar
+    local text = "-- "..status:upper().." --"
+    local textElement = hs.styledtext.new(text, fadedTextStyle)
+    self.menubar:setTitle(textElement)
 
+    -- Fade out desktop mode status display in menu bar
     if status == "desktop" then
-        display:delete(self.DEFAULT_FADE_TIMEOUT)
-        self.displays[status] = nil
+        self.timer = hs.timer.doAfter(0.5, function()
+            self.menubar:setTitle(hs.styledtext.new(text, normalTextStyle))
+        end)
     end
 end
+
+-- Handle streaming task output
+function StatusDisplay:handleTaskOutput(_, stdout)
+    if stdout == "Dark" then
+        self.isDarkMode = true
+        return false
+    end
+
+    return true
+end
+
+-- Initialize status display with desktop mode
+function StatusDisplay:initialize()
+    self:show("desktop")
+end
+
+-- Start swift task in the background to retrieve the dark mode status
+local swiftBin = "/usr/bin/swift"
+local swiftFile = spoonPath.."bin/print-dark-mode.swift"
+local taskDoneCallback = function(...) return StatusDisplay:initialize(...) end
+local streamingCallback = function(...) return StatusDisplay:handleTaskOutput(...) end
+local getDarkModeTask = hs.task.new(swiftBin, taskDoneCallback, streamingCallback, { swiftFile })
+getDarkModeTask:start()
 
 return StatusDisplay

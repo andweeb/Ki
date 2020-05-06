@@ -25,6 +25,7 @@ Ki ships with the following core modes:
  * [URL](#URL)
 * Variables - Configurable values
  * [defaultEntities](#defaultEntities)
+ * [isDarkMode](#isDarkMode)
  * [statusDisplay](#statusDisplay)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [registerModes](#registerModes)
@@ -87,6 +88,12 @@ Ki ships with the following core modes:
 | **Signature**                               | `Ki.defaultEntities`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing lists of all default entity instances keyed by mode name when the [default config](#useDefaultConfig) is used, `nil` otherwise.                                                                     |
+
+| [isDarkMode](#isDarkMode)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki.isDarkMode`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A boolean value indicating whether the menu bar style is in dark mode. This value will be determined automatically.                                                                     |
 
 | [statusDisplay](#statusDisplay)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

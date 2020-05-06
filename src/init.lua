@@ -616,6 +616,13 @@ function Ki:start()
     local description = "Shortcuts for Ki modes and entities"
     self.cheatsheet = Cheatsheet:new(self.name, description, shortcuts)
 
+    -- Set menu item click callback function to show the cheatsheet
+    if self.statusDisplay.isDefault then
+        self.statusDisplay.menubar:setClickCallback(function()
+            self.cheatsheet:show()
+        end)
+    end
+
     -- Start the application watcher
     self.ApplicationWatcher:start()
 
