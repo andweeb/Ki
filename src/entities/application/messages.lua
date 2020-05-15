@@ -54,7 +54,7 @@ Messages:registerShortcuts({
     { nil, "l", Messages.find, { "Edit", "Search" } },
     { nil, "n", Messages.newMessage, { "File", "New Message" } },
     { nil, "w", Messages.close, { "File", "New Message" } },
-    { { "cmd" }, "f", Messages.find, { "Edit", "Search" } },
+    { { "shift" }, "f", Messages.find, { "Edit", "Search" } },
 })
 
 return Messages

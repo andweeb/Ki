@@ -13,7 +13,7 @@ Reminders.goToToday = Application.createMenuItemEvent("Go to Today", { focusBefo
 Reminders:registerShortcuts({
     { nil, "n", Reminders.newReminder, { "File", "New Reminder" } },
     { nil, "t", Reminders.goToToday, { "View", "Go to Today" } },
-    { { "cmd" }, "f", Reminders.find, { "Edit", "Find" } },
+    { { "shift" }, "f", Reminders.find, { "Edit", "Find" } },
     { { "shift" }, "n", Reminders.newReminderList, { "File", "New List" } },
 })
 

@@ -23,7 +23,7 @@ Terminal:registerShortcuts({
     { nil, "n", Terminal.newWindow, { "Shell", "New Window" } },
     { nil, "t", Terminal.newTab, { "Shell", "New Tab" } },
     { nil, "w", Terminal.close, { "Shell", "Close Tab or Window" } },
-    { { "cmd" }, "f", Terminal.find, { "Edit", "Find..." } },
+    { { "shift" }, "f", Terminal.find, { "Edit", "Find..." } },
 })
 
 return Terminal

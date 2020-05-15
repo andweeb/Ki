@@ -65,7 +65,7 @@ Notes:registerShortcuts({
     { nil, "l", Notes.search, { "Edit", "Find..." } },
     { nil, "n", Notes.newNote, { "File", "New Note" } },
     { nil, "1", Notes.toggleAttachmentsBrowser, { "File", "Toggle Attachments Browser" } },
-    { { "cmd" }, "f", Notes.search, { "Edit", "Find..." } },
+    { { "shift" }, "f", Notes.search, { "Edit", "Find..." } },
     { { "shift" }, "n", Notes.newFolder, { "File", "New Folder" } },
 })
 

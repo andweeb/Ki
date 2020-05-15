@@ -15,9 +15,9 @@ Calendar.newCalendarSubscription = Application.createMenuItemEvent("New Calendar
 Calendar:registerShortcuts({
     { nil, "l", Calendar.find, { "Edit", "Find" } },
     { nil, "n", Calendar.newEvent, { "File", "New Event" } },
+    { { "shift" }, "f", Calendar.find, { "Edit", "Find" } },
     { { "shift" }, "n", Calendar.newCalendar, { "File", "New Calendar" } },
     { { "shift" }, "s", Calendar.newCalendarSubscription, { "File", "New Calendar Subscription..." } },
-    { { "cmd" }, "f", Calendar.find, { "Edit", "Find" } },
 })
 
 return Calendar

@@ -17,7 +17,7 @@ Dictionary:registerShortcuts({
     { nil, "n", Dictionary.newWindow, { "File", "New Window" } },
     { nil, "t", Dictionary.newTab, { "File", "New Tab" } },
     { nil, "w", Dictionary.close, { "File", "Close Tab or Window" } },
-    { { "cmd" }, "f", Dictionary.search, { "Edit", "Search For a New Word..." } },
+    { { "shift" }, "f", Dictionary.search, { "Edit", "Search For a New Word..." } },
 })
 
 return Dictionary

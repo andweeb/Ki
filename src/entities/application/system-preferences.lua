@@ -55,7 +55,7 @@ end
 SystemPreferences:registerShortcuts({
     { nil, nil, SystemPreferences.focus, { "View", "Activate/Focus" } },
     { nil, "l", SystemPreferences.showAllPreferences, { "View", "Show All Preferences" } },
-    { { "cmd" }, "f", SystemPreferences.search, { "View", "Search" } },
+    { { "shift" }, "f", SystemPreferences.search, { "View", "Search" } },
 })
 
 return SystemPreferences

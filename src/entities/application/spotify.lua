@@ -39,8 +39,8 @@ Spotify:registerShortcuts({
     { nil, "n", Spotify.playNext, { "Playback", "Next" } },
     { nil, "s", Spotify.stop, { "Playback", "Stop" } },
     { nil, "l", Spotify.search, { "Edit", "Search" } },
-    { { "cmd" }, "n", Spotify.newPlaylist, { "File", "New Playlist" } },
-    { { "cmd" }, "f", Spotify.search, { "Edit", "Search" } },
+    { { "shift" }, "n", Spotify.newPlaylist, { "File", "New Playlist" } },
+    { { "shift" }, "f", Spotify.search, { "Edit", "Search" } },
     { { "cmd", "shift" }, "n", Spotify.newPlaylistFolder, { "File", "New Playlist Folder" } },
 })
 

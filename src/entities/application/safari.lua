@@ -167,7 +167,7 @@ Safari:registerShortcuts({
     { { "ctrl" }, "n", Safari.nextMedia, { "Media", "Next Media" } },
     { { "ctrl" }, "p", Safari.previousMedia, { "Media", "Previous Media" } },
     { { "ctrl" }, "s", Safari.skipMedia, { "Media", "Skip Media" } },
-    { { "cmd" }, "m", Safari.moveTabToNewWindow, { "Window", "Move Tab To New Window" } },
+    { { "ctrl", "cmd" }, "m", Safari.moveTabToNewWindow, { "Window", "Move Tab To New Window" } },
     { { "cmd", "shift" }, "m", Safari.mergeAllWindows, { "Window", "Merge All Windows" } },
     { { "shift" }, "n", Safari.openNewPrivateWindow, { "File", "Open New Private Window" } },
 })
