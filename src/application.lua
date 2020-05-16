@@ -50,7 +50,9 @@ function Behaviors.select(self, eventHandler)
         end
     end
 
-    return Behaviors.dispatchAction(self, executeAction)
+    Behaviors.dispatchAction(self, executeAction)
+
+    return self.autoExitMode
 end
 
 -- Use the entity mode behavior as the default behavior
@@ -73,9 +75,10 @@ function Behaviors.dispatchAction(self, action)
     local isUnhidden = status == ApplicationWatcher.statusTypes.unhidden
     local isApplicationOpen = isActivated or isLaunched or isUnhidden
 
-    -- Execute the action if the application is already running
+    -- Execute the action if the application is already running and return indicator to auto-exit mode
     if app and app:isRunning() or isApplicationOpen then
-        return action(app)
+        local autoExit = action(app)
+        return autoExit == nil and self.autoExitMode or autoExit
     end
 
     -- Determine the target event based on the current application status

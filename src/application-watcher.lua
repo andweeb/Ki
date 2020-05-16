@@ -32,6 +32,8 @@ ApplicationWatcher.statusTypes = {
 
 -- Sets the state of the application with the triggered event on `ApplicationWatcher.states`.
 function ApplicationWatcher:handleEvent(name, event, app)
+    if not name then return end
+
     -- Store the new application state
     self.states[name] = { status = event, app = app }
 
