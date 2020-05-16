@@ -47,6 +47,10 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
         local shortcutKey = shortcut[_G.SHORTCUT_HOTKEY_INDEX] or ""
         local shortcutMetadata = shortcut[_G.SHORTCUT_METADATA_INDEX]
 
+        if shortcutKey:find("unmapped") then
+            goto continue
+        end
+
         if shortcutMetadata and #shortcutMetadata > 0 and shortcutMetadata[1] then
             local category = shortcutMetadata[1]
             local name = shortcutMetadata[2]
@@ -76,6 +80,8 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
                 id = id,
             })
         end
+
+        ::continue::
     end
 
     for category, shortcuts in pairs(shortcutCategories) do

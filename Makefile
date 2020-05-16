@@ -73,6 +73,7 @@ deps:
 	luarocks install --tree deps fsm 1.1.0-1
 	luarocks install --tree deps lustache 1.3.1-0
 	luarocks install --tree deps middleclass 4.1.1-0
+	luarocks install --tree deps inspect 3.1.1-0
 
 lint-deps:
 	luarocks install luacheck

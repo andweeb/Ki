@@ -1,0 +1,174 @@
+#!/usr/bin/env lua
+----------------------------------------------------------------------------------------------------
+-- Entity Config Code Generator
+--
+local Generator = {}
+local PATH = arg[0]:match("(.*[/\\])")
+local luaVersion = _VERSION:match("%d+%.%d+")
+package.cpath = PATH.."../deps/lib/lua/"..luaVersion.."/?.so;"..package.cpath
+package.path = PATH.."../deps/share/lua/"..luaVersion.."/?.lua;../deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
+
+local inspect = require("inspect")
+local lustache = require("lustache")
+local help = [[
+USAGE
+    codegen [entity_type] [entity_name] [...]
+
+EXAMPLES
+    Generate a url config file:             codegen url [website_name] [url]
+
+        [website_name]    any website name
+        [url]             URL of the website
+
+        $ codegen url "Google" "https://www.google.com"
+
+    Generate an entity config file:         codegen entity [entity_name]
+
+        [entity_name]     any entity name
+
+        $ codegen entity "Notification Center"
+
+    Generate an application config file:    codegen application [application_name] [include_unmapped]
+
+        [application_name]    localized name of the application
+        [include_unmapped]    boolean to include menu bar items not mapped to shortcuts
+
+        $ codegen application "Google Chrome"
+        $ codegen application "Google Chrome" false]]
+
+-- General text transform functions
+function Generator.capitalize(text) return text:gsub('^%l', string.upper) end
+function Generator.capitalizeWords(text) return string.gsub(" "..text, "%W%l", string.upper):sub(2) end
+function Generator.camelCase(text) return text:gsub('%W+(%w+)', Generator.capitalize) end
+
+function Generator:createInstanceName(name)
+    return self.capitalize(self.camelCase(name))
+end
+
+-- Render entity config template for a particular entity with its view model
+function Generator:renderEntityConfig(template, name, viewModel)
+    viewModel = viewModel or {}
+    viewModel.entityName = viewModel.entityName or name
+    viewModel.instanceName = viewModel.instanceName or self:createInstanceName(name)
+
+    return lustache:render(template, viewModel)
+end
+
+-- Entity config code generator
+function Generator:entity(name)
+    if not name then return end
+
+    local filename = "entity.template.lua"
+    local file = io.open(PATH.."/"..filename, "rb")
+    local template = file:read("*all")
+
+    file:close()
+
+    return self:renderEntityConfig(template, name)
+end
+
+-- URL entity config code generator
+function Generator:url(name, idklol)
+    if not name or not idklol then return end
+
+    local filename = "url.template.lua"
+    local file = io.open(PATH.."/"..filename, "rb")
+    local template = file:read("*all")
+
+    file:close()
+
+    return self:renderEntityConfig(template, name, { url = idklol })
+end
+
+-- Application entity config code generator
+function Generator:application(name, includeUnmapped)
+    local instanceName = self:createInstanceName(name)
+
+    -- Prepare the Hammerspoon menu item shortcuts script
+    local filename = "menu-item-shortcuts.template.lua"
+    local hsfile = io.open(PATH.."/"..filename, "rb")
+    local appDataTemplate = hsfile:read("*all")
+    hsfile:close()
+
+    -- Call Hammerspoon to leverage their API to retrieve app menu item data
+    local hscode = self:renderEntityConfig(appDataTemplate, name, {
+        includeUnmapped = includeUnmapped or false
+    })
+    local handle = io.popen("hs -c -- <<- EOM".."\n"..hscode.."\nEOM")
+    local hsResponse = handle:read("*a")
+    handle:close()
+
+    -- Load the Hammerspoon response
+    local getShortcuts, err = load(hsResponse)
+    if err then
+        print("Error retrieving application shortcuts: "..err)
+        os.exit(1)
+    end
+
+    local menuBarShortcuts, menuBarItems = getShortcuts()
+
+    if not menuBarItems or #menuBarItems == 0 then
+        print("No menu bar items found for application "..name)
+        os.exit(1)
+    end
+
+    local actions = {}
+    local shortcutLines = {}
+    local initializationLines = {}
+
+    for i = 1, #menuBarItems do
+        local menuBarTitle = menuBarItems[i]
+        local shortcuts = menuBarShortcuts[menuBarTitle]
+
+        -- Demarcate blocks of shortcuts by their parent menu bar title
+        table.insert(shortcutLines, "    -- "..menuBarTitle)
+
+        for _, shortcut in pairs(shortcuts) do
+            local actionName = self.capitalizeWords(shortcut.metadata[2]):gsub("%W", "")
+            actionName = actionName:find("%l") == 2
+                and self.camelCase(actionName):gsub("^%u", string.lower)
+                or self.camelCase(actionName)
+
+            local modifierString = inspect(shortcut.hotkey[1])
+            local hotkeyString = inspect(shortcut.hotkey[2])
+            local metadataString = inspect(shortcut.metadata)
+
+            table.insert(actions, {
+                name = actionName,
+                menuItemPath = metadataString,
+                eventType = shortcut.eventType,
+            })
+
+            local line = "    { "..modifierString..", "..hotkeyString..", "..instanceName.."."..actionName..", "..metadataString.." },"
+            table.insert(shortcutLines, line)
+        end
+    end
+
+    for _, action in pairs(actions) do
+        local line = instanceName.."."..action.name.." = Application."..action.eventType.."("..action.menuItemPath..")"
+        table.insert(initializationLines, line)
+    end
+
+    table.sort(initializationLines, function(a, b) return a < b end)
+
+    local templateFilename = "application.template.lua"
+    local file = io.open(PATH.."/"..templateFilename, "rb")
+    local template = file:read("*all")
+
+    file:close()
+
+    return self:renderEntityConfig(template, name, {
+        entityName = name,
+        instanceName = instanceName,
+        actionInitializations = table.concat(initializationLines, "\n"),
+        shortcuts = table.concat(shortcutLines, "\n"),
+    })
+end
+
+local entityType, name, idklol = table.unpack(arg or {})
+if not Generator[entityType] then print(help) return end
+
+local config = Generator[entityType](Generator, name, idklol)
+if not config then print(help) return end
+
+io.write(config)
