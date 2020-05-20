@@ -21,7 +21,7 @@ URL.displaySelectionModalIcons = true
 
 --- URL.behaviors
 --- Variable
---- URL [behaviors](Entity.html#behaviors) defined to invoke event handlers with the file path.
+--- URL [behaviors](Entity.html#behaviors) defined to invoke event handlers with the URL.
 --- Currently supported behaviors:
 --- * `default` - Simply triggers the event handler with the entity's url
 --- * `select` - Generates a list of choice items from [`self:getSelectionItems`](#getSelectionItems) and displays them in a selection modal for selection
@@ -136,9 +136,7 @@ end
 ---
 --- Parameters:
 ---  * `url` - The web address that the entity is representing
----  * `shortcuts` - The list of shortcuts containing keybindings and actions for the file entity
----  * `options` - A table containing various options that configures the file instance
----    * `selections` - A flag to display hidden files in the file selection modal. Defaults to `false`
+---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the url entity
 ---
 --- Each `shortcut` item should be a list with items at the following indices:
 ---  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`
@@ -151,14 +149,11 @@ end
 --- Returns:
 ---  * None
 function URL:initialize(url, shortcuts)
-    local actions = {
-        open = self.open,
-    }
     local commonShortcuts = {
-        { nil, nil, actions.open, { url, "Open URL" } },
+        { nil, nil, self.open, { url, "Open URL" } },
     }
 
-    local mergedShortcuts = self.mergeShortcuts(shortcuts, commonShortcuts)
+    local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)
 
     self.url = url
     self.name = url

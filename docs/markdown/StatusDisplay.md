@@ -5,10 +5,20 @@ Small menubar text display
 
 
 ## API Overview
+* Variables - Configurable values
+ * [isDarkMode](#isDarkMode)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [show](#show)
 
 ## API Documentation
+
+### Variables
+
+| [isDarkMode](#isDarkMode)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `StatusDisplay.isDarkMode`                                                                    |
+| **Type**                                    | Variable                                                                     |
+| **Description**                             | A boolean value indicating whether the menu bar style is in dark mode. This value will be determined automatically.                                                                     |
 
 ### Methods
 

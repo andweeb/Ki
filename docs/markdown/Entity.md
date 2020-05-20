@@ -14,7 +14,6 @@ Entity class that represents some abstract automatable desktop entity
  * [getEventHandler](#getEventHandler)
  * [getSelectionItems](#getSelectionItems)
  * [initialize](#initialize)
- * [mergeShortcuts](#mergeShortcuts)
  * [notifyError](#notifyError)
  * [registerSelectionModalShortcuts](#registerSelectionModalShortcuts)
  * [registerShortcuts](#registerShortcuts)
@@ -76,14 +75,6 @@ Entity class that represents some abstract automatable desktop entity
 | **Description**                             | Initializes a new entity instance with its name and shortcuts. By default, a `cheatsheet` object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the `autoExitMode` parameter is explicitly set to `false`.                                                                     |
 | **Parameters**                              | <ul><li>`name` - The entity name</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the entity</li><li>`autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
-
-| [mergeShortcuts](#mergeShortcuts)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity.mergeShortcuts(fromList, toList) -> table`                                                                    |
-| **Type**                                    | Method                                                                     |
-| **Description**                             | Merges lists of shortcuts based on their keybindings                                                                     |
-| **Parameters**                              | <ul><li>`fromList` - The list of shortcuts to apply onto the second list argument</li><li>`toList` - The target list of shortcuts to override with those in the first list argument with conflicting keybindings</li></ul> |
-| **Returns**                                 | <ul><li> `list` - The list of merged shortcut objects</li></ul>          |
 
 | [notifyError](#notifyError)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

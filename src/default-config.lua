@@ -14,82 +14,7 @@ local function requireEntity(type, filename)
     return require(type.."."..filename)
 end
 
--- Define custom modes and specify all state transitions between those modes
-local modeTransitionEvents = {
-    -- URL --
-    { name = "enterUrlMode", from = "normal", to = "url" },
-    { name = "enterUrlMode", from = "select", to = "url" },
-    { name = "enterUrlMode", from = "entity", to = "url" },
-    { name = "exitMode", from = "url", to = "desktop" },
-    -- SELECT --
-    { name = "enterEntityMode", from = "select", to = "entity" },
-    { name = "enterSelectMode", from = "entity", to = "select" },
-    { name = "enterSelectMode", from = "normal", to = "select" },
-    { name = "exitMode", from = "select", to = "desktop" },
-    -- FILE --
-    { name = "enterFileMode", from = "normal", to = "file" },
-    { name = "enterFileMode", from = "entity", to = "file" },
-    { name = "enterFileMode", from = "select", to = "file" },
-    { name = "enterSelectMode", from = "file", to = "select" },
-    { name = "exitMode", from = "file", to = "desktop" },
-    -- VOLUME --
-    { name = "enterVolumeMode", from = "normal", to = "volume" },
-    { name = "exitMode", from = "volume", to = "desktop" },
-    -- BRIGHTNESS --
-    { name = "enterBrightnessMode", from = "normal", to = "brightness" },
-    { name = "exitMode", from = "brightness", to = "desktop" },
-}
-
--- Add normal mode shortcuts to transition to different modes
-local normalModeShortcuts = {
-    { {"cmd"}, "b", function() Ki.state:enterBrightnessMode() end, { "Normal Mode", "Enter Brightness Mode" } },
-    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Normal Mode", "Enter File Mode" } },
-    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Normal Mode", "Enter Select Mode" } },
-    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Normal Mode", "Enter URL Mode" } },
-    { {"cmd"}, "v", function() Ki.state:enterVolumeMode() end, { "Normal Mode", "Enter Volume Mode" } },
-}
--- Add entity mode shortcuts to transition to url and select mode
-local entityModeShortcuts = {
-    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Entity Mode", "Enter File Mode" } },
-    { {"cmd"}, "s", function() Ki.state:enterSelectMode() end, { "Entity Mode", "Enter Select Mode" } },
-    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Entity Mode", "Enter URL Mode" } },
-}
--- Add select mode shortcuts to exit to desktop mode and enter entity, file, and url mode
-local selectModeShortcuts = {
-    { nil, "escape", function() Ki.state:exitMode() end, { "Select Mode", "Exit to Desktop Mode" } },
-    { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Select Mode", "Enter Entity Mode" } },
-    { {"cmd"}, "f", function() Ki.state:enterFileMode() end, { "Select Mode", "Enter File Mode" } },
-    { {"cmd"}, "u", function() Ki.state:enterUrlMode() end, { "Select Mode", "Enter URL Mode" } },
-}
--- Add file mode shortcut to exit to desktop mode
-local fileModeShortcuts = {
-    { nil, "escape", function() Ki.state:exitMode() end, { "File Mode", "Exit to Desktop Mode" } },
-}
--- Add url mode shortcut to exit to desktop mode
-local urlModeShortcuts =  {
-    { nil, "escape", function() Ki.state:exitMode() end, { "URL Mode", "Exit to Desktop Mode" } },
-}
--- Add volume mode shortcut to exit to desktop mode
-local volumeModeShortcuts =  {
-    { nil, "escape", function() Ki.state:exitMode() end, { "Volume Control Mode", "Exit to Desktop Mode" } },
-}
--- Add volume mode shortcut to exit to desktop mode
-local brightnessModeShortcuts =  {
-    { nil, "escape", function() Ki.state:exitMode() end, { "Brightness Control Mode", "Exit to Desktop Mode" } },
-}
-
--- Register mode shortcuts
-Ki:registerModes(modeTransitionEvents, {
-    normal = normalModeShortcuts,
-    entity = entityModeShortcuts,
-    select = selectModeShortcuts,
-    file = fileModeShortcuts,
-    url = urlModeShortcuts,
-    volume = volumeModeShortcuts,
-    brightness = brightnessModeShortcuts,
-})
-
--- Initialize entities and assign shortcuts for entity and entity select mode
+-- Initialize entities
 local entities = {
     ActivityMonitor = requireEntity("application", "activity-monitor"),
     AppStore = requireEntity("application", "app-store"),
@@ -124,7 +49,8 @@ local entities = {
     TextEdit = requireEntity("application", "text-edit"),
     VoiceMemos = requireEntity("application", "voice-memos"),
 }
-local entityShortcuts = {
+-- Register entity mode shortcuts
+Ki:registerModeShortcuts("entity", {
     { nil, "a", entities.AppStore, { "Entities", "App Store" } },
     { nil, "b", entities.Books, { "Entities", "Books" } },
     { nil, "c", entities.Calendar, { "Entities", "Calendar" } },
@@ -157,8 +83,11 @@ local entityShortcuts = {
     { { "shift", "cmd" }, "p", entities.Photos, { "Entities", "Photos" } },
     { { "shift", "cmd" }, "m", entities.Mail, { "Entities", "Mail" } },
     { { "shift", "cmd" }, "s", entities.Stickies, { "Entities", "Stickies" } },
-}
-local selectEntityShortcuts = {
+})
+
+-- Register select mode and assign shortcuts for applicable entities that implement selection
+local enterSelectModeShortcut = { {"cmd"}, "s", nil, { "Normal Mode", "Enter Select Mode" } }
+Ki:registerMode("select", enterSelectModeShortcut, {
     { nil, "d", entities.Dictionary, { "Select Events", "Select a Dictionary window" } },
     { nil, "f", entities.Finder, { "Select Events", "Select a Finder window" } },
     { nil, "g", entities.GoogleChrome, { "Select Events", "Select a Google Chrome tab or window" } },
@@ -170,13 +99,17 @@ local selectEntityShortcuts = {
     { nil, "t", entities.Terminal, { "Select Events", "Select a Terminal window" } },
     { nil, ",", entities.SystemPreferences, { "Select Events", "Select a System Preferences pane" } },
     { { "shift" }, "t", entities.TextEdit, { "Select Events", "Select a Text Edit window" } },
-}
+})
+-- Register mode transitions between select mode and others
+Ki:registerModeTransition("entity", "select", { {"cmd"}, "s", nil, { "Entity Mode", "Enter Select Mode" } })
+Ki:registerModeTransition("select", "entity", { {"cmd"}, "e", nil, { "Select Mode", "Enter Entity Mode" } })
+Ki:registerModeTransition("select", "file", { {"cmd"}, "f", nil, { "Select Mode", "Enter File Mode" } })
+Ki:registerModeTransition("select", "url", { {"cmd"}, "u", nil, { "Select Mode", "Enter URL Mode" } })
 
--- Initialize file entities and assign file mode shortcuts
+-- Initialize file entities
 local function openFinderApplicationEvent(name)
     return function()
-        hs.application.launchOrFocus(name)
-        return true
+        return hs.application.launchOrFocus(name)
     end
 end
 local files = {
@@ -188,21 +121,29 @@ local files = {
     Documents = File:new("~/Documents"),
     Downloads = File:new("~/Downloads"),
     Home = File:new("~"),
+    Library = File:new("~/Library"),
     iCloudDrive = openFinderApplicationEvent("iCloud Drive"),
     Movies = File:new("~/Movies"),
     Network = openFinderApplicationEvent("Network"),
     Pictures = File:new("~/Pictures"),
     Recents = openFinderApplicationEvent("Recents"),
+    System = File:new("/System"),
     Trash = File:new("~/.Trash"),
+    Users = File:new("/Users"),
     Volumes = File:new("/Volumes"),
 }
-local fileShortcuts = {
+-- Register file mode and assign shortcuts for the initialized file entities
+local enterFileModeShortcut = { {"cmd"}, "f", nil, { "Normal Mode", "Enter File Mode" } }
+Ki:registerMode("file", enterFileModeShortcut, {
     { nil, "a", files.Applications, { "Files", "Applications" } },
     { nil, "d", files.Downloads, { "Files", "Downloads" } },
     { nil, "h", files.Home, { "Files", "$HOME" } },
+    { nil, "l", files.Library, { "Files", "Library" } },
     { nil, "m", files.Movies, { "Files", "Movies" } },
     { nil, "p", files.Pictures, { "Files", "Pictures" } },
+    { nil, "s", files.System, { "Files", "System" } },
     { nil, "t", files.Trash, { "Files", "Trash" } },
+    { nil, "u", files.Users, { "Files", "Users" } },
     { nil, "v", files.Volumes, { "Files", "Volumes" } },
     { { "cmd" }, "a", files.Airdrop, { "Files", "Airdrop" } },
     { { "cmd" }, "c", files.Computer, { "Files", "Computer" } },
@@ -212,9 +153,11 @@ local fileShortcuts = {
     { { "shift" }, "a", files.AllMyFiles, { "Files", "All My Files" } },
     { { "shift" }, "d", files.Desktop, { "Files", "Desktop" } },
     { { "cmd", "shift" }, "d", files.Documents, { "Files", "Documents" } },
-}
+})
+-- Register mode transitions to allow transitioning from entity to file mode
+Ki:registerModeTransition("entity", "file", { {"cmd"}, "f", nil, { "Entity Mode", "Enter File Mode" } })
 
--- Initialize URL entities and assign URL mode shortcuts
+-- Initialize URL entities
 local urls = {
     Amazon = requireEntity("url", "amazon"),
     Facebook = requireEntity("url", "facebook"),
@@ -234,7 +177,9 @@ local urls = {
     YouTube = requireEntity("url", "youtube"),
     Zillow = requireEntity("url", "zillow"),
 }
-local urlShortcuts = {
+-- Register URL mode and assign shortcuts for the initialized URL entities
+local enterUrlModeShortcut = { {"cmd"}, "u", nil, { "Normal Mode", "Enter URL Mode" } }
+Ki:registerMode("url", enterUrlModeShortcut, {
     { nil, "a", urls.Amazon, { "URL Events", "Amazon" } },
     { nil, "f", urls.Facebook, { "URL Events", "Facebook" } },
     { nil, "g", urls.Google, { "URL Events", "Google" } },
@@ -252,12 +197,21 @@ local urlShortcuts = {
     { { "shift" }, "w", urls.Weather, { "URL Events", "Weather" } },
     { { "shift" }, "y", urls.Yelp, { "URL Events", "Yelp" } },
     { { "cmd", "shift" }, "m", urls.GMail, { "URL Events", "Gmail" } },
-}
+})
+-- Register mode transitions to allow transitioning from entity to URL mode
+Ki:registerModeTransition("entity", "url", { {"cmd"}, "u", nil, { "Entity Mode", "Enter URL Mode" } })
 
--- Initialize entities tied to specific modes
+-- Register volume mode and assign shortcuts
 local Volume = requireEntity("entity", "volume")
-local Brightness = requireEntity("entity", "brightness")
+local enterVolumeModeShortcut = { {"cmd"}, "v", nil, { "Normal Mode", "Enter Volume Mode" } }
+Ki:registerMode("volume", enterVolumeModeShortcut, Volume.shortcuts)
 
+-- Register brightness mode and assign shortcuts
+local Brightness = requireEntity("entity", "brightness")
+local enterBrightnessModeShortcut = { {"cmd"}, "b", nil, { "Normal Mode", "Enter Brightness Mode" } }
+Ki:registerMode("brightness", enterBrightnessModeShortcut, Brightness.shortcuts)
+
+-- Set default entities
 Ki.defaultEntities = {
     volume = Volume,
     brightness = Brightness,
@@ -265,12 +219,3 @@ Ki.defaultEntities = {
     file = files,
     url = urls,
 }
-
-Ki:registerShortcuts({
-    volume = Volume.shortcuts,
-    brightness = Brightness.shortcuts,
-    entity = entityShortcuts,
-    select = selectEntityShortcuts,
-    file = fileShortcuts,
-    url = urlShortcuts,
-})

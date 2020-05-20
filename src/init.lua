@@ -12,6 +12,38 @@
 --- * `DESKTOP` the default state of macOS
 --- * `NORMAL` a mode in which modes can be entered or actions can be specified
 --- * `ENTITY` a mode in which entities are available to be launched or activated
+---
+--- #### Shortcut Structure
+---
+--- The shortcut table structure is similar to the argument list for binding hotkeys in Hammerspoon:
+---   1. a list of [modifier keys](http://www.hammerspoon.org/docs/hs.hotkey.html#bind) or `nil`
+---   2. a string containing the name of a keyboard key (as found in [hs.keycodes.map](http://www.hammerspoon.org/docs/hs.keycodes.html#map))
+---   3. either an event handler function or an [`Entity`](#Entity) instance (or subclassed entity instance) that implements a [`dispatchAction`](Entity.html#dispatchAction) method to be invoked when the hotkey is pressed. A boolean value can be returned to automatically exit back to `desktop` mode after the action has completed.
+---   4. a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet
+---
+--- ```
+--- -- Example shortcut list:
+--- {
+---     { nil, "t", function() print("executed action") end, { "Test", "Test print to console" } },
+---     { { "cmd", "shift" }, "s", Ki.Application:new("Slack"), { "Entities", "Slack" } },
+--- }
+---
+--- -- Explanation:
+--- {
+---      {
+---          nil,                                     -- assign hotkey with no modifier key
+---          "t",                                     -- assign the "t" key
+---          function() print("executed action") end, -- event handler function
+---          { "Test", "Test print to console" }      -- shortcut metadata
+---      },
+---      {
+---          { "cmd", "shift" },                      -- assign the command and shift modifier keys
+---          "s",                                     -- assign the "s" key
+---          Ki.Application:new("Slack"),             -- initialized Application instance
+---          { "Entities", "Slack" },                 -- shortcut metadata
+---      },
+--- }
+--- ```
 
 local Ki = {}
 Ki.__index = Ki
@@ -35,7 +67,6 @@ _G.SHORTCUT_EVENT_HANDLER_INDEX = 3
 _G.SHORTCUT_METADATA_INDEX = 4
 
 local FSM = require("fsm")
-local Util = require("util")
 local Cheatsheet = require("cheatsheet")
 
 -- Allow Spotlight to be used to find alternate names for applications
@@ -81,59 +112,43 @@ Ki.state = {}
 --- A table containing lists of all default entity instances keyed by mode name when the [default config](#useDefaultConfig) is used, `nil` otherwise.
 Ki.defaultEntities = nil
 
--- Merge Ki events with the option of overriding events
--- Events with conflicting hotkeys will result in the lhs event being overwritten by the rhs event
-function Ki._mergeEvents(mode, lhs, rhs, overrideLHS)
-    -- LHS event modifiers keyed by event keyname
-    local lhsHotkeys = {}
-
-    -- Map lhs keynames to modifier keys
-    for index, lhsEvent in pairs(lhs) do
-        local modifiers = lhsEvent[_G.SHORTCUT_MODKEY_INDEX] or {}
-        local keyName = lhsEvent[_G.SHORTCUT_HOTKEY_INDEX]
-
-        lhsHotkeys[keyName] = {
-            index = index,
-            modifiers = modifiers,
-        }
+-- Create a string shortcut key from its modifiers and hotkey
+function Ki.getShortcutKey(modifiers, hotkey)
+    if not modifiers then
+        return hotkey
     end
 
-    -- Merge events from rhs to lhs
-    for _, rhsEvent in pairs(rhs) do
-        -- Determine if event exists in lhs events
-        local rhsEventModifiers = rhsEvent[_G.SHORTCUT_MODKEY_INDEX] or {}
-        local eventKeyName = rhsEvent[_G.SHORTCUT_HOTKEY_INDEX]
-        local eventModifiers = lhsHotkeys[eventKeyName] and lhsHotkeys[eventKeyName].modifiers or nil
-        local hasHotkeyConflict = Util.areListsEqual(eventModifiers, rhsEventModifiers)
+    local clonedModifiers = {table.unpack(modifiers)}
+    table.sort(clonedModifiers)
 
-        if not hasHotkeyConflict then
-            table.insert(lhs, rhsEvent)
+    return table.concat(clonedModifiers)..hotkey
+end
+
+-- Merge Ki shortcuts with the option of overriding shortcuts
+-- Shortcuts with conflicting hotkeys will result in the lhs shortcut being overwritten by the rhs shortcut
+function Ki:mergeShortcuts(fromList, toList)
+    local mergedShortcuts = {table.unpack(toList)}
+    local memo = {}
+
+    for i = 1, #mergedShortcuts do
+        local shortcut = mergedShortcuts[i]
+        local key = self.getShortcutKey(table.unpack(shortcut))
+        memo[key] = { i, shortcut }
+    end
+
+    for i = 1, #fromList do
+        local shortcut = fromList[i]
+        local key = self.getShortcutKey(table.unpack(shortcut))
+        local foundIndex, foundShortcut = table.unpack(memo[key] or {})
+
+        if foundIndex then
+            mergedShortcuts[foundIndex] = foundShortcut
         else
-            if overrideLHS then
-                -- Overwrite LHS shortcut or concat the RHS shortcut
-                local lhsIndex = lhsHotkeys[eventKeyName]
-                    and lhsHotkeys[eventKeyName].index
-                    or nil
-
-                if lhsIndex ~= nil then
-                    lhs[lhsIndex] = rhsEvent
-                else
-                    table.insert(lhs, rhsEvent)
-                end
-            else
-                -- Generate hotkey binding text to display in console warning
-                local modifierName = ""
-
-                for index, modifiers in pairs(rhsEventModifiers) do
-                    modifierName = (index == 1 and modifierName or modifierName.."+")..modifiers
-                end
-
-                local binding = "{"..(#rhsEventModifiers == 0 and "" or modifierName.."+")..eventKeyName.."}"
-
-                hs.showError("Cannot overwrite hotkey binding "..binding.." in "..mode.." mode reserved for transition events")
-            end
+            table.insert(mergedShortcuts, shortcut)
         end
     end
+
+    return mergedShortcuts
 end
 
 -- A table containing [state transition events](https://github.com/unindented/lua-fsm#usage) that allow transitions between different modes in Ki.
@@ -182,25 +197,6 @@ function Ki.history:recordEvent(mode, keyName, flags)
         flags = flags,
         keyName = keyName,
     })
-end
-
-function Ki._renderHotkeyText(modifiers, keyName)
-    local modKeyText = ""
-    local modNames = {
-        cmd = "⌘",
-        alt = "⌥",
-        shift = "⇧",
-        ctrl = "⌃",
-        fn = "<fn>",
-    }
-
-    for name, isKeyDown in pairs(modifiers) do
-        if name and modNames[name] and isKeyDown then
-            modKeyText = modKeyText..modNames[name]
-        end
-    end
-
-    return modKeyText..keyName
 end
 
 -- Generate the finite state machine callbacks for all state events, generic `onstatechange` callbacks for recording/resetting event history and state event-specific callbacks
@@ -274,12 +270,6 @@ function Ki:_handleKeyDown(event)
             if shouldAutoExit then
                 self.state:exitMode()
             end
-        else
-            local hotkeyText = self._renderHotkeyText(flags, keyName)
-            local details =
-                "The event handler may be misconfigured for the shortcut "..hotkeyText.." in "..mode.." mode."
-
-            self.createEntity().notifyError("Unexpected event handler", details)
         end
 
         return true
@@ -298,83 +288,102 @@ function Ki:init()
     self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, eventHandler)
 end
 
---- Ki:registerModes(modeTransitionEvents, transitionShortcuts) -> table of state transition events, table of transition shortcuts
+--- Ki:registerMode(mode, enterModeShortcut, shortcuts) -> table of state transition events, table of registered shortcuts
 --- Method
---- Registers state events that transition between modes and their assigned keyboard shortcuts.
+--- Registers a new custom mode and its keyboard shortcuts.
 ---
 --- Parameters:
----  * `modeTransitionEvents` - A table containing the [transition events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to [`Ki.state`](#state).
+---  * `mode` - The name of the new mode to be registered
+---  * `enterModeShortcut` - The shortcut that will be available in normal mode to enter the new custom mode
 ---
----     The example state events below create methods on `Ki.state` to enter and exit entity mode from normal mode:
----     ```
----     { { name = "enterEntityMode", from = "normal", to = "entity" }
----       { name = "exitMode", from = "entity", to = "normal" } }
----     ```
+---  The shortcut follows the same table structure as any other shortcut, except the event handler function is optional, but if not `nil` will be invoked after the mode has been entered with the following arguments:
+---    * `fsm` - The [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki
+---    * `fromMode` - The previous mode name
+---    * `toMode` - The current mode name
 ---
----     **Note**: these events will only _initialize and expose_ methods on [`Ki.state`](#state). For example, the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods will only be _initialized_ with the example state events above, in which they can be used in the handler functions for the `transitionShortcuts` in the second argument.
----
----  * `transitionShortcuts` - Lists of shortcut objects keyed by mode name, with each shortcut allowing the transition from and to the modes specified in the `modeTransitionEvents` events.
----
----     Continuing with the example above, we can reference the `Ki.state:enterEntityMode` and `Ki.state:exitMode` methods initialized by the state transitions to define the shortcuts that enter and exit entity mode:
----     ```
----     {
----         -- For when in `normal` mode
----         normal = {
----             -- Register <cmd> + e as the shortcut to enter `entity` mode
----             { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Enter Entity Mode" } },
----         },
----         -- For when in `entity` mode
----         entity = {
----             -- Register <escape> as the shortcut to exit back to `desktop` mode
----             { nil, "escape", function() Ki.state:exitMode() end, { "Entity Mode", "Exit to Desktop Mode" } },
----         },
----     }
----     ```
-function Ki:registerModes(modeTransitionEvents, transitionShortcuts)
-    -- Register FSM state transition events
-    for _, modeTransition in pairs(modeTransitionEvents) do
-        table.insert(self.modeTransitionEvents, modeTransition)
-    end
+---  Example of `enterModeShortcut` table:
+---  ```lua
+---  {
+---      {"cmd"}, "f",
+---      function(fsm, fromMode, toMode)
+---          print("Current state of the FSM is "..fsm.current) -- (should equal `toMode`)
+---          print("Transitioned from "..fromMode.." to "..toMode)
+---      end,
+---      { "Normal Mode", "Enter File Mode" },
+---  },
+---  ```
+---  * `shortcuts` - The shortcuts that will be assigned to the new custom mode
+function Ki:registerMode(mode, enterModeShortcut, shortcuts)
+    local modeName = mode:gsub("^%l", string.upper)
 
-    -- Register transition shortcuts
-    return self.modeTransitionEvents, self:registerShortcuts(transitionShortcuts, true)
+    -- Register the action to enter the mode from normal mode
+    self:registerModeTransition("normal", mode, enterModeShortcut)
+
+    -- Register the action to exit the mode back to desktop mode
+    local metadata = { modeName.." Mode", "Exit to "..modeName.." Mode" }
+    local exitModeShortcut = { nil, "escape", nil, metadata }
+    self:registerModeTransition(mode, "desktop", exitModeShortcut, "exitMode")
+
+    -- Register the new mode shortcuts
+    return self.modeTransitionEvents, self:registerModeShortcuts(mode, shortcuts)
 end
 
---- Ki:registerShortcuts(shortcuts[, override]) -> table of registered shortcuts
+--- Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut[, transitionName]) -> table of state transition events, table of registered shortcuts
 --- Method
---- Registers a list of shortcuts for one or more modes.
----
---- For each shortcut, the table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys list, key name, and event handler. An optional but recommended fourth item is a list with category and name of the shortcut to be displayed in the cheatsheet. For example, the following events open applications on keydown events on <kbd>s</kbd> and <kbd>⇧⌘s</kbd>:
----
---- An [`Entity`](#Entity) (or any subclassed Entity) instance can be also used as an event handler:
---- ```lua
---- local shortcuts = {
----     entity = {
----         { nil, "w", Ki.Application:new("Microsoft Word"), { "Entities", "Microsoft Word" } },
----         { { "cmd", "shift" }, "s", Ki.Application:new("Slack"), { "Entities", "Slack" } },
----     },
----     select = {
----         { nil, "w", Ki.Application:new("Microsoft Word"), { "Entities", "Microsoft Word" } },
----     },
---- }
---- ```
---- The boolean return value of the event handler or an entity's `dispatchAction` function indicates whether to automatically exit back to `desktop` mode after the action has completed.
+--- Allows a transition between two modes and registers the shortcut in normal mode to transition to the target mode
 ---
 --- Parameters:
----  * `shortcuts` - The list of shortcut objects
----  * `override` - A boolean denoting whether to override existing shortcuts
-function Ki:registerShortcuts(shortcuts, override)
-    override = override == nil and true or override
+---  * `fromMode` - The name of the starting mode that will have the transition shortcut assigned to
+---  * `toMode` - The name of the target mode that will be transitioned to from the `fromMode` mode
+---  * `transitionModeShortcut` - The shortcut to be assigned to the `fromMode` to transition to the `toMode`
+---  * `transitionName` - An optional name for the transition method to be made available on [`Ki.state`](Ki.html#state). Defaults to "enter?Mode", ? being the capitalized mode name.
+---
+---  The transition mode shortcut follows the same table structure as any other shortcut, except the third list item is an optional callback to be invoked after the mode has been entered:
+---  ```lua
+---  {
+---      {"cmd"}, "f",
+---      function(fsm, fromMode, toMode)
+---          print("Current state of the FSM is "..fsm.current) -- should equal `toMode`
+---          print("Transitioned from "..fromMode.." to "..toMode)
+---      end,
+---      { "Normal Mode", "Enter File Mode" },
+---  },
+---  ```
+function Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut, transitionName)
+    transitionName = transitionName or "enter"..toMode:gsub("^%l", string.upper).."Mode"
 
-    for mode, modeShortcuts in pairs(shortcuts) do
-        if not self.shortcuts[mode] then
-            self.shortcuts[mode] = {}
+    local stateEvent = { name = transitionName, from = fromMode, to = toMode }
+
+    -- Add to mode transition events
+    table.insert(self.modeTransitionEvents, stateEvent)
+
+    -- Compose the transition mode transition event handler with the transition callback
+    local onTransition = transitionModeShortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+    transitionModeShortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX] = function()
+        self.state[transitionName](self.state)
+        if onTransition then
+            onTransition(self.state, fromMode, toMode)
         end
-
-        self._mergeEvents(mode, self.shortcuts[mode], modeShortcuts, override)
     end
 
-    return self.shortcuts
+    -- Register shortcut mode transition shortcut
+    return self.modeTransitionEvents, self:registerModeShortcuts(fromMode, { transitionModeShortcut })
+end
+
+--- Ki:registerModeShortcuts(mode, shortcuts) -> table of registered shortcuts
+--- Method
+--- Registers a set of shortcuts for a mode that is already registered.
+---
+--- Parameters:
+---  * `mode` - The name of the mode
+---  * `shortcuts` - A list of shortcuts
+---
+--- Returns:
+---   * The total list of shortcuts registered for the given mode
+function Ki:registerModeShortcuts(mode, shortcuts)
+    local modeShortcuts = self.shortcuts[mode] or {}
+    self.shortcuts[mode] = self:mergeShortcuts(modeShortcuts, shortcuts)
+    return self.shortcuts[mode]
 end
 
 --- Ki:remapShortcuts(shortcuts) -> table of categorized shortcut mappings
@@ -555,8 +564,6 @@ function Ki:useDefaultConfig(options)
                     includes[entity.url] or
                     includes[entity.path] or
                     includes[entity.name] or
-                    (entity.url and includes[mode.."."..entity.url]) or
-                    (entity.path and includes[mode.."."..entity.path]) or
                     (entity.name and includes[mode.."."..entity.name])
                 ) then
                     table.insert(defaultShortcuts[mode], shortcut)
@@ -565,18 +572,17 @@ function Ki:useDefaultConfig(options)
                     not excludes[entity.url] and
                     not excludes[entity.path] and
                     not excludes[entity.name] and
-                    (not excludes[mode.."."..(entity.url or "")]) and
-                    (not excludes[mode.."."..(entity.path or "")]) and
                     (not excludes[mode.."."..(entity.name or "")])
                 ) then
                     table.insert(defaultShortcuts[mode], shortcut)
                 end
             end
         end
-    end
 
-    -- Register default shortcuts over any existing ones
-    self:registerShortcuts(defaultShortcuts, true)
+        -- Register default shortcuts over any existing ones
+        self.shortcuts[mode] = {}
+        self:registerModeShortcuts(mode, defaultShortcuts[mode])
+    end
 end
 
 --- Ki:start() -> hs.eventtap

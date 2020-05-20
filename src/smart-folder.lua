@@ -46,7 +46,7 @@ function SmartFolder:initialize(path, shortcuts)
         { { "shift" }, "/", actions.showCheatsheet, { path, "Show Cheatsheet" } },
     }
 
-    local mergedShortcuts = self.mergeShortcuts(shortcuts, commonShortcuts)
+    local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)
 
     self.path = path
     self.name = path

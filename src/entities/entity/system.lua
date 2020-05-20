@@ -48,6 +48,6 @@ System:registerShortcuts({
     { { "ctrl" }, "r", System.restart, { "Normal Mode", "Restart" } },
     { { "ctrl" }, "s", System.sleep, { "Normal Mode", "Sleep" } },
     { { "cmd", "ctrl" }, "s", System.startScreenSaver, { "Normal Mode", "Enter Screen Saver" } },
-})
+}, true)
 
 return System

@@ -14,6 +14,38 @@ Ki ships with the following core modes:
 * `NORMAL` a mode in which modes can be entered or actions can be specified
 * `ENTITY` a mode in which entities are available to be launched or activated
 
+#### Shortcut Structure
+
+The shortcut table structure is similar to the argument list for binding hotkeys in Hammerspoon:
+  1. a list of [modifier keys](http://www.hammerspoon.org/docs/hs.hotkey.html#bind) or `nil`
+  2. a string containing the name of a keyboard key (as found in [hs.keycodes.map](http://www.hammerspoon.org/docs/hs.keycodes.html#map))
+  3. either an event handler function or an [`Entity`](#Entity) instance (or subclassed entity instance) that implements a [`dispatchAction`](Entity.html#dispatchAction) method to be invoked when the hotkey is pressed. A boolean value can be returned to automatically exit back to `desktop` mode after the action has completed.
+  4. a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet
+
+```
+-- Example shortcut list:
+{
+    { nil, "t", function() print("executed action") end, { "Test", "Test print to console" } },
+    { { "cmd", "shift" }, "s", Ki.Application:new("Slack"), { "Entities", "Slack" } },
+}
+
+-- Explanation:
+{
+     {
+         nil,                                     -- assign hotkey with no modifier key
+         "t",                                     -- assign the "t" key
+         function() print("executed action") end, -- event handler function
+         { "Test", "Test print to console" }      -- shortcut metadata
+     },
+     {
+         { "cmd", "shift" },                      -- assign the command and shift modifier keys
+         "s",                                     -- assign the "s" key
+         Ki.Application:new("Slack"),             -- initialized Application instance
+         { "Entities", "Slack" },                 -- shortcut metadata
+     },
+}
+```
+
 ## API Overview
 * Constants - Useful values which cannot be changed
  * [Application](#Application)
@@ -25,11 +57,11 @@ Ki ships with the following core modes:
  * [URL](#URL)
 * Variables - Configurable values
  * [defaultEntities](#defaultEntities)
- * [isDarkMode](#isDarkMode)
  * [statusDisplay](#statusDisplay)
 * Methods - API calls which can only be made on an object returned by a constructor
- * [registerModes](#registerModes)
- * [registerShortcuts](#registerShortcuts)
+ * [registerMode](#registerMode)
+ * [registerModeShortcuts](#registerModeShortcuts)
+ * [registerModeTransition](#registerModeTransition)
  * [remapShortcuts](#remapShortcuts)
  * [start](#start)
  * [stop](#stop)
@@ -89,12 +121,6 @@ Ki ships with the following core modes:
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing lists of all default entity instances keyed by mode name when the [default config](#useDefaultConfig) is used, `nil` otherwise.                                                                     |
 
-| [isDarkMode](#isDarkMode)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.isDarkMode`                                                                    |
-| **Type**                                    | Variable                                                                     |
-| **Description**                             | A boolean value indicating whether the menu bar style is in dark mode. This value will be determined automatically.                                                                     |
-
 | [statusDisplay](#statusDisplay)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Ki.statusDisplay`                                                                    |
@@ -103,19 +129,27 @@ Ki ships with the following core modes:
 
 ### Methods
 
-| [registerModes](#registerModes)         |                                                                                     |
+| [registerMode](#registerMode)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki:registerModes(modeTransitionEvents, transitionShortcuts) -> table of state transition events, table of transition shortcuts`                                                                    |
+| **Signature**                               | `Ki:registerMode(mode, enterModeShortcut, shortcuts) -> table of state transition events, table of registered shortcuts`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Registers state events that transition between modes and their assigned keyboard shortcuts.                                                                     |
-| **Parameters**                              | <ul><li>`modeTransitionEvents` - A table containing the [transition events](https://github.com/unindented/lua-fsm#usage) for the finite state machine set to [`Ki.state`](#state).</li></ul> |
+| **Description**                             | Registers a new custom mode and its keyboard shortcuts.                                                                     |
+| **Parameters**                              | <ul><li>`mode` - The name of the new mode to be registered</li><li>`enterModeShortcut` - The shortcut that will be available in normal mode to enter the new custom mode</li></ul> |
 
-| [registerShortcuts](#registerShortcuts)         |                                                                                     |
+| [registerModeShortcuts](#registerModeShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki:registerShortcuts(shortcuts[, override]) -> table of registered shortcuts`                                                                    |
+| **Signature**                               | `Ki:registerModeShortcuts(mode, shortcuts) -> table of registered shortcuts`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Registers a list of shortcuts for one or more modes.                                                                     |
-| **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects</li><li>`override` - A boolean denoting whether to override existing shortcuts</li></ul> |
+| **Description**                             | Registers a set of shortcuts for a mode that is already registered.                                                                     |
+| **Parameters**                              | <ul><li>`mode` - The name of the mode</li><li>`shortcuts` - A list of shortcuts</li></ul> |
+| **Returns**                                 | <ul><li> The total list of shortcuts registered for the given mode</li></ul>          |
+
+| [registerModeTransition](#registerModeTransition)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut[, transitionName]) -> table of state transition events, table of registered shortcuts`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Allows a transition between two modes and registers the shortcut in normal mode to transition to the target mode                                                                     |
+| **Parameters**                              | <ul><li>`fromMode` - The name of the starting mode that will have the transition shortcut assigned to</li><li>`toMode` - The name of the target mode that will be transitioned to from the `fromMode` mode</li><li>`transitionModeShortcut` - The shortcut to be assigned to the `fromMode` to transition to the `toMode`</li><li>`transitionName` - An optional name for the transition method to be made available on [`Ki.state`](Ki.html#state). Defaults to "enter?Mode", ? being the capitalized mode name.</li></ul> |
 
 | [remapShortcuts](#remapShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

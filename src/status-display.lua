@@ -10,7 +10,7 @@ StatusDisplay.timer = nil
 StatusDisplay.isDefault = true
 StatusDisplay.menubar = hs.menubar.new()
 
---- Ki.isDarkMode
+--- StatusDisplay.isDarkMode
 --- Variable
 --- A boolean value indicating whether the menu bar style is in dark mode. This value will be determined automatically.
 StatusDisplay.isDarkMode = false

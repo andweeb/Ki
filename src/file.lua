@@ -127,8 +127,7 @@ function File:initialize(path, shortcuts, options)
     self.showHiddenFiles = options.showHiddenFiles or false
     self.sortAttribute = options.sortAttribute or "modification"
 
-    self:registerShortcuts(commonShortcuts)
-    self:registerShortcuts(shortcuts, true)
+    self:registerShortcuts(self:mergeShortcuts(shortcuts, commonShortcuts))
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for file "..self.path
     self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, self.shortcuts)
@@ -284,7 +283,7 @@ function File:showFileSelectionModal(path, handler, options)
         { { "cmd" }, "return", openFile },
         { { "cmd", "shift" }, ".", toggleHiddenFiles },
     }
-    self.selectionModalShortcuts = self.mergeShortcuts(navigationShortcuts, self.selectionModalShortcuts)
+    self.selectionModalShortcuts = self:mergeShortcuts(navigationShortcuts, self.selectionModalShortcuts)
 
     local iterator, directory = hs.fs.dir(absolutePath)
     if iterator == nil then

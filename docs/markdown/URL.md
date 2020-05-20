@@ -23,7 +23,7 @@ URL class that subclasses [Entity](Entity.html) to represent some automatable UR
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `URL.behaviors`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | URL [behaviors](Entity.html#behaviors) defined to invoke event handlers with the file path.                                                                     |
+| **Description**                             | URL [behaviors](Entity.html#behaviors) defined to invoke event handlers with the URL.                                                                     |
 
 | [displaySelectionModalIcons](#displaySelectionModalIcons)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -59,7 +59,7 @@ URL class that subclasses [Entity](Entity.html) to represent some automatable UR
 | **Signature**                               | `URL:initialize(url, shortcuts)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Initializes a new url entity instance with its url and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.                                                                     |
-| **Parameters**                              | <ul><li>`url` - The web address that the entity is representing</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the file entity</li><li>`options` - A table containing various options that configures the file instance</li><li>  `selections` - A flag to display hidden files in the file selection modal. Defaults to `false`</li></ul> |
+| **Parameters**                              | <ul><li>`url` - The web address that the entity is representing</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the url entity</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
 | [open](#open)         |                                                                                     |

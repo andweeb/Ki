@@ -5,9 +5,23 @@
 local class = require("middleclass")
 local lustache = require("lustache")
 local Cheatsheet = require("cheatsheet")
-local util = require("util")
 
 local Entity = class("Entity")
+
+local function cloneTable(input)
+    if type(input) ~= "table" then
+        return input
+    end
+
+    local copy = {}
+    for key, value in next, input, nil do
+        copy[cloneTable(key)] = cloneTable(value)
+    end
+
+    setmetatable(copy, cloneTable(getmetatable(input)))
+
+    return copy
+end
 
 --- Entity.behaviors
 --- Variable
@@ -32,7 +46,7 @@ Entity.behaviors = {
 -- Allow behaviors to be overwritten
 setmetatable(Entity.behaviors, {
     __add = function(lhs, rhs)
-        lhs = util:clone(lhs)
+        lhs = cloneTable(lhs)
 
         for mode, behavior in pairs(rhs) do
             lhs[mode] = behavior
@@ -114,48 +128,52 @@ end
 function Entity:initialize(name, shortcuts, autoExitMode)
     self.name = name
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
-    self:registerShortcuts(self.mergeShortcuts(shortcuts or {}, {
+    self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
         { { "shift" }, "/", function() self.cheatsheet:show() end, { name, "Show Cheatsheet" } },
     }))
 end
 
---- Entity.mergeShortcuts(fromList, toList) -> table
---- Method
---- Merges lists of shortcuts based on their keybindings
----
---- Parameters:
----  * `fromList` - The list of shortcuts to apply onto the second list argument
----  * `toList` - The target list of shortcuts to override with those in the first list argument with conflicting keybindings
----
---- Returns:
----   * `list` - The list of merged shortcut objects
-function Entity.mergeShortcuts(fromList, toList)
-    if not fromList or #fromList == 0 then
-        return toList
+-- Create a string shortcut key from its modifiers and hotkey
+function Entity.getShortcutKey(modifiers, hotkey)
+    if not hotkey then return nil end
+    if not modifiers then return hotkey end
+
+    local clonedModifiers = {table.unpack(modifiers)}
+    table.sort(clonedModifiers)
+
+    return table.concat(clonedModifiers)..hotkey
+end
+
+-- Merge Ki shortcuts with the option of overriding shortcuts
+-- Shortcuts with conflicting hotkeys will result in the `toList` shortcut being overwritten by the `fromList` shortcut
+function Entity:mergeShortcuts(fromList, toList)
+    fromList = fromList or {}
+    toList = toList or {}
+
+    local mergedShortcuts = {table.unpack(toList)}
+    local memo = {}
+
+    for i = 1, #mergedShortcuts do
+        local shortcut = mergedShortcuts[i]
+        local key = self.getShortcutKey(table.unpack(shortcut))
+        if key then
+            memo[key] = { i, shortcut }
+        end
     end
 
-    for _, shortcut in pairs(fromList) do
-        local modifierKeys = shortcut[_G.SHORTCUT_MODKEY_INDEX] or {}
-        local hotkey = shortcut[_G.SHORTCUT_HOTKEY_INDEX]
-        local overrideIndex = nil
+    for i = 1, #fromList do
+        local shortcut = fromList[i]
+        local key = self.getShortcutKey(table.unpack(shortcut))
+        local foundIndex, foundShortcut = table.unpack(memo[key] or {})
 
-        for index, registeredAction in pairs(toList) do
-            local registeredModifierKeys = registeredAction[_G.SHORTCUT_MODKEY_INDEX] or {}
-            local registeredHotkey = registeredAction[_G.SHORTCUT_HOTKEY_INDEX]
-
-            if hotkey == registeredHotkey and util.areListsEqual(modifierKeys, registeredModifierKeys) then
-                overrideIndex = index
-            end
+        if foundIndex then
+            mergedShortcuts[foundIndex] = foundShortcut
+        else
+            table.insert(mergedShortcuts, shortcut)
         end
-
-        if overrideIndex then
-            table.remove(toList, overrideIndex)
-        end
-
-        table.insert(toList, shortcut)
     end
 
-    return toList
+    return mergedShortcuts
 end
 
 --- Entity:registerShortcuts(shortcuts[, override]) -> table of shortcuts
@@ -171,7 +189,7 @@ end
 function Entity:registerShortcuts(shortcuts, override)
     local cheatsheetDescription = self.name and "Ki shortcut keybindings registered for "..self.name or "Ki shortcut keybindings"
 
-    self.shortcuts = override and shortcuts or self.mergeShortcuts(shortcuts, self.shortcuts or {})
+    self.shortcuts = override and shortcuts or self:mergeShortcuts(shortcuts, self.shortcuts or {})
     self.cheatsheet = Cheatsheet:new(self.name, cheatsheetDescription, self.shortcuts)
 
     return self.shortcuts
@@ -240,7 +258,7 @@ Entity.selectionModalShortcuts = {
 ---   * `shortcuts` - Returns the list of registered selection modal shortcuts
 function Entity:registerSelectionModalShortcuts(shortcuts, override)
     local existingShortcuts = self.selectionModalShortcuts or {}
-    self.selectionModalShortcuts = override and shortcuts or self.mergeShortcuts(shortcuts, existingShortcuts)
+    self.selectionModalShortcuts = override and shortcuts or self:mergeShortcuts(shortcuts, existingShortcuts)
     return self.selectionModalShortcuts
 end
 

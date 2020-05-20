@@ -26,6 +26,36 @@
 <li><code>NORMAL</code> a mode in which modes can be entered or actions can be specified</li>
 <li><code>ENTITY</code> a mode in which entities are available to be launched or activated</li>
 </ul>
+<h4>Shortcut Structure</h4>
+<p>The shortcut table structure is similar to the argument list for binding hotkeys in Hammerspoon:</p>
+<ol>
+<li>a list of <a href="http://www.hammerspoon.org/docs/hs.hotkey.html#bind">modifier keys</a> or <code>nil</code></li>
+<li>a string containing the name of a keyboard key (as found in <a href="http://www.hammerspoon.org/docs/hs.keycodes.html#map">hs.keycodes.map</a>)</li>
+<li>either an event handler function or an <a href="#Entity"><code>Entity</code></a> instance (or subclassed entity instance) that implements a <a href="Entity.html#dispatchAction"><code>dispatchAction</code></a> method to be invoked when the hotkey is pressed. A boolean value can be returned to automatically exit back to <code>desktop</code> mode after the action has completed.</li>
+<li>a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet</li>
+</ol>
+
+<pre><code>-- Example shortcut list:
+{
+    { nil, "t", function() print("executed action") end, { "Test", "Test print to console" } },
+    { { "cmd", "shift" }, "s", Ki.Application:new("Slack"), { "Entities", "Slack" } },
+}
+
+-- Explanation:
+{
+     {
+         nil,                                     -- assign hotkey with no modifier key
+         "t",                                     -- assign the "t" key
+         function() print("executed action") end, -- event handler function
+         { "Test", "Test print to console" }      -- shortcut metadata
+     },
+     {
+         { "cmd", "shift" },                      -- assign the command and shift modifier keys
+         "s",                                     -- assign the "s" key
+         Ki.Application:new("Slack"),             -- initialized Application instance
+         { "Entities", "Slack" },                 -- shortcut metadata
+     },
+}</code></pre>
 
       </header>
       <h3>API Overview</h3>
@@ -43,13 +73,13 @@
         <li>Variables - Configurable values</li>
           <ul>
             <li><a href="#defaultEntities">defaultEntities</a></li>
-            <li><a href="#isDarkMode">isDarkMode</a></li>
             <li><a href="#statusDisplay">statusDisplay</a></li>
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
-            <li><a href="#registerModes">registerModes</a></li>
-            <li><a href="#registerShortcuts">registerShortcuts</a></li>
+            <li><a href="#registerMode">registerMode</a></li>
+            <li><a href="#registerModeShortcuts">registerModeShortcuts</a></li>
+            <li><a href="#registerModeTransition">registerModeTransition</a></li>
             <li><a href="#remapShortcuts">remapShortcuts</a></li>
             <li><a href="#start">start</a></li>
             <li><a href="#stop">stop</a></li>
@@ -211,25 +241,6 @@
               </tr>
             </table>
           </section>
-          <section id="isDarkMode">
-            <a name="//apple_ref/cpp/Variable/isDarkMode" class="dashAnchor"></a>
-            <h5><a href="#isDarkMode">isDarkMode</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Ki.isDarkMode</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Variable</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>A boolean value indicating whether the menu bar style is in dark mode. This value will be determined automatically.</p>
-</td>
-              </tr>
-            </table>
-          </section>
           <section id="statusDisplay">
             <a name="//apple_ref/cpp/Variable/statusDisplay" class="dashAnchor"></a>
             <h5><a href="#statusDisplay">statusDisplay</a></h5>
@@ -258,13 +269,13 @@
             </table>
           </section>
         <h4 class="documentation-section">Methods</h4>
-          <section id="registerModes">
-            <a name="//apple_ref/cpp/Method/registerModes" class="dashAnchor"></a>
-            <h5><a href="#registerModes">registerModes</a></h5>
+          <section id="registerMode">
+            <a name="//apple_ref/cpp/Method/registerMode" class="dashAnchor"></a>
+            <h5><a href="#registerMode">registerMode</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki:registerModes(modeTransitionEvents, transitionShortcuts) -&gt; table of state transition events, table of transition shortcuts</code></td>
+                <td><code>Ki:registerMode(mode, enterModeShortcut, shortcuts) -&gt; table of state transition events, table of registered shortcuts</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -272,44 +283,41 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Registers state events that transition between modes and their assigned keyboard shortcuts.</p>
+                <td><p>Registers a new custom mode and its keyboard shortcuts.</p>
 <p>Parameters:</p>
 <ul>
-<li><p><code>modeTransitionEvents</code> - A table containing the <a href="https://github.com/unindented/lua-fsm#usage">transition events</a> for the finite state machine set to <a href="#state"><code>Ki.state</code></a>.</p>
-<p>The example state events below create methods on <code>Ki.state</code> to enter and exit entity mode from normal mode:</p>
-
-<pre><code> { { name = "enterEntityMode", from = "normal", to = "entity" }
-   { name = "exitMode", from = "entity", to = "normal" } }</code></pre>
-<p><strong>Note</strong>: these events will only <em>initialize and expose</em> methods on <a href="#state"><code>Ki.state</code></a>. For example, the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods will only be <em>initialized</em> with the example state events above, in which they can be used in the handler functions for the <code>transitionShortcuts</code> in the second argument.</p>
+<li><code>mode</code> - The name of the new mode to be registered</li>
+<li><p><code>enterModeShortcut</code> - The shortcut that will be available in normal mode to enter the new custom mode</p>
+<p>The shortcut follows the same table structure as any other shortcut, except the event handler function is optional, but if not <code>nil</code> will be invoked after the mode has been entered with the following arguments:</p>
+<ul>
+<li><code>fsm</code> - The <a href="https://github.com/unindented/lua-fsm#usage">finite state machine</a> used to manage modes in Ki</li>
+<li><code>fromMode</code> - The previous mode name</li>
+<li><code>toMode</code> - The current mode name</li>
+</ul>
+<p>Example of <code>enterModeShortcut</code> table:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">},</span> <span class="s2">&quot;f&quot;</span><span class="p">,</span>
+  <span class="kr">function</span><span class="p">(</span><span class="n">fsm</span><span class="p">,</span> <span class="n">fromMode</span><span class="p">,</span> <span class="n">toMode</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Current state of the FSM is &quot;</span><span class="o">..</span><span class="n">fsm</span><span class="p">.</span><span class="n">current</span><span class="p">)</span> <span class="c1">-- (should equal `toMode`)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Transitioned from &quot;</span><span class="o">..</span><span class="n">fromMode</span><span class="o">..</span><span class="s2">&quot; to &quot;</span><span class="o">..</span><span class="n">toMode</span><span class="p">)</span>
+  <span class="kr">end</span><span class="p">,</span>
+  <span class="p">{</span> <span class="s2">&quot;Normal Mode&quot;</span><span class="p">,</span> <span class="s2">&quot;Enter File Mode&quot;</span> <span class="p">},</span>
+<span class="p">},</span>
+</pre></div>
 </li>
-<li><p><code>transitionShortcuts</code> - Lists of shortcut objects keyed by mode name, with each shortcut allowing the transition from and to the modes specified in the <code>modeTransitionEvents</code> events.</p>
-<p>Continuing with the example above, we can reference the <code>Ki.state:enterEntityMode</code> and <code>Ki.state:exitMode</code> methods initialized by the state transitions to define the shortcuts that enter and exit entity mode:</p>
-
-<pre><code> {
-     -- For when in `normal` mode
-     normal = {
-         -- Register &lt;cmd&gt; + e as the shortcut to enter `entity` mode
-         { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Enter Entity Mode" } },
-     },
-     -- For when in `entity` mode
-     entity = {
-         -- Register &lt;escape&gt; as the shortcut to exit back to `desktop` mode
-         { nil, "escape", function() Ki.state:exitMode() end, { "Entity Mode", "Exit to Desktop Mode" } },
-     },
- }</code></pre>
-</li>
+<li><code>shortcuts</code> - The shortcuts that will be assigned to the new custom mode</li>
 </ul>
 </td>
               </tr>
             </table>
           </section>
-          <section id="registerShortcuts">
-            <a name="//apple_ref/cpp/Method/registerShortcuts" class="dashAnchor"></a>
-            <h5><a href="#registerShortcuts">registerShortcuts</a></h5>
+          <section id="registerModeShortcuts">
+            <a name="//apple_ref/cpp/Method/registerModeShortcuts" class="dashAnchor"></a>
+            <h5><a href="#registerModeShortcuts">registerModeShortcuts</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki:registerShortcuts(shortcuts[, override]) -&gt; table of registered shortcuts</code></td>
+                <td><code>Ki:registerModeShortcuts(mode, shortcuts) -&gt; table of registered shortcuts</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -317,24 +325,52 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Registers a list of shortcuts for one or more modes.</p>
-<p>For each shortcut, the table structure matches the argument list for hotkey bindings in Hammerspoon: modifier keys list, key name, and event handler. An optional but recommended fourth item is a list with category and name of the shortcut to be displayed in the cheatsheet. For example, the following events open applications on keydown events on <kbd>s</kbd> and <kbd>⇧⌘s</kbd>:</p>
-<p>An <a href="#Entity"><code>Entity</code></a> (or any subclassed Entity) instance can be also used as an event handler:</p>
-<div class="highlight"><pre><span></span><span class="kd">local</span> <span class="n">shortcuts</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">entity</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">Application</span><span class="p">:</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Microsoft Word&quot;</span><span class="p">),</span> <span class="p">{</span> <span class="s2">&quot;Entities&quot;</span><span class="p">,</span> <span class="s2">&quot;Microsoft Word&quot;</span> <span class="p">}</span> <span class="p">},</span>
-        <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">Application</span><span class="p">:</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Slack&quot;</span><span class="p">),</span> <span class="p">{</span> <span class="s2">&quot;Entities&quot;</span><span class="p">,</span> <span class="s2">&quot;Slack&quot;</span> <span class="p">}</span> <span class="p">},</span>
-    <span class="p">},</span>
-    <span class="nb">select</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">Ki</span><span class="p">.</span><span class="n">Application</span><span class="p">:</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Microsoft Word&quot;</span><span class="p">),</span> <span class="p">{</span> <span class="s2">&quot;Entities&quot;</span><span class="p">,</span> <span class="s2">&quot;Microsoft Word&quot;</span> <span class="p">}</span> <span class="p">},</span>
-    <span class="p">},</span>
-<span class="p">}</span>
-</pre></div>
-<p>The boolean return value of the event handler or an entity's <code>dispatchAction</code> function indicates whether to automatically exit back to <code>desktop</code> mode after the action has completed.</p>
+                <td><p>Registers a set of shortcuts for a mode that is already registered.</p>
 <p>Parameters:</p>
 <ul>
-<li><code>shortcuts</code> - The list of shortcut objects</li>
-<li><code>override</code> - A boolean denoting whether to override existing shortcuts</li>
+<li><code>mode</code> - The name of the mode</li>
+<li><code>shortcuts</code> - A list of shortcuts</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The total list of shortcuts registered for the given mode</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="registerModeTransition">
+            <a name="//apple_ref/cpp/Method/registerModeTransition" class="dashAnchor"></a>
+            <h5><a href="#registerModeTransition">registerModeTransition</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut[, transitionName]) -&gt; table of state transition events, table of registered shortcuts</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Allows a transition between two modes and registers the shortcut in normal mode to transition to the target mode</p>
+<p>Parameters:</p>
+<ul>
+<li><code>fromMode</code> - The name of the starting mode that will have the transition shortcut assigned to</li>
+<li><code>toMode</code> - The name of the target mode that will be transitioned to from the <code>fromMode</code> mode</li>
+<li><code>transitionModeShortcut</code> - The shortcut to be assigned to the <code>fromMode</code> to transition to the <code>toMode</code></li>
+<li><p><code>transitionName</code> - An optional name for the transition method to be made available on <a href="Ki.html#state"><code>Ki.state</code></a>. Defaults to "enter?Mode", ? being the capitalized mode name.</p>
+<p>The transition mode shortcut follows the same table structure as any other shortcut, except the third list item is an optional callback to be invoked after the mode has been entered:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">},</span> <span class="s2">&quot;f&quot;</span><span class="p">,</span>
+  <span class="kr">function</span><span class="p">(</span><span class="n">fsm</span><span class="p">,</span> <span class="n">fromMode</span><span class="p">,</span> <span class="n">toMode</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Current state of the FSM is &quot;</span><span class="o">..</span><span class="n">fsm</span><span class="p">.</span><span class="n">current</span><span class="p">)</span> <span class="c1">-- should equal `toMode`</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Transitioned from &quot;</span><span class="o">..</span><span class="n">fromMode</span><span class="o">..</span><span class="s2">&quot; to &quot;</span><span class="o">..</span><span class="n">toMode</span><span class="p">)</span>
+  <span class="kr">end</span><span class="p">,</span>
+  <span class="p">{</span> <span class="s2">&quot;Normal Mode&quot;</span><span class="p">,</span> <span class="s2">&quot;Enter File Mode&quot;</span> <span class="p">},</span>
+<span class="p">},</span>
+</pre></div>
+</li>
 </ul>
 </td>
               </tr>

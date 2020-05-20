@@ -3,7 +3,6 @@
 --- Application class that subclasses [Entity](Entity.html) to represent some automatable desktop application
 ---
 
-local Util = require("util")
 local Entity = require("entity")
 local ApplicationWatcher = require("application-watcher")
 
@@ -203,7 +202,7 @@ function Application.createMenuItemSelectionEvent(menuItem, options)
                     Application.focus(app, windowChoice)
                 end
 
-                local targetMenuItem = Util:clone(menuItem)
+                local targetMenuItem = {table.unpack(menuItem)}
 
                 table.insert(targetMenuItem, menuItemChoice.text)
 
@@ -274,7 +273,7 @@ function Application:initialize(name, shortcuts, autoExitMode)
         { nil, ",", self.createMenuItemEvent("Preferences...", true), { name, "Open Preferences" } },
     }
 
-    local mergedShortcuts = self.mergeShortcuts(shortcuts, commonShortcuts)
+    local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)
 
     Entity.initialize(self, name, mergedShortcuts, autoExitMode)
 end
