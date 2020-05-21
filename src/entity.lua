@@ -135,8 +135,9 @@ end
 
 -- Create a string shortcut key from its modifiers and hotkey
 function Entity.getShortcutKey(modifiers, hotkey)
-    if not hotkey then return nil end
-    if not modifiers then return hotkey end
+    if not hotkey or not modifiers then
+        return tostring(hotkey)
+    end
 
     local clonedModifiers = {table.unpack(modifiers)}
     table.sort(clonedModifiers)
@@ -150,19 +151,17 @@ function Entity:mergeShortcuts(fromList, toList)
     fromList = fromList or {}
     toList = toList or {}
 
-    local mergedShortcuts = {table.unpack(toList)}
+    local mergedShortcuts = {table.unpack(fromList)}
     local memo = {}
 
     for i = 1, #mergedShortcuts do
         local shortcut = mergedShortcuts[i]
         local key = self.getShortcutKey(table.unpack(shortcut))
-        if key then
-            memo[key] = { i, shortcut }
-        end
+        memo[key] = { i, shortcut }
     end
 
-    for i = 1, #fromList do
-        local shortcut = fromList[i]
+    for i = 1, #toList do
+        local shortcut = toList[i]
         local key = self.getShortcutKey(table.unpack(shortcut))
         local foundIndex, foundShortcut = table.unpack(memo[key] or {})
 

@@ -114,8 +114,8 @@ Ki.defaultEntities = nil
 
 -- Create a string shortcut key from its modifiers and hotkey
 function Ki.getShortcutKey(modifiers, hotkey)
-    if not modifiers then
-        return hotkey
+    if not hotkey or not modifiers then
+        return tostring(hotkey)
     end
 
     local clonedModifiers = {table.unpack(modifiers)}
@@ -127,7 +127,10 @@ end
 -- Merge Ki shortcuts with the option of overriding shortcuts
 -- Shortcuts with conflicting hotkeys will result in the lhs shortcut being overwritten by the rhs shortcut
 function Ki:mergeShortcuts(fromList, toList)
-    local mergedShortcuts = {table.unpack(toList)}
+    fromList = fromList or {}
+    toList = toList or {}
+
+    local mergedShortcuts = {table.unpack(fromList)}
     local memo = {}
 
     for i = 1, #mergedShortcuts do
@@ -136,8 +139,8 @@ function Ki:mergeShortcuts(fromList, toList)
         memo[key] = { i, shortcut }
     end
 
-    for i = 1, #fromList do
-        local shortcut = fromList[i]
+    for i = 1, #toList do
+        local shortcut = toList[i]
         local key = self.getShortcutKey(table.unpack(shortcut))
         local foundIndex, foundShortcut = table.unpack(memo[key] or {})
 
@@ -382,7 +385,7 @@ end
 ---   * The total list of shortcuts registered for the given mode
 function Ki:registerModeShortcuts(mode, shortcuts)
     local modeShortcuts = self.shortcuts[mode] or {}
-    self.shortcuts[mode] = self:mergeShortcuts(modeShortcuts, shortcuts)
+    self.shortcuts[mode] = self:mergeShortcuts(shortcuts, modeShortcuts)
     return self.shortcuts[mode]
 end
 
