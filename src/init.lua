@@ -92,10 +92,10 @@ Ki.File = require("file")
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some [smart folder](https://support.apple.com/kb/PH25589) at an existing file path. Class methods and properties are documented [here](SmartFolder.html).
 Ki.SmartFolder = require("smart-folder")
 
---- Ki.URL
+--- Ki.Website
 --- Constant
---- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some url. Class methods and properties are documented [here](URL.html).
-Ki.URL = require("url")
+--- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some website. Class methods and properties are documented [here](Website.html).
+Ki.Website = require("website")
 
 --- Ki.ApplicationWatcher
 --- Constant
@@ -404,10 +404,10 @@ end
 ---         Spotify = { nil, "s" },
 ---         ["Google Chrome"] = { {"cmd", "shift"}, "g" },
 ---     },
----     -- Remap the following URL shortcuts using their metadata
----     -- { nil, "f", urls.Facebook, { "URL Events", "Facebook" } },
----     -- { nil, "m", urls.Messenger, { "URL Events", "Facebook Messenger" } },
----     ["URL Events"] = {
+---     -- Remap the following website mode shortcuts using their metadata
+---     -- { nil, "f", websites.Facebook, { "Websites", "Facebook" } },
+---     -- { nil, "m", websites.Messenger, { "Websites", "Facebook Messenger" } },
+---     ["Websites"] = {
 ---         Facebook = { { "shift" }, "f" },
 ---         ["Facebook Messenger"] = { { "shift" }, "m" },
 ---     },
@@ -424,10 +424,10 @@ end
 ---         Spotify = { nil, "s" },
 ---         ["Google Chrome"] = { {"cmd", "shift"}, "g" },
 ---     },
----     -- Remap the following URL entities available in url mode:
----     -- Ki.defaultEntities.url.Facebook.name == "https://facebook.com"
----     -- Ki.defaultEntities.url.Messenger.name == "https://messenger.com"
----     url = {
+---     -- Remap the following website entities available in website mode:
+---     -- Ki.defaultEntities.website.Facebook.name == "https://facebook.com"
+---     -- Ki.defaultEntities.website.Messenger.name == "https://messenger.com"
+---     website = {
 ---         ["https://facebook.com"] = { {"shift"}, "f" },
 ---         ["https://messenger.com"] = { {"shift"}, "m" },
 ---     },
@@ -510,11 +510,11 @@ end
 --- Loads the default config
 ---
 --- The default config initializes and assigns preset keybindings for almost all native macOS applications, common directory files, and popular websites, and achieves this by including the following preconfigured modes:
---- * `URL` a mode in which URLs can be selected and opened
---- * `FILE` a mode in which files and directories can be automated
---- * `SELECT` the mode in which tabs or windows of entities can be selected
---- * `VOLUME` a mode in which the system volume can be set
 --- * `BRIGHTNESS` a mode in which the system brightness can be set
+--- * `FILE` a mode in which configured files and directories can be opened and operated on
+--- * `SELECT` the mode in which contextual selections of some entity can be selected (i.e. tabs, windows, links, etc.)
+--- * `VOLUME` a mode in which the system volume can be set
+--- * `WEBSITE` a mode in which configured websites can be opened and operated on
 ---
 --- Parameters:
 ---  * `options` - A table containing options that configures which default configs to load
@@ -564,16 +564,12 @@ function Ki:useDefaultConfig(options)
 
             if type(entity) == "table" then
                 if options.include and (
-                    includes[entity.url] or
-                    includes[entity.path] or
                     includes[entity.name] or
                     (entity.name and includes[mode.."."..entity.name])
                 ) then
                     table.insert(defaultShortcuts[mode], shortcut)
                 end
                 if options.exclude and (
-                    not excludes[entity.url] and
-                    not excludes[entity.path] and
                     not excludes[entity.name] and
                     (not excludes[mode.."."..(entity.name or "")])
                 ) then

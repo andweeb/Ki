@@ -11,7 +11,8 @@ local spoonPath = hs.spoons.scriptPath()
 -- Add entities directory to package path and add helper require function
 package.path = package.path..";"..spoonPath.."entities/?.lua"
 local function requireEntity(type, filename)
-    return require(type.."."..filename)
+    local directory = type == "entity" and "entities" or type.."s"
+    return require(directory.."."..filename)
 end
 
 -- Initialize entities
@@ -104,7 +105,7 @@ Ki:registerMode("select", enterSelectModeShortcut, {
 Ki:registerModeTransition("entity", "select", { {"cmd"}, "s", nil, { "Entity Mode", "Enter Select Mode" } })
 Ki:registerModeTransition("select", "entity", { {"cmd"}, "e", nil, { "Select Mode", "Enter Entity Mode" } })
 Ki:registerModeTransition("select", "file", { {"cmd"}, "f", nil, { "Select Mode", "Enter File Mode" } })
-Ki:registerModeTransition("select", "url", { {"cmd"}, "u", nil, { "Select Mode", "Enter URL Mode" } })
+Ki:registerModeTransition("select", "website", { {"cmd"}, "w", nil, { "Select Mode", "Enter Website Mode" } })
 
 -- Initialize file entities
 local function openFinderApplicationEvent(name)
@@ -157,49 +158,49 @@ Ki:registerMode("file", enterFileModeShortcut, {
 -- Register mode transitions to allow transitioning from entity to file mode
 Ki:registerModeTransition("entity", "file", { {"cmd"}, "f", nil, { "Entity Mode", "Enter File Mode" } })
 
--- Initialize URL entities
-local urls = {
-    Amazon = requireEntity("url", "amazon"),
-    Facebook = requireEntity("url", "facebook"),
-    GitHub = requireEntity("url", "github"),
-    GMail = requireEntity("url", "gmail"),
-    Google = requireEntity("url", "google"),
-    GoogleMaps = requireEntity("url", "google-maps"),
-    HackerNews = requireEntity("url", "hacker-news"),
-    LinkedIn = requireEntity("url", "linkedin"),
-    Messenger = requireEntity("url", "messenger"),
-    Netflix = requireEntity("url", "netflix"),
-    Reddit = requireEntity("url", "reddit"),
-    Twitter = requireEntity("url", "twitter"),
-    Wikipedia = requireEntity("url", "wikipedia"),
-    Weather = requireEntity("url", "weather"),
-    Yelp = requireEntity("url", "yelp"),
-    YouTube = requireEntity("url", "youtube"),
-    Zillow = requireEntity("url", "zillow"),
+-- Initialize website entities
+local websites = {
+    Amazon = requireEntity("website", "amazon"),
+    Facebook = requireEntity("website", "facebook"),
+    GitHub = requireEntity("website", "github"),
+    GMail = requireEntity("website", "gmail"),
+    Google = requireEntity("website", "google"),
+    GoogleMaps = requireEntity("website", "google-maps"),
+    HackerNews = requireEntity("website", "hacker-news"),
+    LinkedIn = requireEntity("website", "linkedin"),
+    Messenger = requireEntity("website", "messenger"),
+    Netflix = requireEntity("website", "netflix"),
+    Reddit = requireEntity("website", "reddit"),
+    Twitter = requireEntity("website", "twitter"),
+    Wikipedia = requireEntity("website", "wikipedia"),
+    Weather = requireEntity("website", "weather"),
+    Yelp = requireEntity("website", "yelp"),
+    YouTube = requireEntity("website", "youtube"),
+    Zillow = requireEntity("website", "zillow"),
 }
--- Register URL mode and assign shortcuts for the initialized URL entities
-local enterUrlModeShortcut = { {"cmd"}, "u", nil, { "Normal Mode", "Enter URL Mode" } }
-Ki:registerMode("url", enterUrlModeShortcut, {
-    { nil, "a", urls.Amazon, { "URL Events", "Amazon" } },
-    { nil, "f", urls.Facebook, { "URL Events", "Facebook" } },
-    { nil, "g", urls.Google, { "URL Events", "Google" } },
-    { nil, "h", urls.HackerNews, { "URL Events", "Hacker News" } },
-    { nil, "l", urls.LinkedIn, { "URL Events", "LinkedIn" } },
-    { nil, "m", urls.Messenger, { "URL Events", "Facebook Messenger" } },
-    { nil, "n", urls.Netflix, { "URL Events", "Netflix" } },
-    { nil, "r", urls.Reddit, { "URL Events", "Reddit" } },
-    { nil, "t", urls.Twitter, { "URL Events", "Twitter" } },
-    { nil, "w", urls.Wikipedia, { "URL Events", "Wikipedia" } },
-    { nil, "y", urls.YouTube, { "URL Events", "YouTube" } },
-    { nil, "z", urls.Zillow, { "URL Events", "Zillow" } },
-    { { "shift" }, "g", urls.GitHub, { "URL Events", "GitHub" } },
-    { { "shift" }, "m", urls.GoogleMaps, { "URL Events", "Google Maps" } },
-    { { "shift" }, "w", urls.Weather, { "URL Events", "Weather" } },
-    { { "shift" }, "y", urls.Yelp, { "URL Events", "Yelp" } },
-    { { "cmd", "shift" }, "m", urls.GMail, { "URL Events", "Gmail" } },
+-- Register Website mode and assign shortcuts for the initialized website entities
+local enterWebsiteModeShortcut = { {"cmd"}, "w", nil, { "Normal Mode", "Enter Website Mode" } }
+Ki:registerMode("website", enterWebsiteModeShortcut, {
+    { nil, "a", websites.Amazon, { "Websites", "Amazon" } },
+    { nil, "f", websites.Facebook, { "Websites", "Facebook" } },
+    { nil, "g", websites.Google, { "Websites", "Google" } },
+    { nil, "h", websites.HackerNews, { "Websites", "Hacker News" } },
+    { nil, "l", websites.LinkedIn, { "Websites", "LinkedIn" } },
+    { nil, "m", websites.Messenger, { "Websites", "Facebook Messenger" } },
+    { nil, "n", websites.Netflix, { "Websites", "Netflix" } },
+    { nil, "r", websites.Reddit, { "Websites", "Reddit" } },
+    { nil, "t", websites.Twitter, { "Websites", "Twitter" } },
+    { nil, "w", websites.Wikipedia, { "Websites", "Wikipedia" } },
+    { nil, "y", websites.YouTube, { "Websites", "YouTube" } },
+    { nil, "z", websites.Zillow, { "Websites", "Zillow" } },
+    { { "shift" }, "g", websites.GitHub, { "Websites", "GitHub" } },
+    { { "shift" }, "m", websites.GoogleMaps, { "Websites", "Google Maps" } },
+    { { "shift" }, "w", websites.Weather, { "Websites", "Weather" } },
+    { { "shift" }, "y", websites.Yelp, { "Websites", "Yelp" } },
+    { { "cmd", "shift" }, "m", websites.GMail, { "Websites", "Gmail" } },
 })
--- Register mode transitions to allow transitioning from entity to URL mode
-Ki:registerModeTransition("entity", "url", { {"cmd"}, "u", nil, { "Entity Mode", "Enter URL Mode" } })
+-- Register mode transitions to allow transitioning from entity to website mode
+Ki:registerModeTransition("entity", "website", { {"cmd"}, "w", nil, { "Entity Mode", "Enter Website Mode" } })
 
 -- Register volume mode and assign shortcuts
 local Volume = requireEntity("entity", "volume")
@@ -217,5 +218,5 @@ Ki.defaultEntities = {
     brightness = Brightness,
     entity = entities,
     file = files,
-    url = urls,
+    website = websites,
 }

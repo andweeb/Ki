@@ -1,7 +1,7 @@
 <html>
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Ki docs: URL</title>
+    <title>Ki docs: Website</title>
     <style type="text/css">
       a { text-decoration: none; }
       a:hover { text-decoration: underline; }
@@ -14,8 +14,8 @@
   </head>
   <body>
     <header>
-      <h1><a href="./index.html">docs</a> &raquo; URL</h1>
-      <p>URL class that subclasses <a href="Entity.html">Entity</a> to represent some automatable URL entity</p>
+      <h1><a href="./index.html">docs</a> &raquo; Website</h1>
+      <p>Website class that subclasses <a href="Entity.html">Entity</a> to represent some automatable website entity</p>
 
       </header>
       <h3>API Overview</h3>
@@ -24,7 +24,7 @@
           <ul>
             <li><a href="#behaviors">behaviors</a></li>
             <li><a href="#displaySelectionModalIcons">displaySelectionModalIcons</a></li>
-            <li><a href="#paths">paths</a></li>
+            <li><a href="#links">links</a></li>
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
@@ -32,6 +32,7 @@
             <li><a href="#getSelectionItems">getSelectionItems</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#open">open</a></li>
+            <li><a href="#openWith">openWith</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
@@ -42,7 +43,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>URL.behaviors</code></td>
+                <td><code>Website.behaviors</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -50,12 +51,12 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>URL <a href="Entity.html#behaviors">behaviors</a> defined to invoke event handlers with the URL.
+                <td><p>Website <a href="Entity.html#behaviors">behaviors</a> defined to invoke event handlers with the URL of the website.
 Currently supported behaviors:</p>
 <ul>
-<li><code>default</code> - Simply triggers the event handler with the entity's url</li>
-<li><code>select</code> - Generates a list of choice items from <a href="#getSelectionItems"><code>self:getSelectionItems</code></a> and displays them in a selection modal for selection</li>
-<li><code>url</code> - Triggers the appropriate event handler for the url. Depending on whether the workflow includes select mode, the select mode behavior will be triggered instead</li>
+<li><code>default</code> - Simply triggers the event handler with the initialized website url</li>
+<li><code>select</code> - Generates a list of choice items from <a href="#getSelectionItems"><code>Website:getSelectionItems</code></a> and displays them in a selection modal for selection</li>
+<li><code>website</code> - Triggers the appropriate event handler for the website. Depending on whether the workflow includes select mode, the select mode behavior will be triggered instead</li>
 </ul>
 </td>
               </tr>
@@ -67,7 +68,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>URL.displaySelectionModalIcons</code></td>
+                <td><code>Website.displaySelectionModalIcons</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -80,13 +81,13 @@ Currently supported behaviors:</p>
               </tr>
             </table>
           </section>
-          <section id="paths">
-            <a name="//apple_ref/cpp/Variable/paths" class="dashAnchor"></a>
-            <h5><a href="#paths">paths</a></h5>
+          <section id="links">
+            <a name="//apple_ref/cpp/Variable/links" class="dashAnchor"></a>
+            <h5><a href="#links">links</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>URL.paths</code></td>
+                <td><code>Website.links</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -94,11 +95,13 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>An array of sub-paths of the URL or other related URLs. Defaults to an empty list, but it can be overridden to contain any of the following:</p>
+                <td><p>An array of website links used in the default <a href="#getSelectionItems"><code>Website:getSelectionItems</code></a> method (defaults to an empty list). Any of the following values can be inserted:</p>
 <ul>
-<li>The url sub-path that can be appended to the URL entity's path, i.e. /test</li>
-<li>The full url string, i.e. <a href="https://google.com">https://google.com</a></li>
-<li>A table containing a <code>name</code> and <code>path</code> field</li>
+<li>A complete URL string, i.e. <code>"https://translate.google.com"</code></li>
+<li>A URL path string that can be appended to the website entity's initialized URL, i.e. <code>"/calendar"</code></li>
+<li>A table containing a <code>name</code> string and <code>link</code> field that can be either the complete URL string or URL path, i.e.
+<pre><code>{ name = "Google Translate", link = "https://translate.google.com" }</code></pre>
+</li>
 </ul>
 </td>
               </tr>
@@ -111,7 +114,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>URL:getDomain(url) -&gt; string</code></td>
+                <td><code>Website:getDomain(url) -&gt; string</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -138,7 +141,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>URL:getSelectionItems() -&gt; table of choices or nil</code></td>
+                <td><code>Website:getSelectionItems() -&gt; table of choices or nil</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -146,7 +149,7 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Generates a list of selection items using the instance's <code>self.paths</code> list. Each path item will display the page favicon if the <a href="URL.html#displaySelectionModalIcons"><code>URL.displaySelectionModalIcons</code></a> option is set to <code>true</code>.</p>
+                <td><p>Generates a list of selection items using the instance's <a href="Website.html#links"><code>Website.links</code></a> list. Each item will display the page favicon if the <a href="Website.html#displaySelectionModalIcons"><code>Website.displaySelectionModalIcons</code></a> option is set to <code>true</code>.</p>
 <p>Returns:</p>
 <ul>
 <li>A list of choice objects</li>
@@ -161,7 +164,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>URL:initialize(url, shortcuts)</code></td>
+                <td><code>Website:initialize(name, url, links, shortcuts)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -169,22 +172,13 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Initializes a new url entity instance with its url and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.</p>
+                <td><p>Initializes a new website entity instance with its name, url, links, and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.</p>
 <p>Parameters:</p>
 <ul>
-<li><code>url</code> - The web address that the entity is representing</li>
+<li><code>name</code> - The name of the website</li>
+<li><code>url</code> - The website URL</li>
+<li><code>links</code> - Related links to initialize <a href="#links"><code>Website.links</code></a></li>
 <li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the url entity</li>
-</ul>
-<p>Each <code>shortcut</code> item should be a list with items at the following indices:</p>
-<ul>
-<li><code>1</code> - An optional table containing zero or more of the following keyboard modifiers: <code>"cmd"</code>, <code>"alt"</code>, <code>"shift"</code>, <code>"ctrl"</code>, <code>"fn"</code></li>
-<li><code>2</code> - The name of a keyboard key. String representations of keys can be found in <a href="https://www.hammerspoon.org/docs/hs.keycodes.html#map"><code>hs.keycodes.map</code></a>.</li>
-<li><code>3</code> - The event handler that defines the action for when the shortcut is triggered</li>
-<li><code>4</code> - A table containing the metadata for the shortcut, also a list with items at the following indices:<ul>
-<li><code>1</code> - The category name of the shortcut</li>
-<li><code>2</code> - A description of what the shortcut does</li>
-</ul>
-</li>
 </ul>
 <p>Returns:</p>
 <ul>
@@ -200,7 +194,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>URL:open(url)</code></td>
+                <td><code>Website:open(url)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -212,6 +206,33 @@ Currently supported behaviors:</p>
 <p>Parameters:</p>
 <ul>
 <li><code>url</code> - the address of the url to open</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="openWith">
+            <a name="//apple_ref/cpp/Method/openWith" class="dashAnchor"></a>
+            <h5><a href="#openWith">openWith</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Website:openWith(url)</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Opens a URL with an application selected from a modal</p>
+<p>Parameters:</p>
+<ul>
+<li><code>url</code> - the target url that should be opened with the selected application</li>
 </ul>
 <p>Returns:</p>
 <ul>

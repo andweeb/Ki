@@ -54,7 +54,7 @@ The shortcut table structure is similar to the argument list for binding hotkeys
  * [File](#File)
  * [SmartFolder](#SmartFolder)
  * [state](#state)
- * [URL](#URL)
+ * [Website](#Website)
 * Variables - Configurable values
  * [defaultEntities](#defaultEntities)
  * [statusDisplay](#statusDisplay)
@@ -107,11 +107,11 @@ The shortcut table structure is similar to the argument list for binding hotkeys
 | **Type**                                    | Constant                                                                     |
 | **Description**                             | The [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki.                                                                     |
 
-| [URL](#URL)         |                                                                                     |
+| [Website](#Website)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.URL`                                                                    |
+| **Signature**                               | `Ki.Website`                                                                    |
 | **Type**                                    | Constant                                                                     |
-| **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some url. Class methods and properties are documented [here](URL.html).                                                                     |
+| **Description**                             | A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some website. Class methods and properties are documented [here](Website.html).                                                                     |
 
 ### Variables
 

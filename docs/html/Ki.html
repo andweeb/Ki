@@ -68,7 +68,7 @@
             <li><a href="#File">File</a></li>
             <li><a href="#SmartFolder">SmartFolder</a></li>
             <li><a href="#state">state</a></li>
-            <li><a href="#URL">URL</a></li>
+            <li><a href="#Website">Website</a></li>
           </ul>
         <li>Variables - Configurable values</li>
           <ul>
@@ -202,13 +202,13 @@
               </tr>
             </table>
           </section>
-          <section id="URL">
-            <a name="//apple_ref/cpp/Constant/URL" class="dashAnchor"></a>
-            <h5><a href="#URL">URL</a></h5>
+          <section id="Website">
+            <a name="//apple_ref/cpp/Constant/Website" class="dashAnchor"></a>
+            <h5><a href="#Website">Website</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki.URL</code></td>
+                <td><code>Ki.Website</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -216,7 +216,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A <a href="https://github.com/kikito/middleclass/wiki">middleclass</a> class that represents some url. Class methods and properties are documented <a href="URL.html">here</a>.</p>
+                <td><p>A <a href="https://github.com/kikito/middleclass/wiki">middleclass</a> class that represents some website. Class methods and properties are documented <a href="Website.html">here</a>.</p>
 </td>
               </tr>
             </table>
@@ -402,10 +402,10 @@
       <span class="n">Spotify</span> <span class="o">=</span> <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span> <span class="p">},</span>
       <span class="p">[</span><span class="s2">&quot;Google Chrome&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;g&quot;</span> <span class="p">},</span>
   <span class="p">},</span>
-  <span class="c1">-- Remap the following URL shortcuts using their metadata</span>
-  <span class="c1">-- { nil, &quot;f&quot;, urls.Facebook, { &quot;URL Events&quot;, &quot;Facebook&quot; } },</span>
-  <span class="c1">-- { nil, &quot;m&quot;, urls.Messenger, { &quot;URL Events&quot;, &quot;Facebook Messenger&quot; } },</span>
-  <span class="p">[</span><span class="s2">&quot;URL Events&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="c1">-- Remap the following website mode shortcuts using their metadata</span>
+  <span class="c1">-- { nil, &quot;f&quot;, websites.Facebook, { &quot;Websites&quot;, &quot;Facebook&quot; } },</span>
+  <span class="c1">-- { nil, &quot;m&quot;, websites.Messenger, { &quot;Websites&quot;, &quot;Facebook Messenger&quot; } },</span>
+  <span class="p">[</span><span class="s2">&quot;Websites&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
       <span class="n">Facebook</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;f&quot;</span> <span class="p">},</span>
       <span class="p">[</span><span class="s2">&quot;Facebook Messenger&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span> <span class="s2">&quot;shift&quot;</span> <span class="p">},</span> <span class="s2">&quot;m&quot;</span> <span class="p">},</span>
   <span class="p">},</span>
@@ -421,10 +421,10 @@
       <span class="n">Spotify</span> <span class="o">=</span> <span class="p">{</span> <span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span> <span class="p">},</span>
       <span class="p">[</span><span class="s2">&quot;Google Chrome&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;g&quot;</span> <span class="p">},</span>
   <span class="p">},</span>
-  <span class="c1">-- Remap the following URL entities available in url mode:</span>
-  <span class="c1">-- Ki.defaultEntities.url.Facebook.name == &quot;https://facebook.com&quot;</span>
-  <span class="c1">-- Ki.defaultEntities.url.Messenger.name == &quot;https://messenger.com&quot;</span>
-  <span class="n">url</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="c1">-- Remap the following website entities available in website mode:</span>
+  <span class="c1">-- Ki.defaultEntities.website.Facebook.name == &quot;https://facebook.com&quot;</span>
+  <span class="c1">-- Ki.defaultEntities.website.Messenger.name == &quot;https://messenger.com&quot;</span>
+  <span class="n">website</span> <span class="o">=</span> <span class="p">{</span>
       <span class="p">[</span><span class="s2">&quot;https://facebook.com&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;f&quot;</span> <span class="p">},</span>
       <span class="p">[</span><span class="s2">&quot;https://messenger.com&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">{</span><span class="s2">&quot;shift&quot;</span><span class="p">},</span> <span class="s2">&quot;m&quot;</span> <span class="p">},</span>
   <span class="p">},</span>
@@ -520,11 +520,11 @@
                 <td><p>Loads the default config</p>
 <p>The default config initializes and assigns preset keybindings for almost all native macOS applications, common directory files, and popular websites, and achieves this by including the following preconfigured modes:</p>
 <ul>
-<li><code>URL</code> a mode in which URLs can be selected and opened</li>
-<li><code>FILE</code> a mode in which files and directories can be automated</li>
-<li><code>SELECT</code> the mode in which tabs or windows of entities can be selected</li>
-<li><code>VOLUME</code> a mode in which the system volume can be set</li>
 <li><code>BRIGHTNESS</code> a mode in which the system brightness can be set</li>
+<li><code>FILE</code> a mode in which configured files and directories can be opened and operated on</li>
+<li><code>SELECT</code> the mode in which contextual selections of some entity can be selected (i.e. tabs, windows, links, etc.)</li>
+<li><code>VOLUME</code> a mode in which the system volume can be set</li>
+<li><code>WEBSITE</code> a mode in which configured websites can be opened and operated on</li>
 </ul>
 <p>Parameters:</p>
 <ul>
