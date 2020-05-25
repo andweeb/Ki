@@ -61,7 +61,7 @@ The shortcut table structure is similar to the argument list for binding hotkeys
  * [Website](#Website)
 * Variables - Configurable values
  * [defaultEntities](#defaultEntities)
- * [statusDisplay](#statusDisplay)
+ * [modeIndicator](#modeIndicator)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [registerMode](#registerMode)
  * [registerModeShortcuts](#registerModeShortcuts)
@@ -125,11 +125,11 @@ The shortcut table structure is similar to the argument list for binding hotkeys
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table containing lists of all default entity instances keyed by mode name when the [default config](#useDefaultConfig) is used, `nil` otherwise.                                                                     |
 
-| [statusDisplay](#statusDisplay)         |                                                                                     |
+| [modeIndicator](#modeIndicator)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Ki.statusDisplay`                                                                    |
+| **Signature**                               | `Ki.modeIndicator`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | A table that defines the behavior for displaying the status of mode transitions. The `show` function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:                                                                     |
+| **Description**                             | A module that defines the behavior for displaying the current mode. The `show` function should reset the previous display and show the current transitioned mode. The following methods should be available on the object:                                                                     |
 
 ### Methods
 
@@ -166,7 +166,7 @@ The shortcut table structure is similar to the argument list for binding hotkeys
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Ki:start() -> hs.eventtap`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Sets the status display, creates all transition and workflow events, and starts the event listener                                                                     |
+| **Description**                             | Initializes the mode indicator, creates all transition and workflow events, and starts the event listener                                                                     |
 | **Parameters**                              | <ul><li>None</li></ul> |
 | **Returns**                                 | <ul><li> An [`hs.eventtap`](https://www.hammerspoon.org/docs/hs.eventtap.html) object</li></ul>          |
 

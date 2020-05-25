@@ -1,7 +1,7 @@
-# [docs](index.md) » StatusDisplay
+# [docs](index.md) » ModeIndicator
 ---
 
-Small menubar text display
+Mode indicator implementation that displays the current Ki mode in a menubar item
 
 
 ## API Overview
@@ -16,7 +16,7 @@ Small menubar text display
 
 | [isDarkMode](#isDarkMode)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `StatusDisplay.isDarkMode`                                                                    |
+| **Signature**                               | `ModeIndicator.isDarkMode`                                                                    |
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A boolean value indicating whether the menu bar style is in dark mode. This value will be determined automatically.                                                                     |
 
@@ -24,9 +24,9 @@ Small menubar text display
 
 | [show](#show)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `StatusDisplay:show(status[, parenthetical])`                                                                    |
+| **Signature**                               | `ModeIndicator:show(mode)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Shows a text display on center of the menu bar to indicate the current mode                                                                     |
-| **Parameters**                              | <ul><li>`status` - a string value containing the current mode (i.e., `"normal"`, `"entity"`, etc.)</li><li>`parenthetical` - an optional string value of some parenthetical in the text display</li></ul> |
+| **Parameters**                              | <ul><li>`mode` - a string value containing the current mode (i.e., `"normal"`, `"entity"`, etc.)</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 

@@ -18,6 +18,6 @@
 | [Entity](Entity.md)                          | Entity class that represents some abstract automatable desktop entity     |
 | [File](File.md)                          | File class that subclasses [Entity](Entity.html) to represent some directory or file to be automated     |
 | [Ki](Ki.md)                          | > A proof of concept to apply the ["Zen" of vi](https://stackoverflow.com/questions/1218390/what-is-your-most-productive-shortcut-with-vim/1220118#1220118) to desktop automation.     |
+| [ModeIndicator](ModeIndicator.md)                          | Mode indicator implementation that displays the current Ki mode in a menubar item     |
 | [SmartFolder](SmartFolder.md)                          | SmartFolder class that subclasses [File](File.html) to represent a [smart folder](https://support.apple.com/kb/PH25589) to be automated     |
-| [StatusDisplay](StatusDisplay.md)                          | Small menubar text display     |
 | [Website](Website.md)                          | Website class that subclasses [Entity](Entity.html) to represent some automatable website entity     |

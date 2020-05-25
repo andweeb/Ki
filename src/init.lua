@@ -182,15 +182,15 @@ Ki.shortcuts = {
     },
 }
 
---- Ki.statusDisplay
+--- Ki.modeIndicator
 --- Variable
---- A table that defines the behavior for displaying the status of mode transitions. The `show` function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:
+--- A module that defines the behavior for displaying the current mode. The `show` function should reset the previous display and show the current transitioned mode. The following methods should be available on the object:
 ---  * `show` - A function invoked when a mode transition event occurs, with the following arguments:
----    * `status` - A string value containing the current mode
----    * `action` - An action specified in the current active workflow, `nil` otherwise
+---    * `mode - A string value containing the name of the current mode
+---    * `action` - An action if specified in the executed workflow, `nil` otherwise
 ---
---- Defaults to a simple text display in the center of the menu bar of the focused screen.
-Ki.statusDisplay = nil
+--- Defaults to an implementation that displays the mode as a menubar item.
+Ki.modeIndicator = nil
 
 -- A table that stores the workflow history.
 Ki.history = {
@@ -216,9 +216,10 @@ function Ki:_createFsmCallbacks()
             return
         end
 
-        -- Show the status display with the current mode and record the event to the workflow history
-        self.statusDisplay:show(stateMachine.current, next(self.history.action))
+        -- Update the current mode in the mode indicator
+        self.modeIndicator:show(stateMachine.current, self.history.action)
 
+        -- Record the event to the workflow history
         if nextState == "desktop" then
             self.history.workflow = {}
             self.history.action = {}
@@ -590,7 +591,7 @@ end
 
 --- Ki:start() -> hs.eventtap
 --- Method
---- Sets the status display, creates all transition and workflow events, and starts the event listener
+--- Initializes the mode indicator, creates all transition and workflow events, and starts the event listener
 ---
 --- Parameters:
 ---  * None
@@ -598,8 +599,8 @@ end
 --- Returns:
 ---   * An [`hs.eventtap`](https://www.hammerspoon.org/docs/hs.eventtap.html) object
 function Ki:start()
-    -- Set default status display if not provided
-    self.statusDisplay = self.statusDisplay or require("status-display")
+    -- Set default mode indicator if not provided
+    self.modeIndicator = self.modeIndicator or require("mode-indicator")
 
     -- Create the internal finite state machine
     self.state = FSM.create({
@@ -626,8 +627,8 @@ function Ki:start()
     self.cheatsheet = Cheatsheet:new(self.name, description, shortcuts)
 
     -- Set menu item click callback function to show the cheatsheet
-    if self.statusDisplay.isDefault then
-        self.statusDisplay.menubar:setClickCallback(function()
+    if self.modeIndicator.isDefault then
+        self.modeIndicator.menubar:setClickCallback(function()
             self.cheatsheet:show()
         end)
     end

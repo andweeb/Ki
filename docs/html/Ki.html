@@ -79,7 +79,7 @@
         <li>Variables - Configurable values</li>
           <ul>
             <li><a href="#defaultEntities">defaultEntities</a></li>
-            <li><a href="#statusDisplay">statusDisplay</a></li>
+            <li><a href="#modeIndicator">modeIndicator</a></li>
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
@@ -247,13 +247,13 @@
               </tr>
             </table>
           </section>
-          <section id="statusDisplay">
-            <a name="//apple_ref/cpp/Variable/statusDisplay" class="dashAnchor"></a>
-            <h5><a href="#statusDisplay">statusDisplay</a></h5>
+          <section id="modeIndicator">
+            <a name="//apple_ref/cpp/Variable/modeIndicator" class="dashAnchor"></a>
+            <h5><a href="#modeIndicator">modeIndicator</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Ki.statusDisplay</code></td>
+                <td><code>Ki.modeIndicator</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -261,15 +261,15 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A table that defines the behavior for displaying the status of mode transitions. The <code>show</code> function should clear out any previous display and show the current transitioned mode. The following methods should be available on the object:</p>
+                <td><p>A module that defines the behavior for displaying the current mode. The <code>show</code> function should reset the previous display and show the current transitioned mode. The following methods should be available on the object:</p>
 <ul>
 <li><code>show</code> - A function invoked when a mode transition event occurs, with the following arguments:<ul>
-<li><code>status</code> - A string value containing the current mode</li>
-<li><code>action</code> - An action specified in the current active workflow, <code>nil</code> otherwise</li>
+<li>`mode - A string value containing the name of the current mode</li>
+<li><code>action</code> - An action if specified in the executed workflow, <code>nil</code> otherwise</li>
 </ul>
 </li>
 </ul>
-<p>Defaults to a simple text display in the center of the menu bar of the focused screen.</p>
+<p>Defaults to an implementation that displays the mode as a menubar item.</p>
 </td>
               </tr>
             </table>
@@ -469,7 +469,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Sets the status display, creates all transition and workflow events, and starts the event listener</p>
+                <td><p>Initializes the mode indicator, creates all transition and workflow events, and starts the event listener</p>
 <p>Parameters:</p>
 <ul>
 <li>None</li>
