@@ -6,11 +6,11 @@
 
 const Fuse = require('fuse.js');
 
-const flattenedShortcuts = window.SHORTCUT_BLOCKS
-    .reduce((acc, block) => [ ...acc, ...block.filter(s => !s.isTitle) ], []);
+const flattenedShortcuts = window.SHORTCUT_BLOCKS.reduce((acc, block) => [ ...acc, ...block ], []);
 
 const fuse = new Fuse(flattenedShortcuts, {
-    threshold: 0.2,
+    threshold: 0.1,
+    distance: 1000,
     keys: ['name'],
 });
 
@@ -43,14 +43,19 @@ function createBlockItem(shortcut) {
 function addShortcutBlocks(ids = []) {
     window.SHORTCUT_BLOCKS.forEach(shortcuts => {
         const block = createDiv('block');
+        const blocks = [];
 
         shortcuts.forEach(shortcut => {
             if (shortcut.isTitle || !ids.length || ids.includes(shortcut.id)) {
-                block.appendChild(createBlockItem(shortcut))
+                blocks.push(createBlockItem(shortcut))
             }
         })
 
-        columns.appendChild(block);
+        if (blocks.length > 1) {
+            blocks.forEach(blockItem => block.appendChild(blockItem))
+            columns.appendChild(block);
+            return
+        }
     });
 }
 
@@ -63,13 +68,25 @@ input.oninput = function handleSearchInput(event) {
         child = columns.lastElementChild;
     }
 
-    let ids = [];
+    let ids = new Set();
     if (event.target.value) {
         const results = fuse.search(event.target.value);
-        ids = results.map(shortcut => shortcut.id);
+        const matchedShortcutIds = results.map(shortcut => shortcut.id);
+
+        // Include all shortcuts under matched category titles
+        const matchedCategoryTitles = results.filter(result => result.isTitle);
+        const matchedCategoryShortcutIds = matchedCategoryTitles.reduce((acc, title) => {
+            const shortcutBlock =  window.SHORTCUT_BLOCKS.find(block => block[0].id === title.id);
+            return [ ...acc, ...shortcutBlock.map(shortcut => shortcut.id) ];
+        }, []);
+
+        ids = new Set([
+            ...matchedShortcutIds,
+            ...matchedCategoryShortcutIds,
+        ]);
     }
 
-    addShortcutBlocks(ids);
+    addShortcutBlocks(Array.from(ids));
 }
 
 addShortcutBlocks();

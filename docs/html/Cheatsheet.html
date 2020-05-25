@@ -15,7 +15,7 @@
   <body>
     <header>
       <h1><a href="./index.html">docs</a> &raquo; Cheatsheet</h1>
-      <p>Cheatsheet modal used to display keyboard shortcuts</p>
+      <p>Cheatsheet modal used to display registered keyboard shortcuts</p>
 
       </header>
       <h3>API Overview</h3>
@@ -45,7 +45,7 @@
                 <td><p>Initialize the cheatsheet object</p>
 <p>Parameters:</p>
 <ul>
-<li><code>name</code> - The subject of the cheatsheet. An icon image will be rendered in the modal view for application names.</li>
+<li><code>name</code> - The subject of the cheatsheet.</li>
 <li><code>description</code> - The description subtext to be rendered under the cheatsheet name</li>
 <li><code>shortcuts</code> - A table containing the list of shortcuts to display in the cheatsheet</li>
 <li><code>view</code> - An optional <a href="https://www.hammerspoon.org/docs/hs.webview.html"><code>hs.webview</code></a> instance to set custom styles for the cheatsheet. A titled, closable utility view will be configured with dark mode by default.</li>
@@ -80,7 +80,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Cheatsheet:show()</code></td>
+                <td><code>Cheatsheet:show([iconURL])</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -91,7 +91,7 @@
                 <td><p>Show the cheatsheet modal. Hit Escape <kbd>⎋</kbd> to close.</p>
 <p>Parameters:</p>
 <ul>
-<li>None</li>
+<li><code>iconURL</code> - Image source of the cheatsheet icon</li>
 </ul>
 <p>Returns:</p>
 <ul>

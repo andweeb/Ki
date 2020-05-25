@@ -19,7 +19,11 @@ Ki ships with the following core modes:
 The shortcut table structure is similar to the argument list for binding hotkeys in Hammerspoon:
   1. a list of [modifier keys](http://www.hammerspoon.org/docs/hs.hotkey.html#bind) or `nil`
   2. a string containing the name of a keyboard key (as found in [hs.keycodes.map](http://www.hammerspoon.org/docs/hs.keycodes.html#map))
-  3. either an event handler function or an [`Entity`](#Entity) instance (or subclassed entity instance) that implements a [`dispatchAction`](Entity.html#dispatchAction) method to be invoked when the hotkey is pressed. A boolean value can be returned to automatically exit back to `desktop` mode after the action has completed.
+  3. the event handler which can be one of the following values:
+     * a function that takes in no arguments
+     * an [`Entity`](#Entity) instance (or subclassed entity instance) that implements a [`dispatchAction`](Entity.html#dispatchAction) method to be invoked when the hotkey is pressed.
+
+     A boolean return value will tell Ki to automatically exit back to `desktop` mode after the action has completed.
   4. a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet
 
 ```

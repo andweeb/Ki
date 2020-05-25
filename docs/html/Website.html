@@ -29,6 +29,7 @@
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
             <li><a href="#getDomain">getDomain</a></li>
+            <li><a href="#getFaviconURL">getFaviconURL</a></li>
             <li><a href="#getSelectionItems">getSelectionItems</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#open">open</a></li>
@@ -114,7 +115,7 @@ Currently supported behaviors:</p>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Website:getDomain(url) -&gt; string</code></td>
+                <td><code>Website:getDomain(url) -&gt; string or <code>nil</code></code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -122,10 +123,38 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Retrieves the domain part of the url argument</p>
+                <td><p>Parses and returns the domain part of the url argument</p>
 <p>Parameters:</p>
 <ul>
 <li><code>url</code> - The url string</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>The string domain of the url or <code>nil</code></li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
+          <section id="getFaviconURL">
+            <a name="//apple_ref/cpp/Method/getFaviconURL" class="dashAnchor"></a>
+            <h5><a href="#getFaviconURL">getFaviconURL</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Website:getFaviconURL(url[, size]) -&gt; string or <code>nil</code></code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Returns a URL pointing to a given URL's favicon using Favicon Kit</p>
+<p>Parameters:</p>
+<ul>
+<li><code>url</code> - The url string</li>
+<li><code>size</code> - The pixel size of the favicon, i.e. <code>32</code> for a 32x32 favicon. Defaults to <code>48</code>.</li>
 </ul>
 <p>Returns:</p>
 <ul>

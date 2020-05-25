@@ -11,6 +11,7 @@ Website class that subclasses [Entity](Entity.html) to represent some automatabl
  * [links](#links)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [getDomain](#getDomain)
+ * [getFaviconURL](#getFaviconURL)
  * [getSelectionItems](#getSelectionItems)
  * [initialize](#initialize)
  * [open](#open)
@@ -42,10 +43,18 @@ Website class that subclasses [Entity](Entity.html) to represent some automatabl
 
 | [getDomain](#getDomain)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Website:getDomain(url) -> string`                                                                    |
+| **Signature**                               | `Website:getDomain(url) -> string or `nil``                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Retrieves the domain part of the url argument                                                                     |
+| **Description**                             | Parses and returns the domain part of the url argument                                                                     |
 | **Parameters**                              | <ul><li>`url` - The url string</li></ul> |
+| **Returns**                                 | <ul><li> The string domain of the url or `nil`</li></ul>          |
+
+| [getFaviconURL](#getFaviconURL)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Website:getFaviconURL(url[, size]) -> string or `nil``                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Returns a URL pointing to a given URL's favicon using Favicon Kit                                                                     |
+| **Parameters**                              | <ul><li>`url` - The url string</li><li>`size` - The pixel size of the favicon, i.e. `32` for a 32x32 favicon. Defaults to `48`.</li></ul> |
 | **Returns**                                 | <ul><li> The string domain of the url or `nil`</li></ul>          |
 
 | [getSelectionItems](#getSelectionItems)         |                                                                                     |

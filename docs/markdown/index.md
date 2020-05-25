@@ -14,7 +14,7 @@
 | ------------------------------------------------------------------ | --------------------- |
 | [Application](Application.md)                          | Application class that subclasses [Entity](Entity.html) to represent some automatable desktop application     |
 | [ApplicationWatcher](ApplicationWatcher.md)                          | A module that wraps [`hs.application.watcher`](http://www.hammerspoon.org/docs/hs.application.watcher.html) to track application states     |
-| [Cheatsheet](Cheatsheet.md)                          | Cheatsheet modal used to display keyboard shortcuts     |
+| [Cheatsheet](Cheatsheet.md)                          | Cheatsheet modal used to display registered keyboard shortcuts     |
 | [Entity](Entity.md)                          | Entity class that represents some abstract automatable desktop entity     |
 | [File](File.md)                          | File class that subclasses [Entity](Entity.html) to represent some directory or file to be automated     |
 | [Ki](Ki.md)                          | > A proof of concept to apply the ["Zen" of vi](https://stackoverflow.com/questions/1218390/what-is-your-most-productive-shortcut-with-vim/1220118#1220118) to desktop automation.     |

@@ -31,7 +31,13 @@
 <ol>
 <li>a list of <a href="http://www.hammerspoon.org/docs/hs.hotkey.html#bind">modifier keys</a> or <code>nil</code></li>
 <li>a string containing the name of a keyboard key (as found in <a href="http://www.hammerspoon.org/docs/hs.keycodes.html#map">hs.keycodes.map</a>)</li>
-<li>either an event handler function or an <a href="#Entity"><code>Entity</code></a> instance (or subclassed entity instance) that implements a <a href="Entity.html#dispatchAction"><code>dispatchAction</code></a> method to be invoked when the hotkey is pressed. A boolean value can be returned to automatically exit back to <code>desktop</code> mode after the action has completed.</li>
+<li><p>the event handler which can be one of the following values:</p>
+<ul>
+<li>a function that takes in no arguments</li>
+<li>an <a href="#Entity"><code>Entity</code></a> instance (or subclassed entity instance) that implements a <a href="Entity.html#dispatchAction"><code>dispatchAction</code></a> method to be invoked when the hotkey is pressed.</li>
+</ul>
+<p>A boolean return value will tell Ki to automatically exit back to <code>desktop</code> mode after the action has completed.</p>
+</li>
 <li>a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet</li>
 </ol>
 

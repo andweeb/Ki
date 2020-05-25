@@ -29,6 +29,11 @@ footer {
 }
 
 .title-section {
+    display: flex;
+    align-items: center;
+}
+
+.titles {
     padding: 0 5px;
     line-height: 1;
 }
@@ -45,6 +50,16 @@ footer {
 
 .icon {
     height: 2.5rem;
+}
+
+#search {
+    -webkit-appearance: none;
+    box-sizing: content-box;
+    font-size: 14px;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    outline: none;
+    padding: 5px;
 }
 
 .cheatsheet {

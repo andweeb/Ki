@@ -1,6 +1,6 @@
 --- === Cheatsheet ===
 ---
---- Cheatsheet modal used to display keyboard shortcuts
+--- Cheatsheet modal used to display registered keyboard shortcuts
 ---
 
 local class = require("middleclass")
@@ -8,6 +8,7 @@ local lustache = require("lustache")
 
 local spoonPath = hs.spoons.scriptPath()
 local Cheatsheet = class("Cheatsheet")
+local UNMAPPED = "﴾unmapped﴿"
 
 local MODIFIER_GLYPHS = {
     cmd = "⌘",
@@ -78,11 +79,15 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
         end
     end
 
+    local index = 1
     for category, shortcuts in pairs(shortcutCategories) do
         local block = {{
             isTitle = true,
+            id = #shortcutList + index,
             name = category,
         }}
+
+        index = index + 1
 
         -- Sort shortcuts by reversed hotkey
         table.sort(shortcuts, function(a, b)
@@ -91,7 +96,13 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
 
         local used_shortcuts = {}
         for _, shortcut in pairs(shortcuts) do
-            if used_shortcuts[shortcut.hotkey] == nil then
+            local isUnmapped = shortcut.hotkey == UNMAPPED
+            if isUnmapped then
+                shortcut.hotkey = "�"
+                shortcut.name = shortcut.name.." (unmapped)"
+            end
+
+            if isUnmapped or used_shortcuts[shortcut.hotkey] == nil then
                 used_shortcuts[shortcut.hotkey] = true
                 table.insert(block, shortcut)
             end
@@ -142,16 +153,16 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
     return shortcutBlocks
 end
 
---- Cheatsheet:show()
+--- Cheatsheet:show([iconURL])
 --- Method
 --- Show the cheatsheet modal. Hit Escape <kbd>⎋</kbd> to close.
 ---
 --- Parameters:
----  * None
+---  * `iconURL` - Image source of the cheatsheet icon
 ---
 --- Returns:
 ---  * None
-function Cheatsheet:show()
+function Cheatsheet:show(iconURL)
     if not self.shortcuts then
         return nil
     end
@@ -174,19 +185,10 @@ function Cheatsheet:show()
     local html = htmlFile:read("*all")
     htmlFile:close()
 
-    local appIconUri = nil
-    local app = hs.application.get(self.name)
-
-    if app then
-        local bundleId = app:bundleID()
-        local iconImage = hs.image.imageFromAppBundle(bundleId)
-        appIconUri = iconImage:encodeAsURLString()
-    end
-
     local title = self.name.." Cheat Sheet"
     local viewModel = {
         title = title,
-        icon = appIconUri,
+        icon = iconURL,
         description = self.description,
         data = hs.json.encode(self.shortcutBlocks),
         javascript = javascript,
@@ -229,7 +231,7 @@ end
 --- Initialize the cheatsheet object
 ---
 --- Parameters:
----  * `name` - The subject of the cheatsheet. An icon image will be rendered in the modal view for application names.
+---  * `name` - The subject of the cheatsheet.
 ---  * `description` - The description subtext to be rendered under the cheatsheet name
 ---  * `shortcuts` - A table containing the list of shortcuts to display in the cheatsheet
 ---  * `view` - An optional [`hs.webview`](https://www.hammerspoon.org/docs/hs.webview.html) instance to set custom styles for the cheatsheet. A titled, closable utility view will be configured with dark mode by default.

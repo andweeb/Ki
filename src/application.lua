@@ -25,17 +25,32 @@ function Behaviors.entity(self, eventHandler, _, _, workflow)
         return Behaviors.select(self, eventHandler)
     end
 
+    -- Handle action-specific options
+    local options = nil
+    local action = eventHandler
+    if type(eventHandler) == "table" then
+        action = eventHandler[1]
+        options = eventHandler[2]
+    end
+
     -- Create local action execution function to either defer or immediately invoke
     local function executeAction(appInstance)
-        local _, autoExit = eventHandler(appInstance, shouldSelect)
+        local _, autoExit = action(appInstance)
         return autoExit == nil and self.autoExitMode or autoExit
     end
 
-    return Behaviors.dispatchAction(self, executeAction)
+    return Behaviors.dispatchAction(self, executeAction, options)
 end
 
 -- Application behavior function for select mode
 function Behaviors.select(self, eventHandler)
+    local options = nil
+    local action = eventHandler
+    if type(eventHandler) == "table" then
+        action = eventHandler[1]
+        options = eventHandler[2]
+    end
+
     -- Create local action execution function to either defer or immediately invoke
     local function executeAction(appInstance)
         local choices = self:getSelectionItems()
@@ -43,13 +58,13 @@ function Behaviors.select(self, eventHandler)
         if choices and #choices > 0 then
             self:showSelectionModal(choices, function (choice)
                 if choice then
-                    eventHandler(appInstance, choice)
+                    action(appInstance, choice)
                 end
             end)
         end
     end
 
-    Behaviors.dispatchAction(self, executeAction)
+    Behaviors.dispatchAction(self, executeAction, options)
 
     return self.autoExitMode
 end
@@ -58,7 +73,11 @@ end
 Behaviors.default = Behaviors.entity
 
 -- Dispatch action behavior for application entities to defer action execution after launch
-function Behaviors.dispatchAction(self, action)
+function Behaviors.dispatchAction(self, action, options)
+    options = options or {
+        openBefore = true,
+    }
+
     local appState = ApplicationWatcher.states[self.name]
     local app = self:getApplication()
     local status = nil
@@ -73,9 +92,10 @@ function Behaviors.dispatchAction(self, action)
     local isLaunched = status == ApplicationWatcher.statusTypes.launched
     local isUnhidden = status == ApplicationWatcher.statusTypes.unhidden
     local isApplicationOpen = isActivated or isLaunched or isUnhidden
+    local isApplicationRunning = app and app:isRunning() or isApplicationOpen
 
     -- Execute the action if the application is already running and return indicator to auto-exit mode
-    if app and app:isRunning() or isApplicationOpen then
+    if not options.openBefore or isApplicationRunning then
         local autoExit = action(app)
         return autoExit == nil and self.autoExitMode or autoExit
     end
@@ -244,6 +264,24 @@ function Application.getMenuItemList(app, menuItemPath)
     return isFound and menuItems or nil
 end
 
+-- Show cheatsheet action
+function Application:showCheatsheet(app)
+    local bundleId = app and app:bundleID() or nil
+    local iconURI = nil
+
+    if not bundleId then
+        local _, id = hs.osascript.applescript([[id of app "]]..self.name..[["]])
+        bundleId = id
+    end
+
+    if bundleId then
+        local iconImage = hs.image.imageFromAppBundle(bundleId)
+        iconURI = iconImage:encodeAsURLString()
+    end
+
+    self.cheatsheet:show(iconURI)
+end
+
 --- Application:initialize(name, shortcuts, autoExitMode)
 --- Method
 --- Initializes a new application instance with its name and shortcuts. By default, common shortcuts are automatically registered, and the initialized [entity](Entity.html) defaults, such as the cheatsheet.
@@ -253,13 +291,17 @@ end
 ---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the entity
 ---  * `autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
 ---
---- Each `shortcut` item should be a list with items at the following indices:
----  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`
----  * `2` - The name of a keyboard key. String representations of keys can be found in [`hs.keycodes.map`](https://www.hammerspoon.org/docs/hs.keycodes.html#map).
----  * `3` - The event handler that defines the action for when the shortcut is triggered
----  * `4` - A table containing the metadata for the shortcut, also a list with items at the following indices:
----    * `1` - The category name of the shortcut
----    * `2` - A description of what the shortcut does
+--- The structure of each shortcut in `shortcuts` is a list containing the following values:
+---   1. a list of [modifier keys](http://www.hammerspoon.org/docs/hs.hotkey.html#bind) or `nil`
+---   2. a string containing the name of a keyboard key (as found in [hs.keycodes.map](http://www.hammerspoon.org/docs/hs.keycodes.html#map))
+---   3. the event handler which can be one of the following values:
+---      * a function that takes the following arguments:
+---        * `app` - The [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) instance if the application is running, `nil` otherwise
+---        * `choice` - A choice object if the entity was selected using select mode, `nil` otherwise
+---      * a tuple containing the function with arguments outlined above and the following options:
+---        * `openBefore` - A boolean value indicating that the application should be opened if not curently running before applying the action (defaults to `true`)
+---      A boolean return value will tell Ki to automatically exit back to `desktop` mode after the action has completed.
+---   4. a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet
 ---
 --- Returns:
 ---  * None
@@ -271,6 +313,7 @@ function Application:initialize(name, shortcuts, autoExitMode)
         { nil, "h", self.createMenuItemEvent("Hide "..name), { name, "Hide Application" } },
         { nil, "q", self.createMenuItemEvent("Quit "..name), { name, "Quit Application" } },
         { nil, ",", self.createMenuItemEvent("Preferences...", true), { name, "Open Preferences" } },
+        { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } }
     }
 
     local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)

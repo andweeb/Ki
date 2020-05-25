@@ -69,9 +69,9 @@ Website.behaviors = Entity.behaviors + {
     end,
 }
 
---- Website:getDomain(url) -> string
+--- Website:getDomain(url) -> string or `nil`
 --- Method
---- Retrieves the domain part of the url argument
+--- Parses and returns the domain part of the url argument
 ---
 --- Parameters:
 ---  * `url` - The url string
@@ -80,6 +80,27 @@ Website.behaviors = Entity.behaviors + {
 ---   * The string domain of the url or `nil`
 function Website.getDomain(url)
     return url:match("[%w%.]*%.(%w+%.%w+)") or url:match("[%w%.]*%/(%w+%.%w+)")
+end
+
+--- Website:getFaviconURL(url[, size]) -> string or `nil`
+--- Method
+--- Returns a URL pointing to a given URL's favicon using Favicon Kit
+---
+--- Parameters:
+---  * `url` - The url string
+---  * `size` - The pixel size of the favicon, i.e. `32` for a 32x32 favicon. Defaults to `48`.
+---
+--- Returns:
+---   * The string domain of the url or `nil`
+function Website:getFaviconURL(url, size)
+    size = size or 48
+
+    local domain = self.getDomain(url)
+    if not domain then
+        return nil
+    end
+
+    return "https://api.faviconkit.com/"..domain.."/"..size
 end
 
 --- Website:getSelectionItems() -> table of choices or nil
@@ -110,11 +131,9 @@ function Website:getSelectionItems()
         end
 
         if self.displaySelectionModalIcons then
-            local domain = self.getDomain(linkStr)
+            local favicon = self:getFaviconURL(linkStr)
 
-            if domain then
-                local favicon = "http://www.google.com/s2/favicons?domain_url="..domain
-
+            if favicon then
                 -- Asynchronously load favicon images individually per selection item
                 hs.image.imageFromURL(favicon, function(image)
                     if not self.selectionModal then
@@ -178,9 +197,9 @@ end
 ---  * None
 function Website:initialize(name, url, links, shortcuts)
     local commonShortcuts = {
-        { nil, nil, self.open, { url, "Open Website" } },
+        { nil, nil, self.open, { name, "Open Website" } },
         { { "shift" }, "o", function(...) self:openWith(...) end, { name, "Open Website with Application" } },
-        { { "shift" }, "/", function() self.cheatsheet:show() end, { name, "Show Cheatsheet" } },
+        { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, { name, "Show Cheatsheet" } },
     }
 
     local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)

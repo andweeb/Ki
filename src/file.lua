@@ -102,7 +102,7 @@ function File:initialize(path, shortcuts, options)
     }
     local commonShortcuts = {
         { nil, nil, actions.open, { path, "Activate/Focus" } },
-        { { "shift" }, "/", function() self.cheatsheet:show() end, { path, "Show Cheatsheet" } },
+        { { "shift" }, "/", function(...) self:showCheatsheet(...) end, { path, "Show Cheatsheet" } },
     }
 
     -- Append directory shortcuts if the file entity is representing a directory path
@@ -131,6 +131,17 @@ function File:initialize(path, shortcuts, options)
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for file "..self.path
     self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, self.shortcuts)
+end
+
+-- Show cheatsheet action
+function File:showCheatsheet(path)
+    local iconURI = nil
+    local fileIcon = self.getFileIcon(path)
+    if fileIcon then
+        iconURI = fileIcon:encodeAsURLString()
+    end
+
+    self.cheatsheet:show(iconURI)
 end
 
 --- File:createEvent(path, placeholderText, handler) -> function
