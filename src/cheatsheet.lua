@@ -99,7 +99,8 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
             local isUnmapped = shortcut.hotkey == UNMAPPED
             if isUnmapped then
                 shortcut.hotkey = "�"
-                shortcut.name = shortcut.name.." (unmapped)"
+                shortcut.name = shortcut.name
+                shortcut.isUnmapped = isUnmapped
             end
 
             if isUnmapped or used_shortcuts[shortcut.hotkey] == nil then

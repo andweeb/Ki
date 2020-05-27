@@ -33,6 +33,14 @@ function createBlockItem(shortcut) {
 
     hotkeyDiv.appendChild(document.createTextNode(shortcut.hotkey || ''));
     titleDiv.appendChild(document.createTextNode(shortcut.name));
+
+    if (shortcut.isUnmapped) {
+        const p = document.createElement('p');
+        p.className = 'unmapped-label';
+        p.appendChild(document.createTextNode('(unmapped)'));
+        titleDiv.appendChild(p);
+    }
+
     shortcutItemDiv.appendChild(hotkeyDiv);
     shortcutItemDiv.appendChild(titleDiv);
 

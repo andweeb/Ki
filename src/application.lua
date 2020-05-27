@@ -312,7 +312,7 @@ function Application:initialize(name, shortcuts, autoExitMode)
         { nil, "f", self.toggleFullScreen, { "View", "Toggle Full Screen" } },
         { nil, "h", self.createMenuItemEvent("Hide "..name), { name, "Hide Application" } },
         { nil, "q", self.createMenuItemEvent("Quit "..name), { name, "Quit Application" } },
-        { nil, ",", self.createMenuItemEvent("Preferences...", true), { name, "Open Preferences" } },
+        { nil, ",", self.createMenuItemEvent("Preferences..."), { name, "Open Preferences" } },
         { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } }
     }
 
