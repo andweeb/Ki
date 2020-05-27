@@ -60,7 +60,7 @@ function Notes.focus(app, choice)
 end
 
 Notes:registerShortcuts({
-    { nil, nil, Notes.focus, { "Notes", "Activate/Focus" } },
+    { nil, nil, Notes.focus, { "Notes", "Activate" } },
     { nil, "\\", Notes.toggleFolderView, { "View", "Show Folders" } },
     { nil, "l", Notes.search, { "Edit", "Find..." } },
     { nil, "n", Notes.newNote, { "File", "New Note" } },

@@ -307,7 +307,7 @@ end
 ---  * None
 function Application:initialize(name, shortcuts, autoExitMode)
     local commonShortcuts = {
-        { nil, nil, self.focus, { name, "Activate/Focus" } },
+        { nil, nil, self.focus, { name, "Activate" } },
         { nil, "a", self.createMenuItemEvent("About "..name), { name, "About "..name } },
         { nil, "f", self.toggleFullScreen, { "View", "Toggle Full Screen" } },
         { nil, "h", self.createMenuItemEvent("Hide "..name), { name, "Hide Application" } },

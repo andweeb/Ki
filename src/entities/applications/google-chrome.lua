@@ -131,7 +131,7 @@ GoogleChrome.toggleMedia = GoogleChrome:createMediaAction("toggle-play", "Error 
 
 -- Register shortcuts with the actions initialized above
 GoogleChrome:registerShortcuts({
-    { nil, nil, GoogleChrome.focus, { "Google Chrome", "Activate/Focus" } },
+    { nil, nil, GoogleChrome.focus, { "Google Chrome", "Activate" } },
     { nil, "d", GoogleChrome.addBookmark, { "Bookmarks", "Bookmark This Page..." } },
     { nil, "i", GoogleChrome.showWebInspector, { "Developer", "Toggle Web Inspector" } },
     { nil, "l", GoogleChrome.openLocation, { "File", "Open Location..." } },

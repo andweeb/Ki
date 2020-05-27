@@ -101,7 +101,7 @@ function File:initialize(path, shortcuts, options)
         end,
     }
     local commonShortcuts = {
-        { nil, nil, actions.open, { path, "Activate/Focus" } },
+        { nil, nil, actions.open, { path, "Open "..path.." "..attributes.mode } },
         { { "shift" }, "/", function(...) self:showCheatsheet(...) end, { path, "Show Cheatsheet" } },
     }
 

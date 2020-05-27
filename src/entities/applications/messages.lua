@@ -50,7 +50,7 @@ function Messages.focus(app, choice)
 end
 
 Messages:registerShortcuts({
-    { nil, nil, Messages.focus, { "Messages", "Activate/Focus" } },
+    { nil, nil, Messages.focus, { "Messages", "Activate" } },
     { nil, "l", Messages.find, { "Edit", "Search" } },
     { nil, "n", Messages.newMessage, { "File", "New Message" } },
     { nil, "w", Messages.close, { "File", "New Message" } },

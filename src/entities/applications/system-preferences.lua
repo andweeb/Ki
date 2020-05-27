@@ -53,7 +53,7 @@ function SystemPreferences.focus(app, choice)
 end
 
 SystemPreferences:registerShortcuts({
-    { nil, nil, SystemPreferences.focus, { "View", "Activate/Focus" } },
+    { nil, nil, SystemPreferences.focus, { "View", "Activate" } },
     { nil, "l", SystemPreferences.showAllPreferences, { "View", "Show All Preferences" } },
     { { "shift" }, "f", SystemPreferences.search, { "View", "Search" } },
 })

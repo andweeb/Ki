@@ -150,7 +150,7 @@ function Safari:focus(app, choice)
 end
 
 Safari:registerShortcuts({
-    { nil, nil, function(...) Safari:focus(...) end, { "Bookmarks", "Add bookmark" } },
+    { nil, nil, function(...) Safari:focus(...) end, { "Safari", "Activate" } },
     { nil, "d", Safari.addBookmark, { "Bookmarks", "Add bookmark" } },
     { nil, "i", Safari.showWebInspector, { "Develop", "Toggle Web Inspector" } },
     { nil, "l", Safari.openLocation, { "File", "Open Location..." } },
