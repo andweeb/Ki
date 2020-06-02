@@ -68,7 +68,7 @@ Website class that subclasses [Entity](Entity.html) to represent some automatabl
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Website:initialize(name, url, links, shortcuts)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Initializes a new website entity instance with its name, url, links, and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.                                                                     |
+| **Description**                             | Initializes a new website entity instance with its name, url, links, and custom shortcuts.                                                                     |
 | **Parameters**                              | <ul><li>`name` - The name of the website</li><li>`url` - The website URL</li><li>`links` - Related links to initialize [`Website.links`](#links)</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the url entity</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 

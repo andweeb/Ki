@@ -4,7 +4,6 @@
 ---
 local File = require("file")
 local Entity = require("entity")
-local Cheatsheet = require("cheatsheet")
 local Website = Entity:subclass("Website")
 local spoonPath = hs.spoons.scriptPath()
 
@@ -183,36 +182,6 @@ function Website:openWith(url)
     end)
 end
 
---- Website:initialize(name, url, links, shortcuts)
---- Method
---- Initializes a new website entity instance with its name, url, links, and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.
----
---- Parameters:
----  * `name` - The name of the website
----  * `url` - The website URL
----  * `links` - Related links to initialize [`Website.links`](#links)
----  * `shortcuts` - The list of shortcuts containing keybindings and actions for the url entity
----
---- Returns:
----  * None
-function Website:initialize(name, url, links, shortcuts)
-    local commonShortcuts = {
-        { nil, nil, self.open, { name, "Open Website" } },
-        { { "shift" }, "o", function(...) self:openWith(...) end, { name, "Open Website with Application" } },
-        { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, { name, "Show Cheatsheet" } },
-    }
-
-    local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)
-
-    self.url = url
-    self.name = name
-    self.links = links
-    self.shortcuts = mergedShortcuts
-
-    local cheatsheetDescription = "Ki shortcut keybindings registered for "..self.name
-    self.cheatsheet = Cheatsheet:new(self.name, cheatsheetDescription, mergedShortcuts)
-end
-
 --- Website:open(url)
 --- Method
 --- Opens the url
@@ -226,6 +195,31 @@ function Website.open(url)
     if not url then return nil end
 
     hs.urlevent.openURL(url)
+end
+
+--- Website:initialize(name, url, links, shortcuts)
+--- Method
+--- Initializes a new website entity instance with its name, url, links, and custom shortcuts.
+---
+--- Parameters:
+---  * `name` - The name of the website
+---  * `url` - The website URL
+---  * `links` - Related links to initialize [`Website.links`](#links)
+---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the url entity
+---
+--- Returns:
+---  * None
+function Website:initialize(name, url, links, shortcuts)
+    self.url = url
+    self.links = links
+
+    local mergedShortcuts = self:mergeShortcuts(shortcuts, {
+        { nil, nil, self.open, { name, "Open Website" } },
+        { { "shift" }, "o", function(...) self:openWith(...) end, { name, "Open Website with Application" } },
+        { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, { name, "Show Cheatsheet" } },
+    })
+
+    Entity.initialize(self, name, mergedShortcuts)
 end
 
 return Website

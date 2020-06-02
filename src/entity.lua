@@ -129,6 +129,7 @@ function Entity:initialize(name, shortcuts, autoExitMode)
     self.name = name
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
     self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
+        { { "cmd" }, "space", function(...) self:showActions(...) end, { name, "Show Actions" } },
         { { "shift" }, "/", function() self.cheatsheet:show() end, { name, "Show Cheatsheet" } },
     }))
 end
@@ -321,6 +322,40 @@ function Entity:showSelectionModal(choices, callback, options)
     -- Start row selection listener and show the modal
     selectionListener:start()
     return modal:show()
+end
+
+--- Entity:showActions()
+--- Method
+--- Opens a selection modal populated with actions configured on the entity, which upon selection will trigger the action
+---
+--- Returns:
+---  * None
+function Entity:showActions()
+    local choices = {}
+    local shortcuts = {table.unpack(self.shortcuts)}
+    for index, shortcut in pairs(shortcuts) do
+        local category, description = table.unpack(shortcut[_G.SHORTCUT_METADATA_INDEX])
+        table.insert(choices, {
+            text = description,
+            subText = category.." action",
+            index = index,
+        })
+    end
+
+    local vowelIndex = self.name:find("[aAeEiIoOuU]")
+    local article = vowelIndex and vowelIndex == 1 and "an" or "a"
+    local options = { placeholderText = "Trigger "..article.." "..self.name.." action" }
+
+    self:showSelectionModal(choices, function(choice)
+        if not choice then return end
+
+        local shortcut = shortcuts[choice.index]
+        local flags = shortcut[_G.SHORTCUT_MODKEY_INDEX]
+        local keyName = shortcut[_G.SHORTCUT_HOTKEY_INDEX]
+        local action = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+
+        self.behaviors.default(self, action, flags, keyName, {})
+    end, options)
 end
 
 --- Entity:getEventHandler(shortcuts, flags, keyName) -> function or nil

@@ -18,6 +18,7 @@ Entity class that represents some abstract automatable desktop entity
  * [registerSelectionModalShortcuts](#registerSelectionModalShortcuts)
  * [registerShortcuts](#registerShortcuts)
  * [renderScriptTemplate](#renderScriptTemplate)
+ * [showActions](#showActions)
  * [showSelectionModal](#showSelectionModal)
  * [triggerAfterConfirmation](#triggerAfterConfirmation)
 
@@ -107,6 +108,13 @@ Entity class that represents some abstract automatable desktop entity
 | **Description**                             | Generates an applescript from templates located in `src/osascripts` with some view model object                                                                     |
 | **Parameters**                              | <ul><li>`scriptPath` - The absolute file path to the applescript file or the name of an existing Ki applescript file (in src/osascripts)</li><li>`viewModel` - An optional [lustache](http://olivinelabs.com/lustache/) view model</li></ul> |
 | **Returns**                                 | <ul><li>The rendered script string or `nil`</li></ul>          |
+
+| [showActions](#showActions)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity:showActions()`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Opens a selection modal populated with actions configured on the entity, which upon selection will trigger the action                                                                     |
+| **Returns**                                 | <ul><li>None</li></ul>          |
 
 | [showSelectionModal](#showSelectionModal)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|

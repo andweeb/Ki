@@ -282,45 +282,6 @@ function Application:showCheatsheet(app)
     self.cheatsheet:show(iconURI)
 end
 
---- Application:initialize(name, shortcuts, autoExitMode)
---- Method
---- Initializes a new application instance with its name and shortcuts. By default, common shortcuts are automatically registered, and the initialized [entity](Entity.html) defaults, such as the cheatsheet.
----
---- Parameters:
----  * `name` - The entity name
----  * `shortcuts` - The list of shortcuts containing keybindings and actions for the entity
----  * `autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
----
---- The structure of each shortcut in `shortcuts` is a list containing the following values:
----   1. a list of [modifier keys](http://www.hammerspoon.org/docs/hs.hotkey.html#bind) or `nil`
----   2. a string containing the name of a keyboard key (as found in [hs.keycodes.map](http://www.hammerspoon.org/docs/hs.keycodes.html#map))
----   3. the event handler which can be one of the following values:
----      * a function that takes the following arguments:
----        * `app` - The [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) instance if the application is running, `nil` otherwise
----        * `choice` - A choice object if the entity was selected using select mode, `nil` otherwise
----      * a tuple containing the function with arguments outlined above and the following options:
----        * `openBefore` - A boolean value indicating that the application should be opened if not curently running before applying the action (defaults to `true`)
----      A boolean return value will tell Ki to automatically exit back to `desktop` mode after the action has completed.
----   4. a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet
----
---- Returns:
----  * None
-function Application:initialize(name, shortcuts, autoExitMode)
-    local commonShortcuts = {
-        { nil, nil, self.focus, { name, "Activate" } },
-        { nil, "a", self.createMenuItemEvent("About "..name), { name, "About "..name } },
-        { nil, "f", self.toggleFullScreen, { "View", "Toggle Full Screen" } },
-        { nil, "h", self.createMenuItemEvent("Hide "..name), { name, "Hide Application" } },
-        { nil, "q", self.createMenuItemEvent("Quit "..name), { name, "Quit Application" } },
-        { nil, ",", self.createMenuItemEvent("Preferences..."), { name, "Open Preferences" } },
-        { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } }
-    }
-
-    local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)
-
-    Entity.initialize(self, name, mergedShortcuts, autoExitMode)
-end
-
 --- Application:getApplication() -> hs.application object or nil
 --- Method
 --- Gets the [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) object from the instance name
@@ -369,6 +330,44 @@ end
 function Application.toggleFullScreen(app)
     app:focusedWindow():toggleFullScreen()
     return true
+end
+
+--- Application:initialize(name, shortcuts, autoExitMode)
+--- Method
+--- Initializes a new application instance with its name and shortcuts. By default, common shortcuts are automatically registered, and the initialized [entity](Entity.html) defaults, such as the cheatsheet.
+---
+--- Parameters:
+---  * `name` - The entity name
+---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the entity
+---  * `autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
+---
+--- The structure of each shortcut in `shortcuts` is a list containing the following values:
+---   1. a list of [modifier keys](http://www.hammerspoon.org/docs/hs.hotkey.html#bind) or `nil`
+---   2. a string containing the name of a keyboard key (as found in [hs.keycodes.map](http://www.hammerspoon.org/docs/hs.keycodes.html#map))
+---   3. the event handler which can be one of the following values:
+---      * a function that takes the following arguments:
+---        * `app` - The [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) instance if the application is running, `nil` otherwise
+---        * `choice` - A choice object if the entity was selected using select mode, `nil` otherwise
+---      * a tuple containing the function with arguments outlined above and the following options:
+---        * `openBefore` - A boolean value indicating that the application should be opened if not curently running before applying the action (defaults to `true`)
+---      A boolean return value will tell Ki to automatically exit back to `desktop` mode after the action has completed.
+---   4. a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet
+---
+--- Returns:
+---  * None
+function Application:initialize(name, shortcuts, autoExitMode)
+    local mergedShortcuts = self:mergeShortcuts(shortcuts, {
+        { nil, nil, self.focus, { name, "Activate" } },
+        { nil, "a", self.createMenuItemEvent("About "..name), { name, "About "..name } },
+        { nil, "f", self.toggleFullScreen, { "View", "Toggle Full Screen" } },
+        { nil, "h", self.createMenuItemEvent("Hide "..name), { name, "Hide Application" } },
+        { nil, "q", self.createMenuItemEvent("Quit "..name), { name, "Quit Application" } },
+        { nil, ",", self.createMenuItemEvent("Preferences..."), { name, "Open Preferences" } },
+        { { "cmd" }, "space", { function(...) self:showActions(...) end, { openBefore = false } }, { name, "Show Actions" } },
+        { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } },
+    })
+
+    Entity.initialize(self, name, mergedShortcuts, autoExitMode)
 end
 
 return Application

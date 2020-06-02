@@ -6,16 +6,16 @@ Cheatsheet modal used to display registered keyboard shortcuts
 
 ## API Overview
 * Methods - API calls which can only be made on an object returned by a constructor
- * [init](#init)
+ * [initialize](#initialize)
  * [show](#show)
 
 ## API Documentation
 
 ### Methods
 
-| [init](#init)         |                                                                                     |
+| [initialize](#initialize)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Cheatsheet:init(name, description, shortcuts[, view])`                                                                    |
+| **Signature**                               | `Cheatsheet:initialize(name, description, shortcuts[, view])`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Initialize the cheatsheet object                                                                     |
 | **Parameters**                              | <ul><li>`name` - The subject of the cheatsheet.</li><li>`description` - The description subtext to be rendered under the cheatsheet name</li><li>`shortcuts` - A table containing the list of shortcuts to display in the cheatsheet</li><li>`view` - An optional [`hs.webview`](https://www.hammerspoon.org/docs/hs.webview.html) instance to set custom styles for the cheatsheet. A titled, closable utility view will be configured with dark mode by default.</li></ul> |

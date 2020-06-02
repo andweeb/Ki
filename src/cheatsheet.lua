@@ -227,7 +227,7 @@ function Cheatsheet:show(iconURL)
     self.cheatsheetListener:start()
 end
 
---- Cheatsheet:init(name, description, shortcuts[, view])
+--- Cheatsheet:initialize(name, description, shortcuts[, view])
 --- Method
 --- Initialize the cheatsheet object
 ---

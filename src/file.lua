@@ -3,7 +3,6 @@
 --- File class that subclasses [Entity](Entity.html) to represent some directory or file to be automated
 ---
 local Entity = require("entity")
-local Cheatsheet = require("cheatsheet")
 local File = Entity:subclass("File")
 local spoonPath = hs.spoons.scriptPath()
 
@@ -34,106 +33,7 @@ File.behaviors = Entity.behaviors + {
     end,
 }
 
---- File:initialize(path, shortcuts)
---- Method
---- Initializes a new file instance with its path and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.
----
---- Parameters:
----  * `path` - The initial directory path
----  * `shortcuts` - The list of shortcuts containing keybindings and actions for the file entity
----  * `options` - A table containing various options that configures the file instance
----    * `showHiddenFiles` - A flag to display hidden files in the file selection modal. Defaults to `false`
----    * `sortAttribute` - The file attribute to sort the file selection list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)
----
---- Each `shortcut` item should be a list with items at the following indices:
----  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`
----  * `2` - The name of a keyboard key. String representations of keys can be found in [`hs.keycodes.map`](https://www.hammerspoon.org/docs/hs.keycodes.html#map).
----  * `3` - The event handler that defines the action for when the shortcut is triggered
----  * `4` - A table containing the metadata for the shortcut, also a list with items at the following indices:
----    * `1` - The category name of the shortcut
----    * `2` - A description of what the shortcut does
----
---- Returns:
----  * None
-function File:initialize(path, shortcuts, options)
-    options = options or {}
-
-    local absolutePath = hs.fs.pathToAbsolute(path)
-
-    if not absolutePath then
-        self.notifyError("Error initializing File entity", "Path "..path.." may not exist.")
-        return
-    end
-
-    local success, value = pcall(function() return hs.fs.attributes(absolutePath) or {} end)
-
-    if not success then
-        self.notifyError("Error initializing File entity", value or "")
-        return
-    end
-
-    local attributes = value
-    local isDirectory = attributes.mode == "directory"
-    local openFileInFolder = self:createEvent(path, "Open a file", function(...)
-        self.open(...)
-    end)
-
-    local actions = {
-        openFileInFolder = openFileInFolder,
-        openFileInFolderWith = self:createEvent(path, "Open file with application", function(target)
-            self:openWith(target)
-        end),
-        showInfoForFileInFolder = self:createEvent(path, "Show info for file", function(target)
-            self:openInfoWindow(target)
-        end),
-        quickLookFileInFolder = self:createEvent(path, "View file with QuickLook", function(target)
-            hs.execute("qlmanage -p "..target)
-        end),
-        deleteFileInFolder = self:createEvent(path, "Move file to trash", function(target)
-            self:moveToTrash(target)
-        end),
-        open = function(target, shouldNavigate)
-            if shouldNavigate then
-                return openFileInFolder(target)
-            end
-
-            return self.open(target)
-        end,
-    }
-    local commonShortcuts = {
-        { nil, nil, actions.open, { path, "Open "..path.." "..attributes.mode } },
-        { { "shift" }, "/", function(...) self:showCheatsheet(...) end, { path, "Show Cheatsheet" } },
-    }
-
-    -- Append directory shortcuts if the file entity is representing a directory path
-    if isDirectory then
-        local commonDirectoryShortcuts = {
-            { nil, "c", function(...) self:copy(...) end, { path, "Copy File to Folder" } },
-            { nil, "d", actions.deleteFileInFolder, { path, "Move File in Folder to Trash" } },
-            { nil, "i", actions.showInfoForFileInFolder, { path, "Open File Info Window" } },
-            { nil, "m", function(...) self:move(...) end, { path, "Move File to Folder" } },
-            { nil, "o", openFileInFolder, { path, "Open File in Folder" } },
-            { nil, "space", actions.quickLookFileInFolder, { path, "Quick Look" } },
-            { { "shift" }, "o", actions.openFileInFolderWith, { path, "Open File in Folder with App" } },
-        }
-
-        for _, shortcut in pairs(commonDirectoryShortcuts) do
-            table.insert(commonShortcuts, shortcut)
-        end
-    end
-
-    self.name = path
-    self.path = path
-    self.showHiddenFiles = options.showHiddenFiles or false
-    self.sortAttribute = options.sortAttribute or "modification"
-
-    self:registerShortcuts(self:mergeShortcuts(shortcuts, commonShortcuts))
-
-    local cheatsheetDescription = "Ki shortcut keybindings registered for file "..self.path
-    self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, self.shortcuts)
-end
-
--- Show cheatsheet action
+-- Show cheatsheet action with file icon
 function File:showCheatsheet(path)
     local iconURI = nil
     local fileIcon = self.getFileIcon(path)
@@ -534,6 +434,99 @@ function File:copy(initialPath)
             end)
         end)
     end)
+end
+
+--- File:initialize(path, shortcuts)
+--- Method
+--- Initializes a new file instance with its path and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.
+---
+--- Parameters:
+---  * `path` - The initial directory path
+---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the file entity
+---  * `options` - A table containing various options that configures the file instance
+---    * `showHiddenFiles` - A flag to display hidden files in the file selection modal. Defaults to `false`
+---    * `sortAttribute` - The file attribute to sort the file selection list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)
+---
+--- Each `shortcut` item should be a list with items at the following indices:
+---  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`
+---  * `2` - The name of a keyboard key. String representations of keys can be found in [`hs.keycodes.map`](https://www.hammerspoon.org/docs/hs.keycodes.html#map).
+---  * `3` - The event handler that defines the action for when the shortcut is triggered
+---  * `4` - A table containing the metadata for the shortcut, also a list with items at the following indices:
+---    * `1` - The category name of the shortcut
+---    * `2` - A description of what the shortcut does
+---
+--- Returns:
+---  * None
+function File:initialize(path, shortcuts, options)
+    options = options or {}
+
+    local absolutePath = hs.fs.pathToAbsolute(path)
+    if not absolutePath then
+        self.notifyError("Error initializing File entity", "Path "..path.." may not exist.")
+        return
+    end
+
+    local success, value = pcall(function() return hs.fs.attributes(absolutePath) or {} end)
+    if not success then
+        self.notifyError("Error initializing File entity", value or "")
+        return
+    end
+
+    local attributes = value
+    local isDirectory = attributes.mode == "directory"
+    local openFileInFolder = self:createEvent(path, "Open a file", function(...)
+        self.open(...)
+    end)
+
+    local actions = {
+        openFileInFolder = openFileInFolder,
+        openFileInFolderWith = self:createEvent(path, "Open file with application", function(target)
+            self:openWith(target)
+        end),
+        showInfoForFileInFolder = self:createEvent(path, "Show info for file", function(target)
+            self:openInfoWindow(target)
+        end),
+        quickLookFileInFolder = self:createEvent(path, "View file with QuickLook", function(target)
+            hs.execute("qlmanage -p "..target)
+        end),
+        deleteFileInFolder = self:createEvent(path, "Move file to trash", function(target)
+            self:moveToTrash(target)
+        end),
+        open = function(target, shouldNavigate)
+            if shouldNavigate then
+                return openFileInFolder(target)
+            end
+
+            return self.open(target)
+        end,
+    }
+    local commonShortcuts = {
+        { nil, nil, actions.open, { path, "Open "..path.." "..attributes.mode } },
+        { { "shift" }, "/", function(...) self:showCheatsheet(...) end, { path, "Show Cheatsheet" } },
+    }
+
+    -- Append directory shortcuts if the file entity is representing a directory path
+    if isDirectory then
+        local commonDirectoryShortcuts = {
+            { nil, "c", function(...) self:copy(...) end, { path, "Copy File to Folder" } },
+            { nil, "d", actions.deleteFileInFolder, { path, "Move File in Folder to Trash" } },
+            { nil, "i", actions.showInfoForFileInFolder, { path, "Open File Info Window" } },
+            { nil, "m", function(...) self:move(...) end, { path, "Move File to Folder" } },
+            { nil, "o", openFileInFolder, { path, "Open File in Folder" } },
+            { nil, "space", actions.quickLookFileInFolder, { path, "Quick Look" } },
+            { { "shift" }, "o", actions.openFileInFolderWith, { path, "Open File in Folder with App" } },
+        }
+
+        for _, shortcut in pairs(commonDirectoryShortcuts) do
+            table.insert(commonShortcuts, shortcut)
+        end
+    end
+
+    self.path = path
+    self.showHiddenFiles = options.showHiddenFiles or false
+    self.sortAttribute = options.sortAttribute or "modification"
+
+    Entity.initialize(self, path, self:mergeShortcuts(shortcuts, commonShortcuts))
 end
 
 return File
