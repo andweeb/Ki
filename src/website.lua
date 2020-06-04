@@ -214,8 +214,8 @@ function Website:initialize(name, url, links, shortcuts)
     self.links = links
 
     local mergedShortcuts = self:mergeShortcuts(shortcuts, {
-        { nil, nil, self.open, { name, "Open Website" } },
-        { { "shift" }, "o", function(...) self:openWith(...) end, { name, "Open Website with Application" } },
+        { nil, nil, self.open, { name, "Open "..name.." in Default Browser" } },
+        { { "shift" }, "o", function(...) self:openWith(...) end, { name, "Open "..name.." with Application" } },
         { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, { name, "Show Cheatsheet" } },
     })
 
