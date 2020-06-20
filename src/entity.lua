@@ -236,10 +236,22 @@ end
 ---  * <kbd>^u</kbd> to navigate a page of rows up
 ---  * <kbd>^d</kbd> to navigate a page of rows down
 Entity.selectionModalShortcuts = {
-    { { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },
-    { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },
-    { { "ctrl" }, "d", function(modal) modal:selectedRow(modal:selectedRow() + modal:rows()) end },
-    { { "ctrl" }, "u", function(modal) modal:selectedRow(modal:selectedRow() - modal:rows()) end },
+    { { "ctrl" }, "j", function(modal)
+        modal:selectedRow(modal:selectedRow() + 1)
+        return true
+    end },
+    { { "ctrl" }, "k", function(modal)
+        modal:selectedRow(modal:selectedRow() - 1)
+        return true
+    end },
+    { { "ctrl" }, "d", function(modal)
+        modal:selectedRow(modal:selectedRow() + modal:rows())
+        return true
+    end },
+    { { "ctrl" }, "u", function(modal)
+        modal:selectedRow(modal:selectedRow() - modal:rows())
+        return true
+    end },
 }
 
 --- Entity:registerSelectionModalShortcuts(shortcuts, override) -> table of registered shortcuts
@@ -314,8 +326,7 @@ function Entity:showSelectionModal(choices, callback, options)
         local modalEventHandler = self.getEventHandler(self.selectionModalShortcuts, flags, keyName)
 
         if modalEventHandler then
-            modalEventHandler(modal)
-            return true
+            return modalEventHandler(modal)
         end
     end)
 

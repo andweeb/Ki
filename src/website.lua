@@ -23,6 +23,32 @@ Website.links = {}
 --- A boolean value to specify whether to show favicons in the selection modal or not. Defaults to `true`.
 Website.displaySelectionModalIcons = true
 
+-- Helper function to create selection modal actions
+function Website.createSelectionModalAction(closeModal, callback)
+    return function(modal)
+        local choice = modal:selectedRowContents()
+
+        if closeModal then modal:cancel() end
+
+        return callback(choice.url)
+    end
+end
+
+-- Register default website selection modal shortcuts
+Website:registerSelectionModalShortcuts({
+    -- Open selected url in the background
+    { { "cmd" }, "return", function(modal)
+        local choice = modal:selectedRowContents()
+        return Website.open(choice.url)
+    end },
+    -- Copy the selected url to clipboard
+    { { "cmd" }, "c", function(modal)
+        local choice = modal:selectedRowContents()
+        modal:cancel()
+        return hs.pasteboard.setContents(choice.url)
+    end },
+})
+
 --- Website.behaviors
 --- Variable
 --- Website [behaviors](Entity.html#behaviors) defined to invoke event handlers with the URL of the website.
@@ -194,7 +220,7 @@ end
 function Website.open(url)
     if not url then return nil end
 
-    hs.urlevent.openURL(url)
+    return hs.urlevent.openURL(url)
 end
 
 --- Website:initialize(name, url, links, shortcuts)
