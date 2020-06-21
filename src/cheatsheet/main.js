@@ -16,6 +16,24 @@ const fuse = new Fuse(flattenedShortcuts, {
 
 const input = document.getElementById('search');
 const columns = document.getElementById('columns');
+const [ content ] = document.getElementsByClassName('content');
+
+document.addEventListener('keydown', event => {
+    event.stopPropagation();
+
+    if (event.ctrlKey && event.key === 'j') {
+        content.scrollTop += 50;
+    }
+    if (event.ctrlKey && event.key === 'k') {
+        content.scrollTop -= 50;
+    }
+    if (event.ctrlKey && event.key === 'd') {
+        content.scrollTop += window.innerHeight / 2;
+    }
+    if (event.ctrlKey && event.key === 'u') {
+        content.scrollTop -= window.innerHeight / 2;
+    }
+});
 
 // Create div with class name
 function createDiv(className) {
