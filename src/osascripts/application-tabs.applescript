@@ -18,7 +18,8 @@ tell application "{{application}}"
 		if ok then
 			repeat with tabItem in tabList
 				set tabURL to URL of tabItem
-				set escapedTabTitle to my replaceString(name of tabItem, "\"", "\\\"")
+				set escapedTabTitle to my replaceString(name of tabItem, "\\", "\\\\")
+				set escapedTabTitle to my replaceString(escapedTabTitle, "\"", "\\\"")
 				set tabTitles to tabTitles & ("\"" & (escapedTabTitle) & " (" & tabURL & ")" & "\"" as string)
 			end repeat
 		end if
