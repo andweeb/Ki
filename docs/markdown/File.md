@@ -21,7 +21,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
  * [openInfoWindow](#openInfoWindow)
  * [openWith](#openWith)
  * [runApplescriptAction](#runApplescriptAction)
- * [showFileSelectionModal](#showFileSelectionModal)
+ * [showFileChooser](#showFileChooser)
 
 ## API Documentation
 
@@ -48,7 +48,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Signature**                               | `File:createEvent(path, placeholderText, handler) -> function`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Convenience method to create file events that share the similar behavior of allowing navigation before item selection                                                                     |
-| **Parameters**                              | <ul><li>`path` - The path of a file</li><li>`placeholderText` - Text to display as a placeholder in the selection modal</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `path` - the selected target path</li></ul> |
+| **Parameters**                              | <ul><li>`path` - The path of a file</li><li>`placeholderText` - Text to display as a placeholder in the chooser</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `path` - the selected target path</li></ul> |
 | **Returns**                                 | <ul><li> An event handler function</li></ul>          |
 
 | [createFileChoices](#createFileChoices)         |                                                                                     |
@@ -80,7 +80,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Signature**                               | `File:initialize(path, shortcuts)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Initializes a new file instance with its path and custom shortcuts. By default, a cheatsheet and common shortcuts are initialized.                                                                     |
-| **Parameters**                              | <ul><li>`path` - The initial directory path</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the file entity</li><li>`options` - A table containing various options that configures the file instance</li><li>  `showHiddenFiles` - A flag to display hidden files in the file selection modal. Defaults to `false`</li><li>  `sortAttribute` - The file attribute to sort the file selection list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)</li></ul> |
+| **Parameters**                              | <ul><li>`path` - The initial directory path</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the file entity</li><li>`options` - A table containing various options that configures the file instance</li><li>  `showHiddenFiles` - A flag to display hidden files in the file chooser. Defaults to `false`</li><li>  `sortAttribute` - The file attribute to sort the file list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
 | [move](#move)         |                                                                                     |
@@ -104,7 +104,7 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Signature**                               | `File:navigate(path, placeholderText, handler)`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Recursively navigates through parent and child directories until a selection is made                                                                     |
-| **Parameters**                              | <ul><li>`path` - the path of the target file</li><li>`placeholderText` - Text to display as a placeholder in the selection modal</li><li>`handler` - the selection callback handler function invoked with the following arguments:</li><li>  `targetFilePath` - the target path of the selected file</li></ul> |
+| **Parameters**                              | <ul><li>`path` - the path of the target file</li><li>`placeholderText` - Text to display as a placeholder in the chooser</li><li>`handler` - the selection callback handler function invoked with the following arguments:</li><li>  `targetFilePath` - the target path of the selected file</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
 | [open](#open)         |                                                                                     |
@@ -139,11 +139,11 @@ File class that subclasses [Entity](Entity.html) to represent some directory or 
 | **Parameters**                              | <ul><li>`viewModel` - The view model object used to render the template</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 
-| [showFileSelectionModal](#showFileSelectionModal)         |                                                                                     |
+| [showFileChooser](#showFileChooser)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `File:showFileSelectionModal(path, handler[, options]) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list`                                                                    |
+| **Signature**                               | `File:showFileChooser(path, handler[, options]) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Shows a selection modal with a list of files at a given path.                                                                     |
-| **Parameters**                              | <ul><li>`path` - the path of the directory that should have its file contents listed in the selection modal</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `targetPath` - the selected target path</li><li>   `shouldTriggerAction` - a boolean value to ensure the action is triggered</li><li>`options` - A table containing various options to configure the underlying [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance</li></ul> |
+| **Description**                             | Shows a [chooser](http://www.hammerspoon.org/docs/hs.chooser.html) with a list of files at a given path.                                                                     |
+| **Parameters**                              | <ul><li>`path` - the path of the directory that should have its file contents listed in the chooser</li><li>`handler` - the selection event handler function that takes in the following arguments:</li><li>   `targetPath` - the selected target path</li><li>   `shouldTriggerAction` - a boolean value to ensure the action is triggered</li><li>`options` - A table containing various options to configure the underlying [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance</li></ul> |
 | **Returns**                                 | <ul><li> A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li></ul>          |
 

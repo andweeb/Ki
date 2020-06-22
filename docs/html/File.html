@@ -39,7 +39,7 @@
             <li><a href="#openInfoWindow">openInfoWindow</a></li>
             <li><a href="#openWith">openWith</a></li>
             <li><a href="#runApplescriptAction">runApplescriptAction</a></li>
-            <li><a href="#showFileSelectionModal">showFileSelectionModal</a></li>
+            <li><a href="#showFileChooser">showFileChooser</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
@@ -114,7 +114,7 @@ Currently supported behaviors:</p>
 <p>Parameters:</p>
 <ul>
 <li><code>path</code> - The path of a file</li>
-<li><code>placeholderText</code> - Text to display as a placeholder in the selection modal</li>
+<li><code>placeholderText</code> - Text to display as a placeholder in the chooser</li>
 <li><code>handler</code> - the selection event handler function that takes in the following arguments:<ul>
 <li><code>path</code> - the selected target path</li>
 </ul>
@@ -237,8 +237,8 @@ Currently supported behaviors:</p>
 <li><code>path</code> - The initial directory path</li>
 <li><code>shortcuts</code> - The list of shortcuts containing keybindings and actions for the file entity</li>
 <li><code>options</code> - A table containing various options that configures the file instance<ul>
-<li><code>showHiddenFiles</code> - A flag to display hidden files in the file selection modal. Defaults to <code>false</code></li>
-<li><code>sortAttribute</code> - The file attribute to sort the file selection list by. File attributes come from <a href="http://www.hammerspoon.org/docs/hs.fs.html#dir">hs.fs.dir</a>. Defaults to <code>modification</code> (last modified timestamp)</li>
+<li><code>showHiddenFiles</code> - A flag to display hidden files in the file chooser. Defaults to <code>false</code></li>
+<li><code>sortAttribute</code> - The file attribute to sort the file list by. File attributes come from <a href="http://www.hammerspoon.org/docs/hs.fs.html#dir">hs.fs.dir</a>. Defaults to <code>modification</code> (last modified timestamp)</li>
 </ul>
 </li>
 </ul>
@@ -333,7 +333,7 @@ Currently supported behaviors:</p>
 <p>Parameters:</p>
 <ul>
 <li><code>path</code> - the path of the target file</li>
-<li><code>placeholderText</code> - Text to display as a placeholder in the selection modal</li>
+<li><code>placeholderText</code> - Text to display as a placeholder in the chooser</li>
 <li><code>handler</code> - the selection callback handler function invoked with the following arguments:<ul>
 <li><code>targetFilePath</code> - the target path of the selected file</li>
 </ul>
@@ -455,13 +455,13 @@ Currently supported behaviors:</p>
               </tr>
             </table>
           </section>
-          <section id="showFileSelectionModal">
-            <a name="//apple_ref/cpp/Method/showFileSelectionModal" class="dashAnchor"></a>
-            <h5><a href="#showFileSelectionModal">showFileSelectionModal</a></h5>
+          <section id="showFileChooser">
+            <a name="//apple_ref/cpp/Method/showFileChooser" class="dashAnchor"></a>
+            <h5><a href="#showFileChooser">showFileChooser</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>File:showFileSelectionModal(path, handler[, options]) -&gt; <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> object list</code></td>
+                <td><code>File:showFileChooser(path, handler[, options]) -&gt; <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> object list</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -469,10 +469,10 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Shows a selection modal with a list of files at a given path.</p>
+                <td><p>Shows a <a href="http://www.hammerspoon.org/docs/hs.chooser.html">chooser</a> with a list of files at a given path.</p>
 <p>Parameters:</p>
 <ul>
-<li><code>path</code> - the path of the directory that should have its file contents listed in the selection modal</li>
+<li><code>path</code> - the path of the directory that should have its file contents listed in the chooser</li>
 <li><code>handler</code> - the selection event handler function that takes in the following arguments:<ul>
 <li><code>targetPath</code> - the selected target path</li>
 <li><code>shouldTriggerAction</code> - a boolean value to ensure the action is triggered</li>

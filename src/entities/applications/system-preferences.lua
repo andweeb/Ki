@@ -11,7 +11,7 @@ SystemPreferences.showAllPreferences = Application.createMenuItemEvent("Show All
 })
 
 -- Implement method to support selection of system preferences in select mode
-function SystemPreferences.getSelectionItems()
+function SystemPreferences.getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("system-preferences", { option = "fetch-panes" })
     local isOk, panes, rawTable = hs.osascript.applescript(script)

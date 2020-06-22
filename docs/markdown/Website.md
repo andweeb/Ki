@@ -7,12 +7,12 @@ Website class that subclasses [Entity](Entity.html) to represent some automatabl
 ## API Overview
 * Variables - Configurable values
  * [behaviors](#behaviors)
- * [displaySelectionModalIcons](#displaySelectionModalIcons)
+ * [displayChooserIcons](#displayChooserIcons)
  * [links](#links)
 * Methods - API calls which can only be made on an object returned by a constructor
+ * [getChooserItems](#getChooserItems)
  * [getDomain](#getDomain)
  * [getFaviconURL](#getFaviconURL)
- * [getSelectionItems](#getSelectionItems)
  * [initialize](#initialize)
  * [open](#open)
  * [openWith](#openWith)
@@ -27,19 +27,26 @@ Website class that subclasses [Entity](Entity.html) to represent some automatabl
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | Website [behaviors](Entity.html#behaviors) defined to invoke event handlers with the URL of the website.                                                                     |
 
-| [displaySelectionModalIcons](#displaySelectionModalIcons)         |                                                                                     |
+| [displayChooserIcons](#displayChooserIcons)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Website.displaySelectionModalIcons`                                                                    |
+| **Signature**                               | `Website.displayChooserIcons`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | A boolean value to specify whether to show favicons in the selection modal or not. Defaults to `true`.                                                                     |
+| **Description**                             | A boolean value to specify whether to show favicons in the chooser or not. Defaults to `true`.                                                                     |
 
 | [links](#links)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Website.links`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | An array of website links used in the default [`Website:getSelectionItems`](#getSelectionItems) method (defaults to an empty list). Any of the following values can be inserted:                                                                     |
+| **Description**                             | An array of website links used in the default [`Website:getChooserItems`](#getChooserItems) method (defaults to an empty list). Any of the following values can be inserted:                                                                     |
 
 ### Methods
+
+| [getChooserItems](#getChooserItems)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Website:getChooserItems() -> table of choices or nil`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Generates a list of chooser items using the instance's [`Website.links`](Website.html#links) list. Each item will display the page favicon if the [`Website.displayChooserIcons`](Website.html#displayChooserIcons) option is set to `true`.                                                                     |
+| **Returns**                                 | <ul><li> A list of choice objects</li></ul>          |
 
 | [getDomain](#getDomain)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -56,13 +63,6 @@ Website class that subclasses [Entity](Entity.html) to represent some automatabl
 | **Description**                             | Returns a URL pointing to a given URL's favicon using Favicon Kit                                                                     |
 | **Parameters**                              | <ul><li>`url` - The url string</li><li>`size` - The pixel size of the favicon, i.e. `32` for a 32x32 favicon. Defaults to `48`.</li></ul> |
 | **Returns**                                 | <ul><li> The string domain of the url or `nil`</li></ul>          |
-
-| [getSelectionItems](#getSelectionItems)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Website:getSelectionItems() -> table of choices or nil`                                                                    |
-| **Type**                                    | Method                                                                     |
-| **Description**                             | Generates a list of selection items using the instance's [`Website.links`](Website.html#links) list. Each item will display the page favicon if the [`Website.displaySelectionModalIcons`](Website.html#displaySelectionModalIcons) option is set to `true`.                                                                     |
-| **Returns**                                 | <ul><li> A list of choice objects</li></ul>          |
 
 | [initialize](#initialize)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -84,7 +84,7 @@ Website class that subclasses [Entity](Entity.html) to represent some automatabl
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Website:openWith(url)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Opens a URL with an application selected from a modal                                                                     |
+| **Description**                             | Opens a URL with an application selected from a chooser                                                                     |
 | **Parameters**                              | <ul><li>`url` - the target url that should be opened with the selected application</li></ul> |
 | **Returns**                                 | <ul><li> None</li></ul>          |
 

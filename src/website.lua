@@ -9,7 +9,7 @@ local spoonPath = hs.spoons.scriptPath()
 
 --- Website.links
 --- Variable
---- An array of website links used in the default [`Website:getSelectionItems`](#getSelectionItems) method (defaults to an empty list). Any of the following values can be inserted:
+--- An array of website links used in the default [`Website:getChooserItems`](#getChooserItems) method (defaults to an empty list). Any of the following values can be inserted:
 ---  * A complete URL string, i.e. `"https://translate.google.com"`
 ---  * A URL path string that can be appended to the website entity's initialized URL, i.e. `"/calendar"`
 ---  * A table containing a `name` string and `link` field that can be either the complete URL string or URL path, i.e.
@@ -18,33 +18,22 @@ local spoonPath = hs.spoons.scriptPath()
 ---  ```
 Website.links = {}
 
---- Website.displaySelectionModalIcons
+--- Website.displayChooserIcons
 --- Variable
---- A boolean value to specify whether to show favicons in the selection modal or not. Defaults to `true`.
-Website.displaySelectionModalIcons = true
+--- A boolean value to specify whether to show favicons in the chooser or not. Defaults to `true`.
+Website.displayChooserIcons = true
 
--- Helper function to create selection modal actions
-function Website.createSelectionModalAction(closeModal, callback)
-    return function(modal)
-        local choice = modal:selectedRowContents()
-
-        if closeModal then modal:cancel() end
-
-        return callback(choice.url)
-    end
-end
-
--- Register default website selection modal shortcuts
-Website:registerSelectionModalShortcuts({
+-- Register default website chooser shortcuts
+Website:registerChooserShortcuts({
     -- Open selected url in the background
-    { { "cmd" }, "return", function(modal)
-        local choice = modal:selectedRowContents()
+    { { "cmd" }, "return", function(chooser)
+        local choice = chooser:selectedRowContents()
         return Website.open(choice.url)
     end },
     -- Copy the selected url to clipboard
-    { { "cmd" }, "c", function(modal)
-        local choice = modal:selectedRowContents()
-        modal:cancel()
+    { { "cmd" }, "c", function(chooser)
+        local choice = chooser:selectedRowContents()
+        chooser:cancel()
         return hs.pasteboard.setContents(choice.url)
     end },
 })
@@ -54,7 +43,7 @@ Website:registerSelectionModalShortcuts({
 --- Website [behaviors](Entity.html#behaviors) defined to invoke event handlers with the URL of the website.
 --- Currently supported behaviors:
 --- * `default` - Simply triggers the event handler with the initialized website url
---- * `select` - Generates a list of choice items from [`Website:getSelectionItems`](#getSelectionItems) and displays them in a selection modal for selection
+--- * `select` - Generates a list of choice items from [`Website:getChooserItems`](#getChooserItems) and displays them in a chooser for selection
 --- * `website` - Triggers the appropriate event handler for the website. Depending on whether the workflow includes select mode, the select mode behavior will be triggered instead
 Website.behaviors = Entity.behaviors + {
     default = function(self, eventHandler)
@@ -62,7 +51,7 @@ Website.behaviors = Entity.behaviors + {
         return true
     end,
     select = function(self, eventHandler)
-        local choices = self:getSelectionItems()
+        local choices = self:getChooserItems()
         local function updateChoices()
             return choices
         end
@@ -74,7 +63,7 @@ Website.behaviors = Entity.behaviors + {
                 end
             end
 
-            self:showSelectionModal(updateChoices, onSelection)
+            self:showChooser(updateChoices, onSelection)
         end
 
         return true
@@ -131,13 +120,13 @@ function Website:getFaviconURL(url, size)
     return "https://api.faviconkit.com/"..domain.."/"..size
 end
 
---- Website:getSelectionItems() -> table of choices or nil
+--- Website:getChooserItems() -> table of choices or nil
 --- Method
---- Generates a list of selection items using the instance's [`Website.links`](Website.html#links) list. Each item will display the page favicon if the [`Website.displaySelectionModalIcons`](Website.html#displaySelectionModalIcons) option is set to `true`.
+--- Generates a list of chooser items using the instance's [`Website.links`](Website.html#links) list. Each item will display the page favicon if the [`Website.displayChooserIcons`](Website.html#displayChooserIcons) option is set to `true`.
 ---
 --- Returns:
 ---   * A list of choice objects
-function Website:getSelectionItems()
+function Website:getChooserItems()
     local choices = {}
 
     for index, link in pairs(self.links) do
@@ -158,7 +147,7 @@ function Website:getSelectionItems()
             choice.url = linkStr
         end
 
-        if self.displaySelectionModalIcons then
+        if self.displayChooserIcons then
             local favicon = self:getFaviconURL(linkStr)
 
             if favicon then
@@ -174,7 +163,7 @@ end
 
 --- Website:openWith(url)
 --- Method
---- Opens a URL with an application selected from a modal
+--- Opens a URL with an application selected from a chooser
 ---
 --- Parameters:
 ---  * `url` - the target url that should be opened with the selected application
@@ -193,9 +182,9 @@ function Website:openWith(url)
         hs.execute("open -a \""..choice.fileName.."\" "..url)
     end
 
-    -- Defer execution to avoid conflicts with the prior selection modal that just closed
+    -- Defer execution to avoid conflicts with the prior chooser that just closed
     hs.timer.doAfter(0, function()
-        self:showSelectionModal(choices, onSelection, {
+        self:showChooser(choices, onSelection, {
             placeholderText = "Open with application",
         })
     end)

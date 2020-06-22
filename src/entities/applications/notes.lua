@@ -18,7 +18,7 @@ Notes.toggleAttachmentsBrowser = Application.createMenuItemEvent({
 }, { isToggleable = true })
 
 -- Implement method to support selection of notes in select mode
-function Notes.getSelectionItems()
+function Notes.getChooserItems()
     local choices = {}
     local isOk, notes, rawTable =
         hs.osascript.applescript(Application.renderScriptTemplate("notes"))

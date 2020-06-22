@@ -56,18 +56,18 @@ function SmartFolder:initialize(path, shortcuts)
     self.cheatsheet = Cheatsheet:new(self.path, cheatsheetDescription, mergedShortcuts)
 end
 
---- SmartFolder:showFileSearchSelectionModal(path, callback)
+--- SmartFolder:showFileSearchChooser(path, callback)
 --- Method
---- Shows a selection modal with smart folder search result choices
+--- Shows a chooser with smart folder search result choices
 ---
 --- Parameters:
 ---  * `path` - The path of the smart folder (`.savedSearch` file)
----  * `callback` - The callback function invoked on a file choice selection with a choice object created from [`File.createFileChoices`](File.html#createFileChoices)
+---  * `callback` - The callback function invoked on a file selection with a choice object created from [`File.createFileChoices`](File.html#createFileChoices)
 ---
 ---
 --- Returns:
 ---  * None
-function SmartFolder:showFileSearchSelectionModal(path, callback)
+function SmartFolder:showFileSearchChooser(path, callback)
     path = path or self.path
 
     local output = hs.execute([[
@@ -75,7 +75,7 @@ function SmartFolder:showFileSearchSelectionModal(path, callback)
     ]])
     local choices = self.createFileChoices(string.gmatch(output, "[^\n]+"))
 
-    self:showSelectionModal(choices, callback)
+    self:showChooser(choices, callback)
 end
 
 --- SmartFolder:openFile(path)
@@ -88,7 +88,7 @@ end
 --- Returns:
 ---  * None
 function SmartFolder:openFile(path)
-    self:showFileSearchSelectionModal(path, function(choice)
+    self:showFileSearchChooser(path, function(choice)
         if choice then hs.open(choice.path) end
     end)
 end
@@ -105,7 +105,7 @@ end
 function SmartFolder:copy(path)
     local startingSearchPath = hs.fs.pathToAbsolute("~")
 
-    self:showFileSearchSelectionModal(path, function(choice)
+    self:showFileSearchChooser(path, function(choice)
         if choice then
             local targetPath = choice.path
 
@@ -134,7 +134,7 @@ end
 --- Returns:
 ---  * None
 function SmartFolder:moveToTrash(path)
-    self:showFileSearchSelectionModal(path, function(choice)
+    self:showFileSearchChooser(path, function(choice)
         if choice then File:moveToTrash(choice.path) end
     end)
 end
@@ -151,7 +151,7 @@ end
 function SmartFolder:move(path)
     local startingSearchPath = hs.fs.pathToAbsolute("~")
 
-    self:showFileSearchSelectionModal(path, function(choice)
+    self:showFileSearchChooser(path, function(choice)
         if choice then
             local targetPath = choice.path
 
@@ -180,7 +180,7 @@ end
 --- Returns:
 ---  * None
 function SmartFolder:openFileWith(path)
-    self:showFileSearchSelectionModal(path, function(choice)
+    self:showFileSearchChooser(path, function(choice)
         if choice then File:openWith(choice.path) end
     end)
 end
@@ -195,7 +195,7 @@ end
 --- Returns:
 ---  * None
 function SmartFolder:openInfoWindow(path)
-    self:showFileSearchSelectionModal(path, function(choice)
+    self:showFileSearchChooser(path, function(choice)
         if choice then File:openInfoWindow(choice.path) end
     end)
 end

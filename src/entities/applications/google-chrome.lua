@@ -25,7 +25,7 @@ GoogleChrome.reopenClosedTab = Application.createMenuItemEvent("Reopen Closed Ta
 GoogleChrome.showHistory = Application.createMenuItemEvent("Show Full History", { focusAfter = true })
 
 -- Implement method to support selection of tab titles in select mode
-function GoogleChrome.getSelectionItems()
+function GoogleChrome.getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("application-tabs", { application = "Google Chrome" })
     local isOk, tabList, rawTable = hs.osascript.applescript(script)

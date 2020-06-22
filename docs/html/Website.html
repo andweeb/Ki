@@ -23,14 +23,14 @@
         <li>Variables - Configurable values</li>
           <ul>
             <li><a href="#behaviors">behaviors</a></li>
-            <li><a href="#displaySelectionModalIcons">displaySelectionModalIcons</a></li>
+            <li><a href="#displayChooserIcons">displayChooserIcons</a></li>
             <li><a href="#links">links</a></li>
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
+            <li><a href="#getChooserItems">getChooserItems</a></li>
             <li><a href="#getDomain">getDomain</a></li>
             <li><a href="#getFaviconURL">getFaviconURL</a></li>
-            <li><a href="#getSelectionItems">getSelectionItems</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#open">open</a></li>
             <li><a href="#openWith">openWith</a></li>
@@ -56,20 +56,20 @@
 Currently supported behaviors:</p>
 <ul>
 <li><code>default</code> - Simply triggers the event handler with the initialized website url</li>
-<li><code>select</code> - Generates a list of choice items from <a href="#getSelectionItems"><code>Website:getSelectionItems</code></a> and displays them in a selection modal for selection</li>
+<li><code>select</code> - Generates a list of choice items from <a href="#getChooserItems"><code>Website:getChooserItems</code></a> and displays them in a chooser for selection</li>
 <li><code>website</code> - Triggers the appropriate event handler for the website. Depending on whether the workflow includes select mode, the select mode behavior will be triggered instead</li>
 </ul>
 </td>
               </tr>
             </table>
           </section>
-          <section id="displaySelectionModalIcons">
-            <a name="//apple_ref/cpp/Variable/displaySelectionModalIcons" class="dashAnchor"></a>
-            <h5><a href="#displaySelectionModalIcons">displaySelectionModalIcons</a></h5>
+          <section id="displayChooserIcons">
+            <a name="//apple_ref/cpp/Variable/displayChooserIcons" class="dashAnchor"></a>
+            <h5><a href="#displayChooserIcons">displayChooserIcons</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Website.displaySelectionModalIcons</code></td>
+                <td><code>Website.displayChooserIcons</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -77,7 +77,7 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A boolean value to specify whether to show favicons in the selection modal or not. Defaults to <code>true</code>.</p>
+                <td><p>A boolean value to specify whether to show favicons in the chooser or not. Defaults to <code>true</code>.</p>
 </td>
               </tr>
             </table>
@@ -96,7 +96,7 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>An array of website links used in the default <a href="#getSelectionItems"><code>Website:getSelectionItems</code></a> method (defaults to an empty list). Any of the following values can be inserted:</p>
+                <td><p>An array of website links used in the default <a href="#getChooserItems"><code>Website:getChooserItems</code></a> method (defaults to an empty list). Any of the following values can be inserted:</p>
 <ul>
 <li>A complete URL string, i.e. <code>"https://translate.google.com"</code></li>
 <li>A URL path string that can be appended to the website entity's initialized URL, i.e. <code>"/calendar"</code></li>
@@ -109,6 +109,29 @@ Currently supported behaviors:</p>
             </table>
           </section>
         <h4 class="documentation-section">Methods</h4>
+          <section id="getChooserItems">
+            <a name="//apple_ref/cpp/Method/getChooserItems" class="dashAnchor"></a>
+            <h5><a href="#getChooserItems">getChooserItems</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Website:getChooserItems() -&gt; table of choices or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Generates a list of chooser items using the instance's <a href="Website.html#links"><code>Website.links</code></a> list. Each item will display the page favicon if the <a href="Website.html#displayChooserIcons"><code>Website.displayChooserIcons</code></a> option is set to <code>true</code>.</p>
+<p>Returns:</p>
+<ul>
+<li>A list of choice objects</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="getDomain">
             <a name="//apple_ref/cpp/Method/getDomain" class="dashAnchor"></a>
             <h5><a href="#getDomain">getDomain</a></h5>
@@ -159,29 +182,6 @@ Currently supported behaviors:</p>
 <p>Returns:</p>
 <ul>
 <li>The string domain of the url or <code>nil</code></li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="getSelectionItems">
-            <a name="//apple_ref/cpp/Method/getSelectionItems" class="dashAnchor"></a>
-            <h5><a href="#getSelectionItems">getSelectionItems</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Website:getSelectionItems() -&gt; table of choices or nil</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Generates a list of selection items using the instance's <a href="Website.html#links"><code>Website.links</code></a> list. Each item will display the page favicon if the <a href="Website.html#displaySelectionModalIcons"><code>Website.displaySelectionModalIcons</code></a> option is set to <code>true</code>.</p>
-<p>Returns:</p>
-<ul>
-<li>A list of choice objects</li>
 </ul>
 </td>
               </tr>
@@ -258,7 +258,7 @@ Currently supported behaviors:</p>
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Opens a URL with an application selected from a modal</p>
+                <td><p>Opens a URL with an application selected from a chooser</p>
 <p>Parameters:</p>
 <ul>
 <li><code>url</code> - the target url that should be opened with the selected application</li>

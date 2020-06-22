@@ -7,20 +7,20 @@ Entity class that represents some abstract automatable desktop entity
 ## API Overview
 * Variables - Configurable values
  * [behaviors](#behaviors)
- * [selectionModal](#selectionModal)
- * [selectionModalShortcuts](#selectionModalShortcuts)
+ * [chooser](#chooser)
+ * [chooserShortcuts](#chooserShortcuts)
 * Methods - API calls which can only be made on an object returned by a constructor
  * [dispatchAction](#dispatchAction)
+ * [getChooserItems](#getChooserItems)
  * [getEventHandler](#getEventHandler)
- * [getSelectionItems](#getSelectionItems)
  * [initialize](#initialize)
  * [loadChooserRowImage](#loadChooserRowImage)
  * [notifyError](#notifyError)
- * [registerSelectionModalShortcuts](#registerSelectionModalShortcuts)
+ * [registerChooserShortcuts](#registerChooserShortcuts)
  * [registerShortcuts](#registerShortcuts)
  * [renderScriptTemplate](#renderScriptTemplate)
  * [showActions](#showActions)
- * [showSelectionModal](#showSelectionModal)
+ * [showChooser](#showChooser)
  * [triggerAfterConfirmation](#triggerAfterConfirmation)
 
 ## API Documentation
@@ -33,17 +33,17 @@ Entity class that represents some abstract automatable desktop entity
 | **Type**                                    | Variable                                                                     |
 | **Description**                             | A table keyed by mode name to define (optional) entity behavior contextual to the mode at the time of an event. The table values are functions that take in the following arguments to invoke the event handler in some mode-specific way:                                                                     |
 
-| [selectionModal](#selectionModal)         |                                                                                     |
+| [chooser](#chooser)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity.selectionModal`                                                                    |
+| **Signature**                               | `Entity.chooser`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | The selection modal [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.                                                                     |
+| **Description**                             | The chooser [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.                                                                     |
 
-| [selectionModalShortcuts](#selectionModalShortcuts)         |                                                                                     |
+| [chooserShortcuts](#chooserShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity.selectionModalShortcuts`                                                                    |
+| **Signature**                               | `Entity.chooserShortcuts`                                                                    |
 | **Type**                                    | Variable                                                                     |
-| **Description**                             | A list of shortcuts that can be used when the selection modal is visible. The following shortcuts are available by default:                                                                     |
+| **Description**                             | A list of shortcuts that can be used when the chooser is visible. The following shortcuts are available by default:                                                                     |
 
 ### Methods
 
@@ -55,6 +55,13 @@ Entity class that represents some abstract automatable desktop entity
 | **Parameters**                              | <ul><li>`mode` - The name of the current mode</li><li>`shortcut` - A shortcut object containing the keybindings and event handler for the entity</li><li>`workflow` - The list of events that compose the current workflow</li></ul> |
 | **Returns**                                 | <ul><li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul>          |
 
+| [getChooserItems](#getChooserItems)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity:getChooserItems() -> table of choices or nil`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | Returns a list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display in the chooser. Entities intended to be used with select mode must implement this method to correctly display items in the chooser.                                                                     |
+| **Returns**                                 | <ul><li> `choices` - A list of choices or `nil`</li></ul>          |
+
 | [getEventHandler](#getEventHandler)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Entity:getEventHandler(shortcuts, flags, keyName) -> function or nil`                                                                    |
@@ -62,13 +69,6 @@ Entity class that represents some abstract automatable desktop entity
 | **Description**                             | Returns the event handler within the provided shortcuts with the given shortcut keybindings, or nil if not found                                                                     |
 | **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects</li><li>`flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)</li><li>`keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)</li></ul> |
 | **Returns**                                 | <ul><li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul>          |
-
-| [getSelectionItems](#getSelectionItems)         |                                                                                     |
-| --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity:getSelectionItems() -> table of choices or nil`                                                                    |
-| **Type**                                    | Method                                                                     |
-| **Description**                             | Returns a list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display in the selection modal. Entities intended to be used with select mode must implement this method to correctly display items in the selection modal.                                                                     |
-| **Returns**                                 | <ul><li> `selectionItems` - A list of choices or `nil`</li></ul>          |
 
 | [initialize](#initialize)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -82,7 +82,7 @@ Entity class that represents some abstract automatable desktop entity
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Entity:loadChooserRowImage(choices, imageURL, index)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | For a chooser with a choices callback, asynchronously loads an image from a URLfor a given row item and refreshes the callback.                                                                     |
+| **Description**                             | For a chooser with a choices callback, asynchronously loads an image from a URL for a given row item and refreshes the callback.                                                                     |
 | **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li><li>`imageURL` - URL of the image to load</li><li>`index` - The index of the choice to have its image set to the loaded [hs.image](http://www.hammerspoon.org/docs/hs.image.html)</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
@@ -94,13 +94,13 @@ Entity class that represents some abstract automatable desktop entity
 | **Parameters**                              | <ul><li>`message` - The main notification message</li><li>`details` - The textual body of the notification containing details of the error</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
-| [registerSelectionModalShortcuts](#registerSelectionModalShortcuts)         |                                                                                     |
+| [registerChooserShortcuts](#registerChooserShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity:registerSelectionModalShortcuts(shortcuts, override) -> table of registered shortcuts`                                                                    |
+| **Signature**                               | `Entity:registerChooserShortcuts(shortcuts, override) -> table of registered shortcuts`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Registers a list of selection modal shortcuts with the option of merging with the existing [default](#selectionModalShortcuts) or previously initialized modal shortcuts.                                                                     |
-| **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects. Shortcut event handlers will be invoked with the [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance:</li><li>   ```</li><li>   { { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },</li><li>   { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },</li><li>   ```</li><li>`override` - A boolean denoting to whether to override the existing selection modal shortcuts</li></ul> |
-| **Returns**                                 | <ul><li> `shortcuts` - Returns the list of registered selection modal shortcuts</li></ul>          |
+| **Description**                             | Registers a list of chooser shortcuts with the option of merging with the existing [default](#chooserShortcuts) or previously initialized chooser shortcuts.                                                                     |
+| **Parameters**                              | <ul><li>`shortcuts` - The list of shortcut objects. Shortcut event handlers will be invoked with the [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance:</li><li>   ```</li><li>   { { "ctrl" }, "j", function(chooser) chooser:selectedRow(chooser:selectedRow() + 1) end },</li><li>   { { "ctrl" }, "k", function(chooser) chooser:selectedRow(chooser:selectedRow() - 1) end },</li><li>   ```</li><li>`override` - A boolean denoting to whether to override the existing chooser shortcuts</li></ul> |
+| **Returns**                                 | <ul><li> `shortcuts` - Returns the list of registered chooser shortcuts</li></ul>          |
 
 | [registerShortcuts](#registerShortcuts)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
@@ -122,15 +122,15 @@ Entity class that represents some abstract automatable desktop entity
 | --------------------------------------------|-------------------------------------------------------------------------------------|
 | **Signature**                               | `Entity:showActions()`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Opens a selection modal populated with actions configured on the entity, which upon selection will trigger the action                                                                     |
+| **Description**                             | Opens a chooser populated with actions configured on the entity, which upon selection will trigger the action                                                                     |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
-| [showSelectionModal](#showSelectionModal)         |                                                                                     |
+| [showChooser](#showChooser)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity:showSelectionModal(choices, callback[, options])`                                                                    |
+| **Signature**                               | `Entity:showChooser(choices, callback[, options])`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.                                                                     |
-| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal</li><li>`callback` - The callback function invoked when a choice is selected from the modal</li><li>`options` - A table containing various options to configure the modal:</li><li>  `placeholderText` - Set the placeholder text</li></ul> |
+| **Description**                             | Shows a [chooser](http://www.hammerspoon.org/docs/hs.chooser.html) with a list of choices. The chooser can be closed with Escape <kbd>⎋</kbd>.                                                                     |
+| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser</li><li>`callback` - The callback function invoked when a row is selected</li><li>`options` - A table containing various options to configure the chooser:</li><li>  `placeholderText` - Set the placeholder text</li></ul> |
 | **Returns**                                 | <ul><li>The [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) object</li></ul>          |
 
 | [triggerAfterConfirmation](#triggerAfterConfirmation)         |                                                                                     |

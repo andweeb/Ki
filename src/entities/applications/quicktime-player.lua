@@ -8,10 +8,10 @@ local QuickTimePlayer = Application:new("QuickTime Player")
 QuickTimePlayer.newAudioRecording = Application.createMenuItemEvent("New Audio Recording")
 QuickTimePlayer.newMovieRecording = Application.createMenuItemEvent("New Movie Recording")
 QuickTimePlayer.openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
-QuickTimePlayer.openRecent = Application.createMenuItemSelectionEvent({ "File", "Open Recent" }, { focusAfter = true })
+QuickTimePlayer.openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent" }, { focusAfter = true })
 QuickTimePlayer.newScreenRecording = Application.createMenuItemEvent("New Screen Recording")
 QuickTimePlayer.trim = Application.createMenuItemEvent("Trim...", { focusBefore = true })
-QuickTimePlayer.exportAs = Application.createMenuItemSelectionEvent({ "File", "Export As" }, { focusBefore = true })
+QuickTimePlayer.exportAs = Application.createMenuItemChooserEvent({ "File", "Export As" }, { focusBefore = true })
 
 -- Helper method to run AppleScript actions available in `osascripts/google-chrome.applescript`
 function QuickTimePlayer:runApplescriptAction(errorMessage, viewModel)

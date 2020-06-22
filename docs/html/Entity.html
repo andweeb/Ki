@@ -23,22 +23,22 @@
         <li>Variables - Configurable values</li>
           <ul>
             <li><a href="#behaviors">behaviors</a></li>
-            <li><a href="#selectionModal">selectionModal</a></li>
-            <li><a href="#selectionModalShortcuts">selectionModalShortcuts</a></li>
+            <li><a href="#chooser">chooser</a></li>
+            <li><a href="#chooserShortcuts">chooserShortcuts</a></li>
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
             <li><a href="#dispatchAction">dispatchAction</a></li>
+            <li><a href="#getChooserItems">getChooserItems</a></li>
             <li><a href="#getEventHandler">getEventHandler</a></li>
-            <li><a href="#getSelectionItems">getSelectionItems</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#loadChooserRowImage">loadChooserRowImage</a></li>
             <li><a href="#notifyError">notifyError</a></li>
-            <li><a href="#registerSelectionModalShortcuts">registerSelectionModalShortcuts</a></li>
+            <li><a href="#registerChooserShortcuts">registerChooserShortcuts</a></li>
             <li><a href="#registerShortcuts">registerShortcuts</a></li>
             <li><a href="#renderScriptTemplate">renderScriptTemplate</a></li>
             <li><a href="#showActions">showActions</a></li>
-            <li><a href="#showSelectionModal">showSelectionModal</a></li>
+            <li><a href="#showChooser">showChooser</a></li>
             <li><a href="#triggerAfterConfirmation">triggerAfterConfirmation</a></li>
           </ul>
       </ul>
@@ -74,13 +74,13 @@
               </tr>
             </table>
           </section>
-          <section id="selectionModal">
-            <a name="//apple_ref/cpp/Variable/selectionModal" class="dashAnchor"></a>
-            <h5><a href="#selectionModal">selectionModal</a></h5>
+          <section id="chooser">
+            <a name="//apple_ref/cpp/Variable/chooser" class="dashAnchor"></a>
+            <h5><a href="#chooser">chooser</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity.selectionModal</code></td>
+                <td><code>Entity.chooser</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -88,18 +88,18 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>The selection modal <a href="https://www.hammerspoon.org/docs/hs.chooser.html"><code>hs.chooser</code></a> instance or <code>nil</code> if not active.</p>
+                <td><p>The chooser <a href="https://www.hammerspoon.org/docs/hs.chooser.html"><code>hs.chooser</code></a> instance or <code>nil</code> if not active.</p>
 </td>
               </tr>
             </table>
           </section>
-          <section id="selectionModalShortcuts">
-            <a name="//apple_ref/cpp/Variable/selectionModalShortcuts" class="dashAnchor"></a>
-            <h5><a href="#selectionModalShortcuts">selectionModalShortcuts</a></h5>
+          <section id="chooserShortcuts">
+            <a name="//apple_ref/cpp/Variable/chooserShortcuts" class="dashAnchor"></a>
+            <h5><a href="#chooserShortcuts">chooserShortcuts</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity.selectionModalShortcuts</code></td>
+                <td><code>Entity.chooserShortcuts</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -107,7 +107,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>A list of shortcuts that can be used when the selection modal is visible. The following shortcuts are available by default:</p>
+                <td><p>A list of shortcuts that can be used when the chooser is visible. The following shortcuts are available by default:</p>
 <ul>
 <li><kbd>^k</kbd> to navigate up an item</li>
 <li><kbd>^j</kbd> to navigate down an item</li>
@@ -148,6 +148,29 @@
               </tr>
             </table>
           </section>
+          <section id="getChooserItems">
+            <a name="//apple_ref/cpp/Method/getChooserItems" class="dashAnchor"></a>
+            <h5><a href="#getChooserItems">getChooserItems</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Entity:getChooserItems() -&gt; table of choices or nil</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Returns a list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display in the chooser. Entities intended to be used with select mode must implement this method to correctly display items in the chooser.</p>
+<p>Returns:</p>
+<ul>
+<li><code>choices</code> - A list of choices or <code>nil</code></li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="getEventHandler">
             <a name="//apple_ref/cpp/Method/getEventHandler" class="dashAnchor"></a>
             <h5><a href="#getEventHandler">getEventHandler</a></h5>
@@ -172,29 +195,6 @@
 <p>Returns:</p>
 <ul>
 <li>A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="getSelectionItems">
-            <a name="//apple_ref/cpp/Method/getSelectionItems" class="dashAnchor"></a>
-            <h5><a href="#getSelectionItems">getSelectionItems</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Entity:getSelectionItems() -&gt; table of choices or nil</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Returns a list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display in the selection modal. Entities intended to be used with select mode must implement this method to correctly display items in the selection modal.</p>
-<p>Returns:</p>
-<ul>
-<li><code>selectionItems</code> - A list of choices or <code>nil</code></li>
 </ul>
 </td>
               </tr>
@@ -254,7 +254,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>For a chooser with a choices callback, asynchronously loads an image from a URLfor a given row item and refreshes the callback.</p>
+                <td><p>For a chooser with a choices callback, asynchronously loads an image from a URL for a given row item and refreshes the callback.</p>
 <p>Parameters:</p>
 <ul>
 <li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects</li>
@@ -297,13 +297,13 @@
               </tr>
             </table>
           </section>
-          <section id="registerSelectionModalShortcuts">
-            <a name="//apple_ref/cpp/Method/registerSelectionModalShortcuts" class="dashAnchor"></a>
-            <h5><a href="#registerSelectionModalShortcuts">registerSelectionModalShortcuts</a></h5>
+          <section id="registerChooserShortcuts">
+            <a name="//apple_ref/cpp/Method/registerChooserShortcuts" class="dashAnchor"></a>
+            <h5><a href="#registerChooserShortcuts">registerChooserShortcuts</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity:registerSelectionModalShortcuts(shortcuts, override) -&gt; table of registered shortcuts</code></td>
+                <td><code>Entity:registerChooserShortcuts(shortcuts, override) -&gt; table of registered shortcuts</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -311,18 +311,18 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Registers a list of selection modal shortcuts with the option of merging with the existing <a href="#selectionModalShortcuts">default</a> or previously initialized modal shortcuts.</p>
+                <td><p>Registers a list of chooser shortcuts with the option of merging with the existing <a href="#chooserShortcuts">default</a> or previously initialized chooser shortcuts.</p>
 <p>Parameters:</p>
 <ul>
 <li><code>shortcuts</code> - The list of shortcut objects. Shortcut event handlers will be invoked with the <a href="https://www.hammerspoon.org/docs/hs.chooser.html"><code>hs.chooser</code></a> instance:
-<pre><code>{ { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },
-{ { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },</code></pre>
+<pre><code>{ { "ctrl" }, "j", function(chooser) chooser:selectedRow(chooser:selectedRow() + 1) end },
+{ { "ctrl" }, "k", function(chooser) chooser:selectedRow(chooser:selectedRow() - 1) end },</code></pre>
 </li>
-<li><code>override</code> - A boolean denoting to whether to override the existing selection modal shortcuts</li>
+<li><code>override</code> - A boolean denoting to whether to override the existing chooser shortcuts</li>
 </ul>
 <p>Returns:</p>
 <ul>
-<li><code>shortcuts</code> - Returns the list of registered selection modal shortcuts</li>
+<li><code>shortcuts</code> - Returns the list of registered chooser shortcuts</li>
 </ul>
 </td>
               </tr>
@@ -398,7 +398,7 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Opens a selection modal populated with actions configured on the entity, which upon selection will trigger the action</p>
+                <td><p>Opens a chooser populated with actions configured on the entity, which upon selection will trigger the action</p>
 <p>Returns:</p>
 <ul>
 <li>None</li>
@@ -407,13 +407,13 @@
               </tr>
             </table>
           </section>
-          <section id="showSelectionModal">
-            <a name="//apple_ref/cpp/Method/showSelectionModal" class="dashAnchor"></a>
-            <h5><a href="#showSelectionModal">showSelectionModal</a></h5>
+          <section id="showChooser">
+            <a name="//apple_ref/cpp/Method/showChooser" class="dashAnchor"></a>
+            <h5><a href="#showChooser">showChooser</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity:showSelectionModal(choices, callback[, options])</code></td>
+                <td><code>Entity:showChooser(choices, callback[, options])</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -421,12 +421,12 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.</p>
+                <td><p>Shows a <a href="http://www.hammerspoon.org/docs/hs.chooser.html">chooser</a> with a list of choices. The chooser can be closed with Escape <kbd>⎋</kbd>.</p>
 <p>Parameters:</p>
 <ul>
-<li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display on the chooser modal</li>
-<li><code>callback</code> - The callback function invoked when a choice is selected from the modal</li>
-<li><code>options</code> - A table containing various options to configure the modal:<ul>
+<li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects to display on the chooser</li>
+<li><code>callback</code> - The callback function invoked when a row is selected</li>
+<li><code>options</code> - A table containing various options to configure the chooser:<ul>
 <li><code>placeholderText</code> - Set the placeholder text</li>
 </ul>
 </li>

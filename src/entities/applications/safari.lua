@@ -47,7 +47,7 @@ Safari.toggleCaptions = Safari:createMediaAction("toggle-captions", "Error toggl
 Safari.skipMedia = Safari:createMediaAction("skip", "Error skipping media")
 
 -- Implement method to support selection of tab titles in select mode
-function Safari.getSelectionItems()
+function Safari.getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("application-tabs", { application = "Safari" })
     local isOk, tabList, rawTable = hs.osascript.applescript(script)

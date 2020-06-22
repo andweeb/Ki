@@ -29,7 +29,7 @@
             <li><a href="#openFile">openFile</a></li>
             <li><a href="#openFileWith">openFileWith</a></li>
             <li><a href="#openInfoWindow">openInfoWindow</a></li>
-            <li><a href="#showFileSearchSelectionModal">showFileSearchSelectionModal</a></li>
+            <li><a href="#showFileSearchChooser">showFileSearchChooser</a></li>
           </ul>
       </ul>
       <h3>API Documentation</h3>
@@ -235,13 +235,13 @@
               </tr>
             </table>
           </section>
-          <section id="showFileSearchSelectionModal">
-            <a name="//apple_ref/cpp/Method/showFileSearchSelectionModal" class="dashAnchor"></a>
-            <h5><a href="#showFileSearchSelectionModal">showFileSearchSelectionModal</a></h5>
+          <section id="showFileSearchChooser">
+            <a name="//apple_ref/cpp/Method/showFileSearchChooser" class="dashAnchor"></a>
+            <h5><a href="#showFileSearchChooser">showFileSearchChooser</a></h5>
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>SmartFolder:showFileSearchSelectionModal(path, callback)</code></td>
+                <td><code>SmartFolder:showFileSearchChooser(path, callback)</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -249,11 +249,11 @@
               </tr>
               <tr>
                 <th>Description</th>
-                <td><p>Shows a selection modal with smart folder search result choices</p>
+                <td><p>Shows a chooser with smart folder search result choices</p>
 <p>Parameters:</p>
 <ul>
 <li><code>path</code> - The path of the smart folder (<code>.savedSearch</code> file)</li>
-<li><code>callback</code> - The callback function invoked on a file choice selection with a choice object created from <a href="File.html#createFileChoices"><code>File.createFileChoices</code></a></li>
+<li><code>callback</code> - The callback function invoked on a file selection with a choice object created from <a href="File.html#createFileChoices"><code>File.createFileChoices</code></a></li>
 </ul>
 <p>Returns:</p>
 <ul>

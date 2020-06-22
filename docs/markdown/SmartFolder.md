@@ -13,7 +13,7 @@ SmartFolder class that subclasses [File](File.html) to represent a [smart folder
  * [openFile](#openFile)
  * [openFileWith](#openFileWith)
  * [openInfoWindow](#openInfoWindow)
- * [showFileSearchSelectionModal](#showFileSearchSelectionModal)
+ * [showFileSearchChooser](#showFileSearchChooser)
 
 ## API Documentation
 
@@ -75,11 +75,11 @@ SmartFolder class that subclasses [File](File.html) to represent a [smart folder
 | **Parameters**                              | <ul><li>`path` - The path of the smart folder (`.savedSearch` file)</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
-| [showFileSearchSelectionModal](#showFileSearchSelectionModal)         |                                                                                     |
+| [showFileSearchChooser](#showFileSearchChooser)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `SmartFolder:showFileSearchSelectionModal(path, callback)`                                                                    |
+| **Signature**                               | `SmartFolder:showFileSearchChooser(path, callback)`                                                                    |
 | **Type**                                    | Method                                                                     |
-| **Description**                             | Shows a selection modal with smart folder search result choices                                                                     |
-| **Parameters**                              | <ul><li>`path` - The path of the smart folder (`.savedSearch` file)</li><li>`callback` - The callback function invoked on a file choice selection with a choice object created from [`File.createFileChoices`](File.html#createFileChoices)</li></ul> |
+| **Description**                             | Shows a chooser with smart folder search result choices                                                                     |
+| **Parameters**                              | <ul><li>`path` - The path of the smart folder (`.savedSearch` file)</li><li>`callback` - The callback function invoked on a file selection with a choice object created from [`File.createFileChoices`](File.html#createFileChoices)</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 

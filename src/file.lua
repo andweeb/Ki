@@ -50,7 +50,7 @@ end
 ---
 --- Parameters:
 ---  * `path` - The path of a file
----  * `placeholderText` - Text to display as a placeholder in the selection modal
+---  * `placeholderText` - Text to display as a placeholder in the chooser
 ---  * `handler` - the selection event handler function that takes in the following arguments:
 ---     * `path` - the selected target path
 ---
@@ -128,7 +128,7 @@ end
 ---
 --- Parameters:
 ---  * `path` - the path of the target file
----  * `placeholderText` - Text to display as a placeholder in the selection modal
+---  * `placeholderText` - Text to display as a placeholder in the chooser
 ---  * `handler` - the selection callback handler function invoked with the following arguments:
 ---    * `targetFilePath` - the target path of the selected file
 ---
@@ -146,20 +146,20 @@ function File:navigate(path, placeholderText, handler)
         end
     end
 
-    -- Defer execution to avoid conflicts with the selection modal that just previously closed
+    -- Defer execution to avoid conflicts with the chooser that just previously closed
     hs.timer.doAfter(0, function()
-        self:showFileSelectionModal(absolutePath, onSelection, {
+        self:showFileChooser(absolutePath, onSelection, {
             placeholderText = placeholderText,
         })
     end)
 end
 
---- File:showFileSelectionModal(path, handler[, options]) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list
+--- File:showFileChooser(path, handler[, options]) -> [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) object list
 --- Method
---- Shows a selection modal with a list of files at a given path.
+--- Shows a [chooser](http://www.hammerspoon.org/docs/hs.chooser.html) with a list of files at a given path.
 ---
 --- Parameters:
----  * `path` - the path of the directory that should have its file contents listed in the selection modal
+---  * `path` - the path of the directory that should have its file contents listed in the chooser
 ---  * `handler` - the selection event handler function that takes in the following arguments:
 ---     * `targetPath` - the selected target path
 ---     * `shouldTriggerAction` - a boolean value to ensure the action is triggered
@@ -167,34 +167,34 @@ end
 ---
 --- Returns:
 ---   * A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects
-function File:showFileSelectionModal(path, handler, options)
+function File:showFileChooser(path, handler, options)
     local choices = {}
     local parentPathRegex = "^(.+)/.+$"
     local absolutePath = hs.fs.pathToAbsolute(path)
     local parentDirectory = absolutePath:match(parentPathRegex) or "/"
 
-    -- Add selection modal shortcut to open files with cmd + return
-    local function openFile(modal)
-        local selectedRow = modal:selectedRow()
-        local choice = modal:selectedRowContents(selectedRow)
+    -- Add chooser shortcut to open files with cmd + return
+    local function openFile(chooser)
+        local selectedRow = chooser:selectedRow()
+        local choice = chooser:selectedRowContents(selectedRow)
         handler(choice.filePath, true)
-        modal:cancel()
+        chooser:cancel()
     end
-    -- Add selection modal shortcut to toggle hidden files cmd + shift + "."
-    local function toggleHiddenFiles(modal)
-        modal:cancel()
+    -- Add chooser shortcut to toggle hidden files cmd + shift + "."
+    local function toggleHiddenFiles(chooser)
+        chooser:cancel()
         self.showHiddenFiles = not self.showHiddenFiles
 
-        -- Defer execution to avoid conflicts with the prior selection modal that just closed
+        -- Defer execution to avoid conflicts with the prior chooser that just closed
         hs.timer.doAfter(0, function()
-            self:showFileSelectionModal(path, handler, options)
+            self:showFileChooser(path, handler, options)
         end)
     end
     local navigationShortcuts = {
         { { "cmd" }, "return", openFile },
         { { "cmd", "shift" }, ".", toggleHiddenFiles },
     }
-    self.selectionModalShortcuts = self:mergeShortcuts(navigationShortcuts, self.selectionModalShortcuts)
+    self.chooserShortcuts = self:mergeShortcuts(navigationShortcuts, self.chooserShortcuts)
 
     local iterator, directory = hs.fs.dir(absolutePath)
     if iterator == nil then
@@ -249,7 +249,7 @@ function File:showFileSelectionModal(path, handler, options)
         end
     end
 
-    self:showSelectionModal(choices, onSelection, options)
+    self:showChooser(choices, onSelection, options)
 end
 
 --- File:open(path)
@@ -340,9 +340,9 @@ function File:openWith(path)
         })
     end
 
-    -- Defer execution to avoid conflicts with the prior selection modal that just closed
+    -- Defer execution to avoid conflicts with the prior chooser that just closed
     hs.timer.doAfter(0, function()
-        self:showSelectionModal(choices, onSelection, {
+        self:showChooser(choices, onSelection, {
             placeholderText = "Open with application",
         })
     end)
@@ -444,8 +444,8 @@ end
 ---  * `path` - The initial directory path
 ---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the file entity
 ---  * `options` - A table containing various options that configures the file instance
----    * `showHiddenFiles` - A flag to display hidden files in the file selection modal. Defaults to `false`
----    * `sortAttribute` - The file attribute to sort the file selection list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)
+---    * `showHiddenFiles` - A flag to display hidden files in the file chooser. Defaults to `false`
+---    * `sortAttribute` - The file attribute to sort the file list by. File attributes come from [hs.fs.dir](http://www.hammerspoon.org/docs/hs.fs.html#dir). Defaults to `modification` (last modified timestamp)
 ---
 --- Each `shortcut` item should be a list with items at the following indices:
 ---  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`

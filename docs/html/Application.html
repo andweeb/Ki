@@ -26,12 +26,12 @@
           </ul>
         <li>Methods - API calls which can only be made on an object returned by a constructor</li>
           <ul>
+            <li><a href="#createMenuItemChooserEvent">createMenuItemChooserEvent</a></li>
             <li><a href="#createMenuItemEvent">createMenuItemEvent</a></li>
-            <li><a href="#createMenuItemSelectionEvent">createMenuItemSelectionEvent</a></li>
             <li><a href="#focus">focus</a></li>
             <li><a href="#getApplication">getApplication</a></li>
+            <li><a href="#getChooserItems">getChooserItems</a></li>
             <li><a href="#getMenuItemList">getMenuItemList</a></li>
-            <li><a href="#getSelectionItems">getSelectionItems</a></li>
             <li><a href="#initialize">initialize</a></li>
             <li><a href="#toggleFullScreen">toggleFullScreen</a></li>
           </ul>
@@ -58,6 +58,38 @@
             </table>
           </section>
         <h4 class="documentation-section">Methods</h4>
+          <section id="createMenuItemChooserEvent">
+            <a name="//apple_ref/cpp/Method/createMenuItemChooserEvent" class="dashAnchor"></a>
+            <h5><a href="#createMenuItemChooserEvent">createMenuItemChooserEvent</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application.createMenuItemChooserEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Convenience method to create an event handler that presents a chooser containing menu items that are nested/expandable underneath at the provided <code>menuItem</code> path, with optionally specified behavior on how the menu item selection occurs</p>
+<p>Parameters:</p>
+<ul>
+<li><code>menuItem</code> - a table list of strings that represent a path to a menu item that expands to menu item list, i.e., <code>{ "File", "Open Recent" }</code></li>
+<li><code>options</code> - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:<ul>
+<li><code>focusBefore</code> - an optional boolean denoting whether to focus the application before the menu item is selected</li>
+<li><code>focusAfter</code> - an optional boolean denoting whether to focus the application after the menu item is selected</li>
+</ul>
+</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>None</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="createMenuItemEvent">
             <a name="//apple_ref/cpp/Method/createMenuItemEvent" class="dashAnchor"></a>
             <h5><a href="#createMenuItemEvent">createMenuItemEvent</a></h5>
@@ -79,38 +111,6 @@
 <li><code>options</code> - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:<ul>
 <li><code>isRegex</code> - a boolean denoting whether there is a regular expression within the menu item name(s)</li>
 <li><code>isToggleable</code> - a boolean denoting whether the menu item parameter is passed in as a list of two items to toggle between, i.e., <code>{ "Play", "Pause" }</code></li>
-<li><code>focusBefore</code> - an optional boolean denoting whether to focus the application before the menu item is selected</li>
-<li><code>focusAfter</code> - an optional boolean denoting whether to focus the application after the menu item is selected</li>
-</ul>
-</li>
-</ul>
-<p>Returns:</p>
-<ul>
-<li>None</li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="createMenuItemSelectionEvent">
-            <a name="//apple_ref/cpp/Method/createMenuItemSelectionEvent" class="dashAnchor"></a>
-            <h5><a href="#createMenuItemSelectionEvent">createMenuItemSelectionEvent</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Application.createMenuItemSelectionEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Convenience method to create an event handler that presents a selection modal containing menu items that are nested/expandable underneath at the provided <code>menuItem</code> path, with optionally specified behavior on how the menu item selection occurs</p>
-<p>Parameters:</p>
-<ul>
-<li><code>menuItem</code> - a table list of strings that represent a path to a menu item that expands to menu item list, i.e., <code>{ "File", "Open Recent" }</code></li>
-<li><code>options</code> - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:<ul>
 <li><code>focusBefore</code> - an optional boolean denoting whether to focus the application before the menu item is selected</li>
 <li><code>focusAfter</code> - an optional boolean denoting whether to focus the application after the menu item is selected</li>
 </ul>
@@ -179,6 +179,34 @@
               </tr>
             </table>
           </section>
+          <section id="getChooserItems">
+            <a name="//apple_ref/cpp/Method/getChooserItems" class="dashAnchor"></a>
+            <h5><a href="#getChooserItems">getChooserItems</a></h5>
+            <table>
+              <tr>
+                <th>Signature</th>
+                <td><code>Application:getChooserItems()</code></td>
+              </tr>
+              <tr>
+                <th>Type</th>
+                <td>Method</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td><p>Default implementation of <a href="Entity.html#getChooserItems"><code>Entity:getChooserItems()</code></a> to returns choice objects containing application window information.</p>
+<p>This can be overridden for instances to return chooser items particular for specific Application entities, i.e. override this function to return conversation choices for the Messages instance.</p>
+<p>Parameters:</p>
+<ul>
+<li>None</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects</li>
+</ul>
+</td>
+              </tr>
+            </table>
+          </section>
           <section id="getMenuItemList">
             <a name="//apple_ref/cpp/Method/getMenuItemList" class="dashAnchor"></a>
             <h5><a href="#getMenuItemList">getMenuItemList</a></h5>
@@ -202,34 +230,6 @@
 <p>Returns:</p>
 <ul>
 <li>A list of <a href="https://www.hammerspoon.org/docs/hs.application.html#getMenuItems">menu items</a> or <code>nil</code></li>
-</ul>
-</td>
-              </tr>
-            </table>
-          </section>
-          <section id="getSelectionItems">
-            <a name="//apple_ref/cpp/Method/getSelectionItems" class="dashAnchor"></a>
-            <h5><a href="#getSelectionItems">getSelectionItems</a></h5>
-            <table>
-              <tr>
-                <th>Signature</th>
-                <td><code>Application:getSelectionItems()</code></td>
-              </tr>
-              <tr>
-                <th>Type</th>
-                <td>Method</td>
-              </tr>
-              <tr>
-                <th>Description</th>
-                <td><p>Default implementation of <a href="Entity.html#getSelectionItems"><code>Entity:getSelectionItems()</code></a> to returns choice objects containing application window information.</p>
-<p>This can be overridden for instances to return selection items particular for specific Application entities, i.e. override this function to return conversation choices for the Messages instance.</p>
-<p>Parameters:</p>
-<ul>
-<li>None</li>
-</ul>
-<p>Returns:</p>
-<ul>
-<li>A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects</li>
 </ul>
 </td>
               </tr>

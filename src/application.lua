@@ -53,10 +53,10 @@ function Behaviors.select(self, eventHandler)
 
     -- Create local action execution function to either defer or immediately invoke
     local function executeAction(appInstance)
-        local choices = self:getSelectionItems()
+        local choices = self:getChooserItems()
 
         if choices and #choices > 0 then
-            self:showSelectionModal(choices, function (choice)
+            self:showChooser(choices, function (choice)
                 if choice then
                     action(appInstance, choice)
                 end
@@ -122,18 +122,18 @@ end
 --- Application [behaviors](Entity.html#behaviors) defined to invoke event handlers with `hs.application`.
 Application.behaviors = Entity.behaviors + Behaviors
 
---- Application:getSelectionItems()
+--- Application:getChooserItems()
 --- Method
---- Default implementation of [`Entity:getSelectionItems()`](Entity.html#getSelectionItems) to returns choice objects containing application window information.
+--- Default implementation of [`Entity:getChooserItems()`](Entity.html#getChooserItems) to returns choice objects containing application window information.
 ---
---- This can be overridden for instances to return selection items particular for specific Application entities, i.e. override this function to return conversation choices for the Messages instance.
+--- This can be overridden for instances to return chooser items particular for specific Application entities, i.e. override this function to return conversation choices for the Messages instance.
 ---
 --- Parameters:
 ---  * None
 ---
 --- Returns:
 ---   * A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects
-function Application:getSelectionItems()
+function Application:getChooserItems()
     local app = self:getApplication()
     local windows = app:allWindows()
     local choices = {}
@@ -189,9 +189,9 @@ function Application.createMenuItemEvent(menuItem, options)
     end
 end
 
---- Application.createMenuItemSelectionEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])
+--- Application.createMenuItemChooserEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])
 --- Method
---- Convenience method to create an event handler that presents a selection modal containing menu items that are nested/expandable underneath at the provided `menuItem` path, with optionally specified behavior on how the menu item selection occurs
+--- Convenience method to create an event handler that presents a chooser containing menu items that are nested/expandable underneath at the provided `menuItem` path, with optionally specified behavior on how the menu item selection occurs
 ---
 --- Parameters:
 ---  * `menuItem` - a table list of strings that represent a path to a menu item that expands to menu item list, i.e., `{ "File", "Open Recent" }`
@@ -201,7 +201,7 @@ end
 ---
 --- Returns:
 ---  * None
-function Application.createMenuItemSelectionEvent(menuItem, options)
+function Application.createMenuItemChooserEvent(menuItem, options)
     options = options or {}
 
     return function(app, windowChoice)
@@ -216,7 +216,7 @@ function Application.createMenuItemSelectionEvent(menuItem, options)
             end
         end
 
-        Application:showSelectionModal(choices, function(menuItemChoice)
+        Application:showChooser(choices, function(menuItemChoice)
             if menuItemChoice then
                 if (options.focusBefore) then
                     Application.focus(app, windowChoice)

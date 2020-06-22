@@ -195,14 +195,14 @@ function Entity:registerShortcuts(shortcuts, override)
     return self.shortcuts
 end
 
---- Entity:getSelectionItems() -> table of choices or nil
+--- Entity:getChooserItems() -> table of choices or nil
 --- Method
---- Returns a list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display in the selection modal. Entities intended to be used with select mode must implement this method to correctly display items in the selection modal.
+--- Returns a list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display in the chooser. Entities intended to be used with select mode must implement this method to correctly display items in the chooser.
 ---
 --- Returns:
----   * `selectionItems` - A list of choices or `nil`
+---   * `choices` - A list of choices or `nil`
 -- luacov: disable
-function Entity:getSelectionItems() -- luacheck: ignore
+function Entity:getChooserItems() -- luacheck: ignore
     return nil
 end
 -- luacov: enable
@@ -228,56 +228,56 @@ function Entity.triggerAfterConfirmation(question, details, action)
     end)
 end
 
---- Entity.selectionModalShortcuts
+--- Entity.chooserShortcuts
 --- Variable
---- A list of shortcuts that can be used when the selection modal is visible. The following shortcuts are available by default:
+--- A list of shortcuts that can be used when the chooser is visible. The following shortcuts are available by default:
 ---  * <kbd>^k</kbd> to navigate up an item
 ---  * <kbd>^j</kbd> to navigate down an item
 ---  * <kbd>^u</kbd> to navigate a page of rows up
 ---  * <kbd>^d</kbd> to navigate a page of rows down
-Entity.selectionModalShortcuts = {
-    { { "ctrl" }, "j", function(modal)
-        modal:selectedRow(modal:selectedRow() + 1)
+Entity.chooserShortcuts = {
+    { { "ctrl" }, "j", function(chooser)
+        chooser:selectedRow(chooser:selectedRow() + 1)
         return true
     end },
-    { { "ctrl" }, "k", function(modal)
-        modal:selectedRow(modal:selectedRow() - 1)
+    { { "ctrl" }, "k", function(chooser)
+        chooser:selectedRow(chooser:selectedRow() - 1)
         return true
     end },
-    { { "ctrl" }, "d", function(modal)
-        modal:selectedRow(modal:selectedRow() + modal:rows())
+    { { "ctrl" }, "d", function(chooser)
+        chooser:selectedRow(chooser:selectedRow() + chooser:rows())
         return true
     end },
-    { { "ctrl" }, "u", function(modal)
-        modal:selectedRow(modal:selectedRow() - modal:rows())
+    { { "ctrl" }, "u", function(chooser)
+        chooser:selectedRow(chooser:selectedRow() - chooser:rows())
         return true
     end },
 }
 
---- Entity:registerSelectionModalShortcuts(shortcuts, override) -> table of registered shortcuts
+--- Entity:registerChooserShortcuts(shortcuts, override) -> table of registered shortcuts
 --- Method
---- Registers a list of selection modal shortcuts with the option of merging with the existing [default](#selectionModalShortcuts) or previously initialized modal shortcuts.
+--- Registers a list of chooser shortcuts with the option of merging with the existing [default](#chooserShortcuts) or previously initialized chooser shortcuts.
 ---
 --- Parameters:
 ---  * `shortcuts` - The list of shortcut objects. Shortcut event handlers will be invoked with the [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance:
 ---    ```
----    { { "ctrl" }, "j", function(modal) modal:selectedRow(modal:selectedRow() + 1) end },
----    { { "ctrl" }, "k", function(modal) modal:selectedRow(modal:selectedRow() - 1) end },
+---    { { "ctrl" }, "j", function(chooser) chooser:selectedRow(chooser:selectedRow() + 1) end },
+---    { { "ctrl" }, "k", function(chooser) chooser:selectedRow(chooser:selectedRow() - 1) end },
 ---    ```
----  * `override` - A boolean denoting to whether to override the existing selection modal shortcuts
+---  * `override` - A boolean denoting to whether to override the existing chooser shortcuts
 ---
 --- Returns:
----   * `shortcuts` - Returns the list of registered selection modal shortcuts
-function Entity:registerSelectionModalShortcuts(shortcuts, override)
-    local existingShortcuts = self.selectionModalShortcuts or {}
-    self.selectionModalShortcuts = override and shortcuts or self:mergeShortcuts(shortcuts, existingShortcuts)
-    return self.selectionModalShortcuts
+---   * `shortcuts` - Returns the list of registered chooser shortcuts
+function Entity:registerChooserShortcuts(shortcuts, override)
+    local existingShortcuts = self.chooserShortcuts or {}
+    self.chooserShortcuts = override and shortcuts or self:mergeShortcuts(shortcuts, existingShortcuts)
+    return self.chooserShortcuts
 end
 
---- Entity.selectionModal
+--- Entity.chooser
 --- Variable
---- The selection modal [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.
-Entity.selectionModal = nil
+--- The chooser [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.
+Entity.chooser = nil
 
 --- Entity:loadChooserRowImage(choices, imageURL, index)
 --- Method
@@ -292,81 +292,81 @@ Entity.selectionModal = nil
 ---  * None
 function Entity:loadChooserRowImage(choices, imageURL, index)
     hs.image.imageFromURL(imageURL, function(image)
-        if not self.selectionModal then
+        if not self.chooser then
             return
         end
 
-        local selectedRow = self.selectionModal:selectedRow()
+        local selectedRow = self.chooser:selectedRow()
 
         choices[index].image = image
 
-        self.selectionModal:refreshChoicesCallback()
-        self.selectionModal:selectedRow(selectedRow)
+        self.chooser:refreshChoicesCallback()
+        self.chooser:selectedRow(selectedRow)
     end)
 end
 
---- Entity:showSelectionModal(choices, callback[, options])
+--- Entity:showChooser(choices, callback[, options])
 --- Method
---- Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.
+--- Shows a [chooser](http://www.hammerspoon.org/docs/hs.chooser.html) with a list of choices. The chooser can be closed with Escape <kbd>⎋</kbd>.
 ---
 --- Parameters:
----  * `choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser modal
----  * `callback` - The callback function invoked when a choice is selected from the modal
----  * `options` - A table containing various options to configure the modal:
+---  * `choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects to display on the chooser
+---  * `callback` - The callback function invoked when a row is selected
+---  * `options` - A table containing various options to configure the chooser:
 ---    * `placeholderText` - Set the placeholder text
 ---
 --- Returns:
 ---  * The [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) object
-function Entity:showSelectionModal(choices, callback, options)
+function Entity:showChooser(choices, callback, options)
     options = options or {}
 
-    local selectionListener = nil
+    local chooserListener = nil
 
-    local modal = hs.chooser.new(function(choice)
-        self.selectionModal = nil
+    local chooser = hs.chooser.new(function(choice)
+        self.chooser = nil
 
-        -- Stop selection listener and invoke the event handler
-        selectionListener:stop()
+        -- Stop chooser listener and invoke the event handler
+        chooserListener:stop()
         callback(choice)
     end)
 
     -- Add default style
-    modal:searchSubText(true)
-    modal:bgDark(true)
+    chooser:searchSubText(true)
+    chooser:bgDark(true)
 
     -- Add choices
-    modal:choices(choices)
+    chooser:choices(choices)
 
     -- Dynamically configure the chooser with specified options
     for methodName, args in pairs(options) do
         if type(args) == "table" then
-            modal[methodName](modal, table.unpack(args))
+            chooser[methodName](chooser, table.unpack(args))
         else
-            modal[methodName](modal, args)
+            chooser[methodName](chooser, args)
         end
     end
 
-    self.selectionModal = modal
+    self.chooser = chooser
 
     -- Create an event listener while the chooser is visible to select rows with ctrl+j/k
-    selectionListener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
+    chooserListener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
         local flags = event:getFlags()
         local keyName = hs.keycodes.map[event:getKeyCode()]
-        local modalEventHandler = self.getEventHandler(self.selectionModalShortcuts, flags, keyName)
+        local chooserEventHandler = self.getEventHandler(self.chooserShortcuts, flags, keyName)
 
-        if modalEventHandler then
-            return modalEventHandler(modal)
+        if chooserEventHandler then
+            return chooserEventHandler(chooser)
         end
     end)
 
-    -- Start row selection listener and show the modal
-    selectionListener:start()
-    return modal:show()
+    -- Start row chooser listener and show the chooser
+    chooserListener:start()
+    return chooser:show()
 end
 
 --- Entity:showActions()
 --- Method
---- Opens a selection modal populated with actions configured on the entity, which upon selection will trigger the action
+--- Opens a chooser populated with actions configured on the entity, which upon selection will trigger the action
 ---
 --- Returns:
 ---  * None
@@ -386,7 +386,7 @@ function Entity:showActions()
     local article = vowelIndex and vowelIndex == 1 and "an" or "a"
     local options = { placeholderText = "Trigger "..article.." "..self.name.." action" }
 
-    self:showSelectionModal(choices, function(choice)
+    self:showChooser(choices, function(choice)
         if not choice then return end
 
         local shortcut = shortcuts[choice.index]

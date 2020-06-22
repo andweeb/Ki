@@ -9,7 +9,7 @@ Messages.find = Application.createMenuItemEvent("Find...", { focusBefore = true 
 Messages.newMessage = Application.createMenuItemEvent("New Message", { focusBefore = true })
 
 -- Implement method to support selection of tab titles in select mode
-function Messages.getSelectionItems()
+function Messages.getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("messages", { action = "get-conversations" })
     local isOk, conversations, rawTable = hs.osascript.applescript(script)

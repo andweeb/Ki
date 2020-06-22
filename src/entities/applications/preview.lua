@@ -8,7 +8,7 @@ local Preview = Application:new("Preview")
 Preview.close = Application.createMenuItemEvent("Close Window", { focusBefore = true })
 Preview.find = Application.createMenuItemEvent({ "Find", "Find..." }, { focusAfter = true })
 Preview.open = Application.createMenuItemEvent("Open...", { focusAfter = true })
-Preview.openRecent = Application.createMenuItemSelectionEvent({ "File", "Open Recent" }, {
+Preview.openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent" }, {
     focusAfter = true,
 })
 
