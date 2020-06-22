@@ -14,6 +14,7 @@ Entity class that represents some abstract automatable desktop entity
  * [getEventHandler](#getEventHandler)
  * [getSelectionItems](#getSelectionItems)
  * [initialize](#initialize)
+ * [loadChooserRowImage](#loadChooserRowImage)
  * [notifyError](#notifyError)
  * [registerSelectionModalShortcuts](#registerSelectionModalShortcuts)
  * [registerShortcuts](#registerShortcuts)
@@ -75,6 +76,14 @@ Entity class that represents some abstract automatable desktop entity
 | **Type**                                    | Method                                                                     |
 | **Description**                             | Initializes a new entity instance with its name and shortcuts. By default, a `cheatsheet` object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the `autoExitMode` parameter is explicitly set to `false`.                                                                     |
 | **Parameters**                              | <ul><li>`name` - The entity name</li><li>`shortcuts` - The list of shortcuts containing keybindings and actions for the entity</li><li>`autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched</li></ul> |
+| **Returns**                                 | <ul><li>None</li></ul>          |
+
+| [loadChooserRowImage](#loadChooserRowImage)         |                                                                                     |
+| --------------------------------------------|-------------------------------------------------------------------------------------|
+| **Signature**                               | `Entity:loadChooserRowImage(choices, imageURL, index)`                                                                    |
+| **Type**                                    | Method                                                                     |
+| **Description**                             | For a chooser with a choices callback, asynchronously loads an image from a URLfor a given row item and refreshes the callback.                                                                     |
+| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li><li>`imageURL` - URL of the image to load</li><li>`index` - The index of the choice to have its image set to the loaded [hs.image](http://www.hammerspoon.org/docs/hs.image.html)</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
 | [notifyError](#notifyError)         |                                                                                     |

@@ -63,6 +63,9 @@ Website.behaviors = Entity.behaviors + {
     end,
     select = function(self, eventHandler)
         local choices = self:getSelectionItems()
+        local function updateChoices()
+            return choices
+        end
 
         if choices and #choices > 0 then
             local function onSelection(choice)
@@ -71,7 +74,7 @@ Website.behaviors = Entity.behaviors + {
                 end
             end
 
-            self:showSelectionModal(choices, onSelection)
+            self:showSelectionModal(updateChoices, onSelection)
         end
 
         return true
@@ -159,17 +162,7 @@ function Website:getSelectionItems()
             local favicon = self:getFaviconURL(linkStr)
 
             if favicon then
-                -- Asynchronously load favicon images individually per selection item
-                hs.image.imageFromURL(favicon, function(image)
-                    if not self.selectionModal then
-                        return
-                    end
-
-                    if choices[index] then
-                        choices[index].image = image
-                        self.selectionModal:choices(choices)
-                    end
-                end)
+                self:loadChooserRowImage(choices, favicon, index)
             end
         end
 

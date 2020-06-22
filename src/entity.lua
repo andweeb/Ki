@@ -279,6 +279,32 @@ end
 --- The selection modal [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.
 Entity.selectionModal = nil
 
+--- Entity:loadChooserRowImage(choices, imageURL, index)
+--- Method
+--- For a chooser with a choices callback, asynchronously loads an image from a URL for a given row item and refreshes the callback.
+---
+--- Parameters:
+---  * `choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects
+---  * `imageURL` - URL of the image to load
+---  * `index` - The index of the choice to have its image set to the loaded [hs.image](http://www.hammerspoon.org/docs/hs.image.html)
+---
+--- Returns:
+---  * None
+function Entity:loadChooserRowImage(choices, imageURL, index)
+    hs.image.imageFromURL(imageURL, function(image)
+        if not self.selectionModal then
+            return
+        end
+
+        local selectedRow = self.selectionModal:selectedRow()
+
+        choices[index].image = image
+
+        self.selectionModal:refreshChoicesCallback()
+        self.selectionModal:selectedRow(selectedRow)
+    end)
+end
+
 --- Entity:showSelectionModal(choices, callback[, options])
 --- Method
 --- Shows a selection modal with a list of choices. The modal can be closed with Escape <kbd>⎋</kbd>.
@@ -304,9 +330,12 @@ function Entity:showSelectionModal(choices, callback, options)
         callback(choice)
     end)
 
-    modal:choices(choices)
+    -- Add default style
     modal:searchSubText(true)
     modal:bgDark(true)
+
+    -- Add choices
+    modal:choices(choices)
 
     -- Dynamically configure the chooser with specified options
     for methodName, args in pairs(options) do
