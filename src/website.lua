@@ -129,7 +129,7 @@ end
 function Website:getChooserItems()
     local choices = {}
 
-    for index, link in pairs(self.links) do
+    for _, link in pairs(self.links) do
         local linkStr = link.link or link
 
         if string.sub(linkStr, 1, 1) == "/" then
@@ -151,12 +151,14 @@ function Website:getChooserItems()
             local favicon = self:getFaviconURL(linkStr)
 
             if favicon then
-                self:loadChooserRowImage(choices, favicon, index)
+                choice.imageURL = favicon
             end
         end
 
         table.insert(choices, choice)
     end
+
+    self:loadChooserRowImages(choices)
 
     return choices
 end

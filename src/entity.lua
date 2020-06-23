@@ -279,30 +279,43 @@ end
 --- The chooser [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.
 Entity.chooser = nil
 
---- Entity:loadChooserRowImage(choices, imageURL, index)
+--- Entity:loadChooserRowImages(choices)
 --- Method
---- For a chooser with a choices callback, asynchronously loads an image from a URL for a given row item and refreshes the callback.
+--- For a given set of choices, asynchronously loads images from an `imageURL` key for each choice object and refreshes the callback for a chooser with a choices callback.
 ---
 --- Parameters:
 ---  * `choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects
----  * `imageURL` - URL of the image to load
----  * `index` - The index of the choice to have its image set to the loaded [hs.image](http://www.hammerspoon.org/docs/hs.image.html)
 ---
 --- Returns:
 ---  * None
-function Entity:loadChooserRowImage(choices, imageURL, index)
-    hs.image.imageFromURL(imageURL, function(image)
-        if not self.chooser then
-            return
+function Entity:loadChooserRowImages(choices)
+    -- Initialize lists of indexes that share the same image URL
+    local indexesByImageURL = {}
+    for i = 1, #choices do
+        local choice = choices[i]
+        if choice.imageURL then
+            indexesByImageURL[choice.imageURL] = indexesByImageURL[choice.imageURL] or {}
+            table.insert(indexesByImageURL[choice.imageURL], i)
         end
+    end
 
-        local selectedRow = self.chooser:selectedRow()
+    -- Asynchronously load sets of image URLs
+    for imageURL, indexes in pairs(indexesByImageURL) do
+        hs.image.imageFromURL(imageURL, function(image)
+            if not self.chooser then
+                return
+            end
 
-        choices[index].image = image
+            for i = 1, #indexes do
+                local index = indexes[i]
+                choices[index].image = image
+            end
 
-        self.chooser:refreshChoicesCallback()
-        self.chooser:selectedRow(selectedRow)
-    end)
+            local selectedRow = self.chooser:selectedRow()
+            self.chooser:refreshChoicesCallback()
+            self.chooser:selectedRow(selectedRow)
+        end)
+    end
 end
 
 --- Entity:showChooser(choices, callback[, options])
