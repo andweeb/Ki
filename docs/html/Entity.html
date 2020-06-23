@@ -246,7 +246,7 @@
             <table>
               <tr>
                 <th>Signature</th>
-                <td><code>Entity:loadChooserRowImages(choices)</code></td>
+                <td><code>Entity:loadChooserRowImages(choices[, reload])</code></td>
               </tr>
               <tr>
                 <th>Type</th>
@@ -258,6 +258,7 @@
 <p>Parameters:</p>
 <ul>
 <li><code>choices</code> - A list of <a href="https://www.hammerspoon.org/docs/hs.chooser.html#choices">choice</a> objects</li>
+<li><code>reload</code> - An optional boolean value to pass to <a href="http://www.hammerspoon.org/docs/hs.chooser.html#refreshChoicesCallback"><code>hs.chooser:refreshChoicesCallback</code></a>. Defaults to <code>true</code>.</li>
 </ul>
 <p>Returns:</p>
 <ul>

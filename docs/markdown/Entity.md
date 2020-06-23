@@ -80,10 +80,10 @@ Entity class that represents some abstract automatable desktop entity
 
 | [loadChooserRowImages](#loadChooserRowImages)         |                                                                                     |
 | --------------------------------------------|-------------------------------------------------------------------------------------|
-| **Signature**                               | `Entity:loadChooserRowImages(choices)`                                                                    |
+| **Signature**                               | `Entity:loadChooserRowImages(choices[, reload])`                                                                    |
 | **Type**                                    | Method                                                                     |
 | **Description**                             | For a given set of choices, asynchronously loads images from an `imageURL` key for each choice object and refreshes the callback for a chooser with a choices callback.                                                                     |
-| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li></ul> |
+| **Parameters**                              | <ul><li>`choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects</li><li>`reload` - An optional boolean value to pass to [`hs.chooser:refreshChoicesCallback`](http://www.hammerspoon.org/docs/hs.chooser.html#refreshChoicesCallback). Defaults to `true`.</li></ul> |
 | **Returns**                                 | <ul><li>None</li></ul>          |
 
 | [notifyError](#notifyError)         |                                                                                     |

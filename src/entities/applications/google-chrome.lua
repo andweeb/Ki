@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- Google Chrome application
 --
+local Website = spoon.Ki.Website
 local Application = spoon.Ki.Application
 local GoogleChrome = Application:new("Google Chrome")
 
@@ -51,6 +52,7 @@ function GoogleChrome.getChooserItems()
                 tabIndex = tabIndex,
                 windowIndex = windowIndex,
                 windowId = windowId,
+                imageURL = Website:getFaviconURL(url),
             })
         end
     end

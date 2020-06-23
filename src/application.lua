@@ -54,13 +54,18 @@ function Behaviors.select(self, eventHandler)
     -- Create local action execution function to either defer or immediately invoke
     local function executeAction(appInstance)
         local choices = self:getChooserItems()
+        local function getChoices()
+            return choices
+        end
 
         if choices and #choices > 0 then
-            self:showChooser(choices, function (choice)
+            self:showChooser(getChoices, function (choice)
                 if choice then
                     action(appInstance, choice)
                 end
             end)
+
+            self:loadChooserRowImages(choices)
         end
     end
 

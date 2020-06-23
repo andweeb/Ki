@@ -279,16 +279,19 @@ end
 --- The chooser [`hs.chooser`](https://www.hammerspoon.org/docs/hs.chooser.html) instance or `nil` if not active.
 Entity.chooser = nil
 
---- Entity:loadChooserRowImages(choices)
+--- Entity:loadChooserRowImages(choices[, reload])
 --- Method
 --- For a given set of choices, asynchronously loads images from an `imageURL` key for each choice object and refreshes the callback for a chooser with a choices callback.
 ---
 --- Parameters:
 ---  * `choices` - A list of [choice](https://www.hammerspoon.org/docs/hs.chooser.html#choices) objects
+---  * `reload` - An optional boolean value to pass to [`hs.chooser:refreshChoicesCallback`](http://www.hammerspoon.org/docs/hs.chooser.html#refreshChoicesCallback). Defaults to `true`.
 ---
 --- Returns:
 ---  * None
-function Entity:loadChooserRowImages(choices)
+function Entity:loadChooserRowImages(choices, reload)
+    reload = reload == nil and true or reload
+
     -- Initialize lists of indexes that share the same image URL
     local indexesByImageURL = {}
     for i = 1, #choices do
@@ -312,7 +315,7 @@ function Entity:loadChooserRowImages(choices)
             end
 
             local selectedRow = self.chooser:selectedRow()
-            self.chooser:refreshChoicesCallback()
+            self.chooser:refreshChoicesCallback(reload)
             self.chooser:selectedRow(selectedRow)
         end)
     end

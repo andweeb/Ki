@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- Safari application
 --
+local Website = spoon.Ki.Website
 local Application = spoon.Ki.Application
 local Safari = Application:new("Safari")
 
@@ -73,6 +74,7 @@ function Safari.getChooserItems()
                 tabIndex = tabIndex,
                 windowIndex = windowIndex,
                 windowId = windowId,
+                imageURL = Website:getFaviconURL(url),
             })
         end
     end
