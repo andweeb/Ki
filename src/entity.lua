@@ -5,6 +5,7 @@
 local class = require("middleclass")
 local lustache = require("lustache")
 local Cheatsheet = require("cheatsheet")
+local glyphs = require("glyphs")
 
 local Entity = class("Entity")
 
@@ -390,12 +391,18 @@ function Entity:showActions()
     local choices = {}
     local shortcuts = {table.unpack(self.shortcuts)}
     for index, shortcut in pairs(shortcuts) do
-        local category, description = table.unpack(shortcut[_G.SHORTCUT_METADATA_INDEX])
-        table.insert(choices, {
+        local flags, keyName, _, metadata = table.unpack(shortcut)
+        local category, description = table.unpack(metadata or {})
+        local shortcutText = glyphs.createShortcutText(flags, keyName)
+        local choice = {
             text = description,
-            subText = category.." action",
+            subText = shortcutText ~= glyphs.unmapped.key
+                and category.." action ("..shortcutText..")"
+                or category,
             index = index,
-        })
+        }
+
+        table.insert(choices, choice)
     end
 
     local vowelIndex = self.name:find("[aAeEiIoOuU]")

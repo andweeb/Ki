@@ -5,34 +5,10 @@
 
 local class = require("middleclass")
 local lustache = require("lustache")
+local glyphs = require("glyphs")
 
 local spoonPath = hs.spoons.scriptPath()
 local Cheatsheet = class("Cheatsheet")
-local UNMAPPED = "﴾unmapped﴿"
-
-local MODIFIER_GLYPHS = {
-    cmd = "⌘",
-    alt = "⌥",
-    shift = "⇧",
-    ctrl = "⌃",
-    fn = "fn",
-}
-local KEY_GLYPHS = {
-    ["return"] = "↩",
-    enter = "⌤",
-    delete = "⌫",
-    escape = "⎋",
-    right = "→",
-    left = "←",
-    up = "↑",
-    down = "↓",
-    pageup = "⇞",
-    pagedown = "⇟",
-    home = "↖",
-    ["end"] = "↘",
-    tab = "⇥",
-    space = "␣",
-}
 
 -- Generate a view model of shortcuts partitioned into categories
 function Cheatsheet._createShortcutBlocks(shortcutList)
@@ -51,28 +27,13 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
         if shortcutMetadata and #shortcutMetadata > 0 and shortcutMetadata[1] then
             local category = shortcutMetadata[1]
             local name = shortcutMetadata[2]
-            local hotkey = ""
 
             if not shortcutCategories[category] then
                 shortcutCategories[category] = {}
             end
 
-            -- Create shortcut text
-            for modifierKey, glyph in pairs(MODIFIER_GLYPHS) do
-                for _, shortcutModifierKey in pairs(shortcutModifierKeys) do
-                    if modifierKey == shortcutModifierKey then
-                        hotkey = hotkey..glyph
-                        break
-                    end
-                end
-            end
-
-            shortcutKey = KEY_GLYPHS[shortcutKey] or shortcutKey:gsub("^%l", string.upper)
-
-            hotkey = hotkey..shortcutKey
-
             table.insert(shortcutCategories[category], {
-                hotkey = hotkey,
+                hotkey = glyphs.createShortcutText(shortcutModifierKeys, shortcutKey),
                 name = name,
                 id = id,
             })
@@ -96,9 +57,9 @@ function Cheatsheet._createShortcutBlocks(shortcutList)
 
         local used_shortcuts = {}
         for _, shortcut in pairs(shortcuts) do
-            local isUnmapped = shortcut.hotkey == UNMAPPED
+            local isUnmapped = shortcut.hotkey == glyphs.unmapped.text
             if isUnmapped then
-                shortcut.hotkey = "�"
+                shortcut.hotkey = glyphs.unmapped.key
                 shortcut.name = shortcut.name
                 shortcut.isUnmapped = isUnmapped
             end
