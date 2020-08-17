@@ -18,25 +18,20 @@ Notes.toggleAttachmentsBrowser = Application.createMenuItemEvent({
 }, { isToggleable = true })
 
 -- Implement method to support selection of notes in select mode
-function Notes.getChooserItems()
+function Notes:getChooserItems()
     local choices = {}
-    local isOk, notes, rawTable =
-        hs.osascript.applescript(Application.renderScriptTemplate("notes"))
+
+    local script = self.renderScriptTemplate("notes", { action = "get-notes" })
+    local isOk, notes, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        Application.notifyError("Error fetching Notes", rawTable.NSLocalizedFailureReason)
-
-        return {}
+        self.notifyError("Error fetching Notes", rawTable.NSLocalizedFailureReason)
     end
-
-    table.sort(notes, function(a, b)
-        return a.containerName < b.containerName
-    end)
 
     for _, note in pairs(notes) do
         table.insert(choices, {
             noteId = note.noteId,
-            text = note.containerName..": "..note.noteName,
+            text = note.noteName,
             subText = "Last modified "..note.lastModified,
         })
     end
