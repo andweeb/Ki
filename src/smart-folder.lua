@@ -4,7 +4,7 @@
 ---
 local File = require("file")
 local Cheatsheet = require("cheatsheet")
-local SmartFolder = File:subclass("File")
+local SmartFolder = File:subclass("SmartFolder")
 
 --- SmartFolder:initialize(path, shortcuts)
 --- Method
@@ -24,7 +24,21 @@ local SmartFolder = File:subclass("File")
 ---
 --- Returns:
 ---  * None
-function SmartFolder:initialize(path, shortcuts)
+function SmartFolder:initialize(options)
+    local name, path, shortcuts
+
+    if type(options) == "string" then
+        name = options
+        path = options
+    elseif #options > 0 then
+        path, shortcuts = table.unpack(options)
+    else
+        name = options.name
+        path = options.path
+        shortcuts = options.shortcuts
+        self.getChooserItems = options.getChooserItems
+    end
+
     path = hs.fs.pathToAbsolute(path)
 
     local actions = {
@@ -49,7 +63,7 @@ function SmartFolder:initialize(path, shortcuts)
     local mergedShortcuts = self:mergeShortcuts(shortcuts, commonShortcuts)
 
     self.path = path
-    self.name = path
+    self.name = name
     self.shortcuts = mergedShortcuts
 
     local cheatsheetDescription = "Ki shortcut keybindings registered for smart folder at "..self.path

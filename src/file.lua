@@ -457,8 +457,20 @@ end
 ---
 --- Returns:
 ---  * None
-function File:initialize(path, shortcuts, options)
-    options = options or {}
+function File:initialize(options)
+    local name, path, shortcuts
+
+    if type(options) == "string" then
+        name = options
+        path = options
+    elseif #options > 0 then
+        path, shortcuts, options = table.unpack(options)
+    else
+        name = options.name
+        path = options.path
+        shortcuts = options.shortcuts
+        self.getChooserItems = options.getChooserItems
+    end
 
     local absolutePath = hs.fs.pathToAbsolute(path)
     if not absolutePath then
@@ -526,7 +538,7 @@ function File:initialize(path, shortcuts, options)
     self.showHiddenFiles = options.showHiddenFiles or false
     self.sortAttribute = options.sortAttribute or "modification"
 
-    Entity.initialize(self, { path, self:mergeShortcuts(shortcuts, commonShortcuts ) })
+    Entity.initialize(self, { name, self:mergeShortcuts(shortcuts, commonShortcuts ) })
 end
 
 return File
