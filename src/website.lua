@@ -229,7 +229,7 @@ function Website:initialize(name, url, links, shortcuts)
         { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, { name, "Show Cheatsheet" } },
     })
 
-    Entity.initialize(self, name, mergedShortcuts)
+    Entity.initialize(self, { name, mergedShortcuts })
 end
 
 return Website

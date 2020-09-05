@@ -526,7 +526,7 @@ function File:initialize(path, shortcuts, options)
     self.showHiddenFiles = options.showHiddenFiles or false
     self.sortAttribute = options.sortAttribute or "modification"
 
-    Entity.initialize(self, path, self:mergeShortcuts(shortcuts, commonShortcuts))
+    Entity.initialize(self, { path, self:mergeShortcuts(shortcuts, commonShortcuts ) })
 end
 
 return File

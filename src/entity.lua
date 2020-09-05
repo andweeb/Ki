@@ -9,6 +9,7 @@ local glyphs = require("glyphs")
 
 local Entity = class("Entity")
 
+-- Helper method to clone table
 local function cloneTable(input)
     if type(input) ~= "table" then
         return input
@@ -107,7 +108,7 @@ function Entity.renderScriptTemplate(script, viewModel)
     return lustache:render(scriptTemplate, viewModel)
 end
 
---- Entity:initialize(name, shortcuts, autoExitMode)
+--- Entity:initialize(TODO)
 --- Method
 --- Initializes a new entity instance with its name and shortcuts. By default, a `cheatsheet` object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the `autoExitMode` parameter is explicitly set to `false`.
 ---
@@ -126,7 +127,19 @@ end
 ---
 --- Returns:
 ---  * None
-function Entity:initialize(name, shortcuts, autoExitMode)
+function Entity:initialize(options)
+    local name, shortcuts, autoExitMode
+
+    if type(options) == "string" then
+        name = options
+    elseif #options > 0 then
+        name, shortcuts, autoExitMode = table.unpack(options)
+    else
+        name = options.name
+        shortcuts = options.shortcuts
+        autoExitMode = options.autoExitMode
+    end
+
     self.name = name
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
     self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {

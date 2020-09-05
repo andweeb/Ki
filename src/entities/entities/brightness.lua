@@ -1,23 +1,23 @@
 ----------------------------------------------------------------------------------------------------
 -- Brightness entity
 --
-local Entity = spoon.Ki.Entity
-local Brightness = Entity:new("Brightness")
+local Ki = spoon.Ki
+local Entity = Ki.Entity
 
 -- Action to lower the system brightness by 10%
-function Brightness.lower()
+local function lowerBrightness()
     local newBrightness = hs.brightness.get() - 10
     hs.brightness.set(newBrightness)
 end
 
 -- Action to raise the system brightness by 10%
-function Brightness.raise()
+local function raiseBrightness()
     local newBrightness = hs.brightness.get() + 10
     hs.brightness.set(newBrightness)
 end
 
--- Helper method to create events that sets some system brightness percentage
-function Brightness.createBrightnessToPercentageEvent(percentage)
+-- Action creator for actions that set a specific system brightness percentage
+local function brightnessToPercent(percentage)
     return function()
         hs.brightness.set(math.floor(percentage))
         return true
@@ -25,8 +25,8 @@ function Brightness.createBrightnessToPercentageEvent(percentage)
 end
 
 local shortcuts = {
-    { nil, "j", Brightness.lower, { "Brightness Control Mode", "Turn Brightness Down" } },
-    { nil, "k", Brightness.raise, { "Brightness Control Mode", "Turn Brightness Up" } },
+    { nil, "j", lowerBrightness, { "Brightness Control Mode", "Lower Brightness" } },
+    { nil, "k", raiseBrightness, { "Brightness Control Mode", "Raise Brightness" } },
 }
 
 -- Generate set brightness events for each number (0-9 being 0% to 100%)
@@ -35,11 +35,12 @@ for number = 0, 9 do
     table.insert(shortcuts, {
         nil,
         tostring(number),
-        Brightness.createBrightnessToPercentageEvent(percent),
+        brightnessToPercent(percent),
         { "Brightness Control Mode", "Set Brightness to "..tostring(math.floor(percent)).."%" },
     })
 end
 
-Brightness:registerShortcuts(shortcuts, true)
-
-return Brightness
+return Entity {
+    name = "Brightness",
+    shortcuts = shortcuts
+}

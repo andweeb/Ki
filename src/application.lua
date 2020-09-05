@@ -372,7 +372,7 @@ function Application:initialize(name, shortcuts, autoExitMode)
         { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } },
     })
 
-    Entity.initialize(self, name, mergedShortcuts, autoExitMode)
+    Entity.initialize(self, { name, mergedShortcuts, autoExitMode })
 end
 
 return Application
