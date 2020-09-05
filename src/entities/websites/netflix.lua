@@ -1,6 +1,10 @@
 ----------------------------------------------------------------------------------------------------
 -- Netflix website config
 --
-local Website = spoon.Ki.Website
+local Ki = spoon.Ki
+local Website = Ki.Website
 
-return Website:new("Netflix", "https://netflix.com")
+return Website {
+    "Netflix",
+    "https://netflix.com",
+}

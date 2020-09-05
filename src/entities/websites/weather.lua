@@ -1,6 +1,10 @@
 ----------------------------------------------------------------------------------------------------
 -- Weather website config
 --
-local Website = spoon.Ki.Website
+local Ki = spoon.Ki
+local Website = Ki.Website
 
-return Website:new("Weather", "https://weather.com")
+return Website {
+    "Weather",
+    "https://weather.com",
+}

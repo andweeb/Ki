@@ -1,11 +1,16 @@
 ----------------------------------------------------------------------------------------------------
 -- Zillow website config
 --
-local Website = spoon.Ki.Website
+local Ki = spoon.Ki
+local Website = Ki.Website
 
-return Website:new("Zillow", "https://zillow.com", {
-    { name = "Buy", link = "/homes/" },
-    { name = "Rent", link = "/homes/for_rent/" },
-    { name = "Sell", link = "/sell/" },
-    { name = "Home Loans", link = "/home-loans/" },
-})
+return Website {
+    name = "Zillow",
+    url = "https://zillow.com",
+    links = {
+        { "Buy", "/homes/" },
+        { "Rent", "/homes/for_rent/" },
+        { "Sell", "/sell/" },
+        { "Home Loans", "/home-loans/" },
+    },
+}

@@ -1,10 +1,15 @@
 ----------------------------------------------------------------------------------------------------
 -- Yelp website config
 --
-local Website = spoon.Ki.Website
+local Ki = spoon.Ki
+local Website = Ki.Website
 
-return Website:new("Yelp", "https://yelp.com", {
-    { name = "Events", link = "/events" },
-    { name = "Talk", link = "/talk" },
-    { name = "Mail", link = "/mail" },
-})
+return Website {
+    name = "Yelp",
+    url = "https://yelp.com",
+    links = {
+        { name = "Events", link = "/events" },
+        { name = "Talk", link = "/talk" },
+        { name = "Mail", link = "/mail" },
+    },
+}

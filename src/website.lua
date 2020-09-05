@@ -219,7 +219,22 @@ end
 ---
 --- Returns:
 ---  * None
-function Website:initialize(name, url, links, shortcuts)
+function Website:initialize(options)
+    local name, url, links, shortcuts
+
+    if type(options) == "string" then
+        name = options
+        url = options
+    elseif #options > 0 then
+        name, url, links = table.unpack(options)
+    else
+        url = options.url
+        name = options.name
+        links = options.links
+        shortcuts = options.shortcuts
+        self.getChooserItems = options.getChooserItems
+    end
+
     self.url = url
     self.links = links
 
