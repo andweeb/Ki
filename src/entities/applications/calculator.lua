@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- Calculator application
 --
-local Application = spoon.Ki.Application
+local Ki = spoon.Ki
+local Application = Ki.Application
 
-return Application:new("Calculator")
+return Application "Calculator"

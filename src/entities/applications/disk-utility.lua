@@ -1,22 +1,23 @@
 ----------------------------------------------------------------------------------------------------
 -- Disk Utility application
 --
-local Application = spoon.Ki.Application
-local DiskUtility = Application:new("Disk Utility")
+local Ki = spoon.Ki
+local Application = Ki.Application
 
 -- Initialize menu item events
-DiskUtility.newBlankImage = Application.createMenuItemEvent("Blank Image...", { focusAfter = true })
-DiskUtility.newImageFromFolder = Application.createMenuItemEvent("Image From Folder...", {
+local newBlankImage = Application.createMenuItemEvent("Blank Image...", { focusAfter = true })
+local newImageFromFolder = Application.createMenuItemEvent("Image From Folder...", {
     focusAfter = true,
 })
-DiskUtility.openDiskImage = Application.createMenuItemEvent("Open Disk Image...", {
+local openDiskImage = Application.createMenuItemEvent("Open Disk Image...", {
     focusAfter = true,
 })
 
-DiskUtility:registerShortcuts({
-    { nil, "n", DiskUtility.newBlankImage, { "File", "New Blank Image" } },
-    { nil, "o", DiskUtility.openDiskImage, { "File", "Open Disk Image" } },
-    { { "shift" }, "n", DiskUtility.newImageFromFolder, { "File", "New Image From Folder" } },
-})
-
-return DiskUtility
+return Application {
+    name = "Disk Utility",
+    shortcuts = {
+        { nil, "n", newBlankImage, { "File", "New Blank Image" } },
+        { nil, "o", openDiskImage, { "File", "Open Disk Image" } },
+        { { "shift" }, "n", newImageFromFolder, { "File", "New Image From Folder" } },
+    },
+}

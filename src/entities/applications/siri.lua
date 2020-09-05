@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- Siri application
 --
-local Application = spoon.Ki.Application
+local Ki = spoon.Ki
+local Application = Ki.Application
 
-return Application:new("Siri")
+return Application "Siri"

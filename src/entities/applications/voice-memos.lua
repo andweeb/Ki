@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- Voice Memos application
 --
-local Application = spoon.Ki.Application
+local Ki = spoon.Ki
+local Application = Ki.Application
 
-return Application:new("Voice Memos")
+return Application "Voice Memos"

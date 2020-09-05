@@ -1,15 +1,15 @@
 ----------------------------------------------------------------------------------------------------
 -- Messages application
 --
-local Application = spoon.Ki.Application
-local Messages = Application:new("Messages")
+local Ki = spoon.Ki
+local Application = Ki.Application
 
 -- Initialize menu item events
-Messages.find = Application.createMenuItemEvent("Find...", { focusBefore = true })
-Messages.newMessage = Application.createMenuItemEvent("New Message", { focusBefore = true })
+local find = Application.createMenuItemEvent("Find...", { focusBefore = true })
+local newMessage = Application.createMenuItemEvent("New Message", { focusBefore = true })
 
 -- Implement method to support selection of tab titles in select mode
-function Messages.getChooserItems()
+local function getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("messages", { action = "get-conversations" })
     local isOk, conversations, rawTable = hs.osascript.applescript(script)
@@ -33,7 +33,7 @@ function Messages.getChooserItems()
 end
 
 -- Action to activate the Messages app or a particular conversation
-function Messages.focus(app, choice)
+local function focus(app, choice)
     app:activate()
 
     if choice then
@@ -49,12 +49,13 @@ function Messages.focus(app, choice)
     end
 end
 
-Messages:registerShortcuts({
-    { nil, nil, Messages.focus, { "Messages", "Activate" } },
-    { nil, "l", Messages.find, { "Edit", "Search" } },
-    { nil, "n", Messages.newMessage, { "File", "New Message" } },
-    { nil, "w", Messages.close, { "File", "New Message" } },
-    { { "shift" }, "f", Messages.find, { "Edit", "Search" } },
-})
-
-return Messages
+return Application {
+    name = "Messages",
+    getChooserItems = getChooserItems,
+    shortcuts = {
+        { nil, nil, focus, { "Messages", "Activate" } },
+        { nil, "l", find, { "Edit", "Search" } },
+        { nil, "n", newMessage, { "File", "New Message" } },
+        { { "shift" }, "f", find, { "Edit", "Search" } },
+    },
+}

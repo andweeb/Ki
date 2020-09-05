@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- Photo Booth application
 --
-local Application = spoon.Ki.Application
+local Ki = spoon.Ki
+local Application = Ki.Application
 
-return Application:new("Photo Booth")
+return Application "Photo Booth"

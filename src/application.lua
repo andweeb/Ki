@@ -360,8 +360,20 @@ end
 ---
 --- Returns:
 ---  * None
-function Application:initialize(name, shortcuts, autoExitMode)
-    local mergedShortcuts = self:mergeShortcuts(shortcuts, {
+function Application:initialize(options)
+    local name, shortcuts
+
+    if type(options) == "string" then
+        name = options
+    elseif #options > 0 then
+        name, shortcuts = table.unpack(options)
+    else
+        name = options.name
+        shortcuts = options.shortcuts
+        self.getChooserItems = options.getChooserItems
+    end
+
+    local mergedShortcuts = self:mergeShortcuts(shortcuts or {}, {
         { nil, nil, self.focus, { name, "Activate" } },
         { nil, "a", self.createMenuItemEvent("About "..name), { name, "About "..name } },
         { nil, "f", self.toggleFullScreen, { "View", "Toggle Full Screen" } },
@@ -372,7 +384,7 @@ function Application:initialize(name, shortcuts, autoExitMode)
         { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } },
     })
 
-    Entity.initialize(self, { name, mergedShortcuts, autoExitMode })
+    Entity.initialize(self, { name, mergedShortcuts })
 end
 
 return Application

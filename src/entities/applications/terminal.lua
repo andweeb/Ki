@@ -1,29 +1,30 @@
 ----------------------------------------------------------------------------------------------------
 -- Terminal application
 --
-local Application = spoon.Ki.Application
-local Terminal = Application:new("Terminal")
+local Ki = spoon.Ki
+local Application = Ki.Application
 
 -- Initialize menu item events
-Terminal.find = Application.createMenuItemEvent("Find...", { focusBefore = true })
-Terminal.newWindow = Application.createMenuItemEvent("New Window with Profile .+$", {
+local find = Application.createMenuItemEvent("Find...", { focusBefore = true })
+local newWindow = Application.createMenuItemEvent("New Window with Profile .+$", {
     focusBefore = true,
     isRegex = true,
 })
-Terminal.newTab = Application.createMenuItemEvent("New Tab with Profile .+$", {
+local newTab = Application.createMenuItemEvent("New Tab with Profile .+$", {
     focusBefore = true,
     isRegex = true,
 })
-Terminal.close = Application.createMenuItemEvent({ "Close Tab", "Close Window" }, {
+local close = Application.createMenuItemEvent({ "Close Tab", "Close Window" }, {
     isToggleable = true,
     focusBefore = true,
 })
 
-Terminal:registerShortcuts({
-    { nil, "n", Terminal.newWindow, { "Shell", "New Window" } },
-    { nil, "t", Terminal.newTab, { "Shell", "New Tab" } },
-    { nil, "w", Terminal.close, { "Shell", "Close Tab or Window" } },
-    { { "shift" }, "f", Terminal.find, { "Edit", "Find..." } },
-})
-
-return Terminal
+return Application {
+    name = "Terminal",
+    shortcuts = {
+        { nil, "n", newWindow, { "Shell", "New Window" } },
+        { nil, "t", newTab, { "Shell", "New Tab" } },
+        { nil, "w", close, { "Shell", "Close Tab or Window" } },
+        { { "shift" }, "f", find, { "Edit", "Find..." } },
+    },
+}

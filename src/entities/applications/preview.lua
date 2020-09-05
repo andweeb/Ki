@@ -1,22 +1,23 @@
 ----------------------------------------------------------------------------------------------------
 -- Preview application
 --
-local Application = spoon.Ki.Application
-local Preview = Application:new("Preview")
+local Ki = spoon.Ki
+local Application = Ki.Application
 
 -- Initialize menu item events
-Preview.close = Application.createMenuItemEvent("Close Window", { focusBefore = true })
-Preview.find = Application.createMenuItemEvent({ "Find", "Find..." }, { focusAfter = true })
-Preview.open = Application.createMenuItemEvent("Open...", { focusAfter = true })
-Preview.openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent" }, {
+local close = Application.createMenuItemEvent("Close Window", { focusBefore = true })
+local find = Application.createMenuItemEvent({ "Find", "Find..." }, { focusAfter = true })
+local open = Application.createMenuItemEvent("Open...", { focusAfter = true })
+local openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent" }, {
     focusAfter = true,
 })
 
-Preview:registerShortcuts({
-    { nil, "o", Preview.open, { "File", "Open..." } },
-    { nil, "w", Preview.close, { "File", "Close Window" } },
-    { { "cmd" }, "f", Preview.find, { "Edit", "Find..." } },
-    { { "shift" }, "o", Preview.openRecent, { "File", "Open Recent" } },
-})
-
-return Preview
+return Application {
+    name = "Preview",
+    shortcuts = {
+        { nil, "o", open, { "File", "Open..." } },
+        { nil, "w", close, { "File", "Close Window" } },
+        { { "cmd" }, "f", find, { "Edit", "Find..." } },
+        { { "shift" }, "o", openRecent, { "File", "Open Recent" } },
+    },
+}

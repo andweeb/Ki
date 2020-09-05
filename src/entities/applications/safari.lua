@@ -3,26 +3,25 @@
 --
 local Website = spoon.Ki.Website
 local Application = spoon.Ki.Application
-local Safari = Application:new("Safari")
 
 -- Initialize menu item events
-Safari.addBookmark = Application.createMenuItemEvent("Add Bookmark...", { focusBefore = true })
-Safari.openLocation = Application.createMenuItemEvent("Open Location...", { focusBefore = true })
-Safari.moveTabToNewWindow = Application.createMenuItemEvent("Move Tab to New Window", { focusBefore = true })
-Safari.mergeAllWindows = Application.createMenuItemEvent("Merge All Windows", { focusBefore = true })
-Safari.openNewWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
-Safari.openNewPrivateWindow = Application.createMenuItemEvent("New Private Window", { focusAfter = true })
-Safari.openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
-Safari.openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
-Safari.undoCloseTab = Application.createMenuItemEvent("Reopen Last Closed Tab", { focusBefore = true })
-Safari.showHistory = Application.createMenuItemEvent("Show All History", { focusAfter = true })
-Safari.showWebInspector = Application.createMenuItemEvent({ "Show Web Inspector", "Close Web Inspector" }, {
+local addBookmark = Application.createMenuItemEvent("Add Bookmark...", { focusBefore = true })
+local openLocation = Application.createMenuItemEvent("Open Location...", { focusBefore = true })
+local moveTabToNewWindow = Application.createMenuItemEvent("Move Tab to New Window", { focusBefore = true })
+local mergeAllWindows = Application.createMenuItemEvent("Merge All Windows", { focusBefore = true })
+local openNewWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
+local openNewPrivateWindow = Application.createMenuItemEvent("New Private Window", { focusAfter = true })
+local openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
+local openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
+local undoCloseTab = Application.createMenuItemEvent("Reopen Last Closed Tab", { focusBefore = true })
+local showHistory = Application.createMenuItemEvent("Show All History", { focusAfter = true })
+local showWebInspector = Application.createMenuItemEvent({ "Show Web Inspector", "Close Web Inspector" }, {
     isToggleable = true,
     focusBefore = true,
 })
 
 -- Use a helper method to create various media actions
-function Safari:createMediaAction(command, errorMessage)
+local function createMediaAction(command, errorMessage)
     return function (_, choice)
         local viewModel = {
             browser = "Safari",
@@ -32,23 +31,23 @@ function Safari:createMediaAction(command, errorMessage)
                 or "front document",
             ["is-safari"] = true,
         }
-        local script = self.renderScriptTemplate("browser-media", viewModel)
+        local script = Application.renderScriptTemplate("browser-media", viewModel)
         local isOk, _, rawTable = hs.osascript.applescript(script)
 
         if not isOk then
-            self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
+            Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
         end
     end
 end
-Safari.toggleMute = Safari:createMediaAction("toggle-mute", "Error (un)muting video")
-Safari.toggleMedia = Safari:createMediaAction("toggle-play", "Error toggling media")
-Safari.nextMedia = Safari:createMediaAction("next", "Error going to the next media")
-Safari.previousMedia = Safari:createMediaAction("previous", "Error going back to the previous media")
-Safari.toggleCaptions = Safari:createMediaAction("toggle-captions", "Error toggling captions")
-Safari.skipMedia = Safari:createMediaAction("skip", "Error skipping media")
+local toggleMute = createMediaAction("toggle-mute", "Error (un)muting video")
+local toggleMedia = createMediaAction("toggle-play", "Error toggling media")
+local nextMedia = createMediaAction("next", "Error going to the next media")
+local previousMedia = createMediaAction("previous", "Error going back to the previous media")
+local toggleCaptions = createMediaAction("toggle-captions", "Error toggling captions")
+local skipMedia = createMediaAction("skip", "Error skipping media")
 
 -- Implement method to support selection of tab titles in select mode
-function Safari.getChooserItems()
+local function getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("application-tabs", { application = "Safari" })
     local isOk, tabList, rawTable = hs.osascript.applescript(script)
@@ -83,17 +82,17 @@ function Safari.getChooserItems()
 end
 
 -- Helper method to run AppleScript actions available in `osascripts/safari.applescript`
-function Safari:runApplescriptAction(errorMessage, viewModel)
-    local script = self.renderScriptTemplate("safari", viewModel)
+local function runApplescriptAction(errorMessage, viewModel)
+    local script = Application.renderScriptTemplate("safari", viewModel)
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
+        Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
     end
 end
 
 -- Action to reload a Safari tab or window
-function Safari:reload(_, choice)
+local function reload(_, choice)
     local viewModel = {
         action = "reload",
         target = "front document",
@@ -103,11 +102,11 @@ function Safari:reload(_, choice)
         viewModel.target = "tab "..choice.tabIndex.." of window id "..choice.windowId
     end
 
-    self:runApplescriptAction("Error reloading Safari tab", viewModel)
+    runApplescriptAction("Error reloading Safari tab", viewModel)
 end
 
 -- Action to close a Safari tab or window
-function Safari:close(_, choice)
+local function close(_, choice)
     local viewModel = {
         action = "close",
         target = "current tab of front window",
@@ -117,12 +116,12 @@ function Safari:close(_, choice)
         viewModel.target = "tab "..choice.tabIndex.." of window id "..choice.windowId
     end
 
-    self:runApplescriptAction("Error closing Safari tab", viewModel)
+    runApplescriptAction("Error closing Safari tab", viewModel)
 end
 
 -- Action to focus a Safari tab for some window id
-function Safari:focusTab(windowId, tabIndex)
-    self:runApplescriptAction("Error focusing Safari tab", {
+local function focusTab(windowId, tabIndex)
+    runApplescriptAction("Error focusing Safari tab", {
         action = "focus-tab",
         windowId = windowId,
         tabIndex = tabIndex,
@@ -133,13 +132,13 @@ end
 --
 -- Override `Application.focus` since there has been a `hs.window:focusTab` issue for
 -- Safari after the v10.14.3 macOS update: https://github.com/Hammerspoon/hammerspoon/issues/2080
-function Safari:focus(app, choice)
+local function focus(app, choice)
     if choice then
         local windowId = choice.windowId
         local tabIndex = choice.tabIndex
 
         if tabIndex then
-            self:focusTab(windowId, tabIndex)
+            focusTab(windowId, tabIndex)
         end
 
         local window = hs.window(tonumber(windowId))
@@ -151,27 +150,29 @@ function Safari:focus(app, choice)
     end
 end
 
-Safari:registerShortcuts({
-    { nil, nil, function(...) Safari:focus(...) end, { "Safari", "Activate" } },
-    { nil, "d", Safari.addBookmark, { "Bookmarks", "Add bookmark" } },
-    { nil, "i", Safari.showWebInspector, { "Develop", "Toggle Web Inspector" } },
-    { nil, "l", Safari.openLocation, { "File", "Open Location..." } },
-    { nil, "m", Safari.toggleMute, { "Media", "Toggle Mute" } },
-    { nil, "n", Safari.openNewWindow, { "File", "Open New Window" } },
-    { nil, "o", Safari.openFile, { "File", "Open File" } },
-    { nil, "r", function(...) Safari:reload(...) end, { "View", "Reload Page" } },
-    { nil, "t", Safari.openNewTab, { "File", "Open New Tab" } },
-    { nil, "u", Safari.undoCloseTab, { "File", "Undo Close Tab" } },
-    { nil, "w", function(...) Safari:close(...) end, { "File", "Close Tab or Window" } },
-    { nil, "y", Safari.showHistory, { "History", "Show History" } },
-    { nil, "space", Safari.toggleMedia, { "Media", "Play/Pause Media" } },
-    { { "ctrl" }, "c", Safari.toggleCaptions, { "Media", "Toggle Media Captions" } },
-    { { "ctrl" }, "n", Safari.nextMedia, { "Media", "Next Media" } },
-    { { "ctrl" }, "p", Safari.previousMedia, { "Media", "Previous Media" } },
-    { { "ctrl" }, "s", Safari.skipMedia, { "Media", "Skip Media" } },
-    { { "ctrl", "cmd" }, "m", Safari.moveTabToNewWindow, { "Window", "Move Tab To New Window" } },
-    { { "cmd", "shift" }, "m", Safari.mergeAllWindows, { "Window", "Merge All Windows" } },
-    { { "shift" }, "n", Safari.openNewPrivateWindow, { "File", "Open New Private Window" } },
-})
-
-return Safari
+return Application {
+    name = "Safari",
+    shortcuts = {
+        { nil, nil, focus, { "Safari", "Activate" } },
+        { nil, "d", addBookmark, { "Bookmarks", "Add bookmark" } },
+        { nil, "i", showWebInspector, { "Develop", "Toggle Web Inspector" } },
+        { nil, "l", openLocation, { "File", "Open Location..." } },
+        { nil, "m", toggleMute, { "Media", "Toggle Mute" } },
+        { nil, "n", openNewWindow, { "File", "Open New Window" } },
+        { nil, "o", openFile, { "File", "Open File" } },
+        { nil, "r", reload, { "View", "Reload Page" } },
+        { nil, "t", openNewTab, { "File", "Open New Tab" } },
+        { nil, "u", undoCloseTab, { "File", "Undo Close Tab" } },
+        { nil, "w", close, { "File", "Close Tab or Window" } },
+        { nil, "y", showHistory, { "History", "Show History" } },
+        { nil, "space", toggleMedia, { "Media", "Play/Pause Media" } },
+        { { "ctrl" }, "c", toggleCaptions, { "Media", "Toggle Media Captions" } },
+        { { "ctrl" }, "n", nextMedia, { "Media", "Next Media" } },
+        { { "ctrl" }, "p", previousMedia, { "Media", "Previous Media" } },
+        { { "ctrl" }, "s", skipMedia, { "Media", "Skip Media" } },
+        { { "ctrl", "cmd" }, "m", moveTabToNewWindow, { "Window", "Move Tab To New Window" } },
+        { { "cmd", "shift" }, "m", mergeAllWindows, { "Window", "Merge All Windows" } },
+        { { "shift" }, "n", openNewPrivateWindow, { "File", "Open New Private Window" } },
+    },
+    getChooserItems = getChooserItems,
+}

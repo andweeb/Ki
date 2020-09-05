@@ -1,32 +1,32 @@
 ----------------------------------------------------------------------------------------------------
 -- Google Chrome application
 --
-local Website = spoon.Ki.Website
-local Application = spoon.Ki.Application
-local GoogleChrome = Application:new("Google Chrome")
+local Ki = spoon.Ki
+local Website = Ki.Website
+local Application = Ki.Application
 
 -- Initialize menu item events
-GoogleChrome.addBookmark = Application.createMenuItemEvent("Bookmark This Page...", {
+local addBookmark = Application.createMenuItemEvent("Bookmark This Page...", {
    focusBefore = true,
    focusAfter = true,
 })
-GoogleChrome.showWebInspector = Application.createMenuItemEvent("Developer Tools", {
+local showWebInspector = Application.createMenuItemEvent("Developer Tools", {
    focusBefore = true,
    focusAfter = true,
 })
-GoogleChrome.openLocation = Application.createMenuItemEvent("Open Location...", {
+local openLocation = Application.createMenuItemEvent("Open Location...", {
    focusBefore = true,
    focusAfter = true,
 })
-GoogleChrome.openNewWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
-GoogleChrome.openNewIncognitoWindow = Application.createMenuItemEvent("New Incognito Window", { focusAfter = true })
-GoogleChrome.openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
-GoogleChrome.openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
-GoogleChrome.reopenClosedTab = Application.createMenuItemEvent("Reopen Closed Tab", { focusAfter = true })
-GoogleChrome.showHistory = Application.createMenuItemEvent("Show Full History", { focusAfter = true })
+local openNewWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
+local openNewIncognitoWindow = Application.createMenuItemEvent("New Incognito Window", { focusAfter = true })
+local openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
+local openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
+local reopenClosedTab = Application.createMenuItemEvent("Reopen Closed Tab", { focusAfter = true })
+local showHistory = Application.createMenuItemEvent("Show Full History", { focusAfter = true })
 
 -- Implement method to support selection of tab titles in select mode
-function GoogleChrome.getChooserItems()
+local function getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("application-tabs", { application = "Google Chrome" })
     local isOk, tabList, rawTable = hs.osascript.applescript(script)
@@ -61,19 +61,19 @@ function GoogleChrome.getChooserItems()
 end
 
 -- Helper method to run AppleScript actions available in `osascripts/google-chrome.applescript`
-function GoogleChrome:runApplescriptAction(errorMessage, viewModel)
-    local script = self.renderScriptTemplate("google-chrome", viewModel)
+local function runApplescriptAction(errorMessage, viewModel)
+    local script = Application.renderScriptTemplate("google-chrome", viewModel)
     local isOk, _, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
+        Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
     end
 end
 
 -- Action to focus a Google Chrome tab or window
-function GoogleChrome.focus(app, choice)
+local function focus(app, choice)
     if choice then
-        GoogleChrome:runApplescriptAction("Error focusing Google Chrome tab", {
+        runApplescriptAction("Error focusing Google Chrome tab", {
             action = "focus-tab",
             windowId = choice.windowId,
             tabIndex = choice.tabIndex,
@@ -84,33 +84,33 @@ function GoogleChrome.focus(app, choice)
 end
 
 -- Action to reload a Google Chrome tab or window
-function GoogleChrome.reload(_, choice)
+local function reload(_, choice)
     local targetName = choice and "tab" or "window"
     local target = choice
         and "tab "..choice.tabIndex.." of window id "..choice.windowId
         or "front document"
 
-    GoogleChrome:runApplescriptAction("Error reloading Google Chrome "..targetName, {
+    runApplescriptAction("Error reloading Google Chrome "..targetName, {
         action = "reload",
         target = target,
     })
 end
 
 -- Action to close a Google Chrome tab or window
-function GoogleChrome.close(_, choice)
+local function close(_, choice)
     local targetName = choice and "tab" or "window"
     local target = choice
         and "tab "..choice.tabIndex.." of window id "..choice.windowId
         or "front document"
 
-    GoogleChrome:runApplescriptAction("Error closing Google Chrome "..targetName, {
+    runApplescriptAction("Error closing Google Chrome "..targetName, {
         action = "close",
         target = target,
     })
 end
 
 -- Use a helper method to create various browser media actions
-function GoogleChrome:createMediaAction(command, errorMessage)
+local function createMediaAction(command, errorMessage)
     return function (_, choice)
         local viewModel = {
             browser = "Google Chrome",
@@ -120,33 +120,35 @@ function GoogleChrome:createMediaAction(command, errorMessage)
                 or "front window's active tab",
             ["is-chrome"] = true,
         }
-        local script = self.renderScriptTemplate("browser-media", viewModel)
+        local script = Application.renderScriptTemplate("browser-media", viewModel)
         local isOk, _, rawTable = hs.osascript.applescript(script)
 
         if not isOk then
-            self.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
+            Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
         end
     end
 end
-GoogleChrome.toggleMute = GoogleChrome:createMediaAction("toggle-mute", "Error (un)muting media")
-GoogleChrome.toggleMedia = GoogleChrome:createMediaAction("toggle-play", "Error toggling media")
+local toggleMute = createMediaAction("toggle-mute", "Error (un)muting media")
+local toggleMedia = createMediaAction("toggle-play", "Error toggling media")
 
 -- Register shortcuts with the actions initialized above
-GoogleChrome:registerShortcuts({
-    { nil, nil, GoogleChrome.focus, { "Google Chrome", "Activate" } },
-    { nil, "d", GoogleChrome.addBookmark, { "Bookmarks", "Bookmark This Page..." } },
-    { nil, "i", GoogleChrome.showWebInspector, { "Developer", "Toggle Web Inspector" } },
-    { nil, "l", GoogleChrome.openLocation, { "File", "Open Location..." } },
-    { nil, "m", GoogleChrome.toggleMute, { "Media", "Toggle Mute" } },
-    { nil, "n", GoogleChrome.openNewWindow, { "File", "New Window" } },
-    { nil, "o", GoogleChrome.openFile, { "File", "Open File" } },
-    { nil, "r", GoogleChrome.reload, { "View", "Reload This Page" } },
-    { nil, "t", GoogleChrome.openNewTab, { "File", "New Tab" } },
-    { nil, "u", GoogleChrome.reopenClosedTab, { "File", "Reopen Closed Tab" } },
-    { nil, "w", GoogleChrome.close, { "File", "Close Tab/Window" } },
-    { nil, "y", GoogleChrome.showHistory, { "History", "Show History" } },
-    { nil, "space", GoogleChrome.toggleMedia, { "Media", "Play/Pause Media" } },
-    { { "shift" }, "n", GoogleChrome.openNewIncognitoWindow, { "File", "New Incognito Window" } },
-})
-
-return GoogleChrome
+return {
+    name = "Google Chrome",
+    getChooserItems = getChooserItems,
+    shortcuts = {
+        { nil, nil, focus, { "Google Chrome", "Activate" } },
+        { nil, "d", addBookmark, { "Bookmarks", "Bookmark This Page..." } },
+        { nil, "i", showWebInspector, { "Developer", "Toggle Web Inspector" } },
+        { nil, "l", openLocation, { "File", "Open Location..." } },
+        { nil, "m", toggleMute, { "Media", "Toggle Mute" } },
+        { nil, "n", openNewWindow, { "File", "New Window" } },
+        { nil, "o", openFile, { "File", "Open File" } },
+        { nil, "r", reload, { "View", "Reload This Page" } },
+        { nil, "t", openNewTab, { "File", "New Tab" } },
+        { nil, "u", reopenClosedTab, { "File", "Reopen Closed Tab" } },
+        { nil, "w", close, { "File", "Close Tab/Window" } },
+        { nil, "y", showHistory, { "History", "Show History" } },
+        { nil, "space", toggleMedia, { "Media", "Play/Pause Media" } },
+        { { "shift" }, "n", openNewIncognitoWindow, { "File", "New Incognito Window" } },
+    },
+}

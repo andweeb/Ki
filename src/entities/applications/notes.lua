@@ -1,31 +1,31 @@
 ----------------------------------------------------------------------------------------------------
 -- Notes application
 --
-local Application = spoon.Ki.Application
-local Notes = Application:new("Notes")
+local Ki = spoon.Ki
+local Application = Ki.Application
 
 -- Initialize menu item events
-Notes.search = Application.createMenuItemEvent("Search", { focusBefore = true })
-Notes.newNote = Application.createMenuItemEvent("New Note", { focusBefore = true })
-Notes.newFolder = Application.createMenuItemEvent("New Folder", { focusBefore = true })
-Notes.toggleFolderView = Application.createMenuItemEvent({ "Show Folders", "Hide Folders" }, {
+local search = Application.createMenuItemEvent("Search", { focusBefore = true })
+local newNote = Application.createMenuItemEvent("New Note", { focusBefore = true })
+local newFolder = Application.createMenuItemEvent("New Folder", { focusBefore = true })
+local toggleFolderView = Application.createMenuItemEvent({ "Show Folders", "Hide Folders" }, {
     isToggleable = true,
     focusBefore = true,
 })
-Notes.toggleAttachmentsBrowser = Application.createMenuItemEvent({
+local toggleAttachmentsBrowser = Application.createMenuItemEvent({
     "Show Attachments Browser",
     "Hide Attachments Browser"
 }, { isToggleable = true })
 
 -- Implement method to support selection of notes in select mode
-function Notes:getChooserItems()
+local function getChooserItems()
     local choices = {}
 
-    local script = self.renderScriptTemplate("notes", { action = "get-notes" })
+    local script = Application.renderScriptTemplate("notes", { action = "get-notes" })
     local isOk, notes, rawTable = hs.osascript.applescript(script)
 
     if not isOk then
-        self.notifyError("Error fetching Notes", rawTable.NSLocalizedFailureReason)
+        Application.notifyError("Error fetching Notes", rawTable.NSLocalizedFailureReason)
     end
 
     for _, note in pairs(notes) do
@@ -40,7 +40,7 @@ function Notes:getChooserItems()
 end
 
 -- Action to activate the Notes app or open a particular note
-function Notes.focus(app, choice)
+local function focus(app, choice)
     app:activate()
 
     if choice then
@@ -54,14 +54,16 @@ function Notes.focus(app, choice)
     end
 end
 
-Notes:registerShortcuts({
-    { nil, nil, Notes.focus, { "Notes", "Activate" } },
-    { nil, "\\", Notes.toggleFolderView, { "View", "Show Folders" } },
-    { nil, "l", Notes.search, { "Edit", "Find..." } },
-    { nil, "n", Notes.newNote, { "File", "New Note" } },
-    { nil, "1", Notes.toggleAttachmentsBrowser, { "File", "Toggle Attachments Browser" } },
-    { { "shift" }, "f", Notes.search, { "Edit", "Find..." } },
-    { { "shift" }, "n", Notes.newFolder, { "File", "New Folder" } },
-})
-
-return Notes
+return Application {
+    name = "Notes",
+    getChooserItems = getChooserItems,
+    shortcuts = {
+        { nil, nil, focus, { "Notes", "Activate" } },
+        { nil, "\\", toggleFolderView, { "View", "Show Folders" } },
+        { nil, "l", search, { "Edit", "Find..." } },
+        { nil, "n", newNote, { "File", "New Note" } },
+        { nil, "1", toggleAttachmentsBrowser, { "File", "Toggle Attachments Browser" } },
+        { { "shift" }, "f", search, { "Edit", "Find..." } },
+        { { "shift" }, "n", newFolder, { "File", "New Folder" } },
+    },
+}

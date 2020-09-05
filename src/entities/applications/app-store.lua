@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- App Store application
 --
-local Application = spoon.Ki.Application
+local Ki = spoon.Ki
+local Application = Ki.Application
 
-return Application:new("App Store")
+return Application "App Store"

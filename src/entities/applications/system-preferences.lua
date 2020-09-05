@@ -1,17 +1,17 @@
 ----------------------------------------------------------------------------------------------------
 -- System Preferences application
 --
-local Application = spoon.Ki.Application
-local SystemPreferences = Application:new("System Preferences")
+local Ki = spoon.Ki
+local Application = Ki.Application
 
 -- Initialize menu item events
-SystemPreferences.search = Application.createMenuItemEvent("Search", { focusBefore = true })
-SystemPreferences.showAllPreferences = Application.createMenuItemEvent("Show All Preferences", {
+local search = Application.createMenuItemEvent("Search", { focusBefore = true })
+local showAllPreferences = Application.createMenuItemEvent("Show All Preferences", {
     focusBefore = true,
 })
 
 -- Implement method to support selection of system preferences in select mode
-function SystemPreferences.getChooserItems()
+local function getChooserItems()
     local choices = {}
     local script = Application.renderScriptTemplate("system-preferences", { option = "fetch-panes" })
     local isOk, panes, rawTable = hs.osascript.applescript(script)
@@ -36,7 +36,7 @@ function SystemPreferences.getChooserItems()
 end
 
 -- Action to activate System Preferences app or with a specific system preference pane
-function SystemPreferences.focus(app, choice)
+local function focus(app, choice)
     app:activate()
 
     if choice then
@@ -52,10 +52,12 @@ function SystemPreferences.focus(app, choice)
     end
 end
 
-SystemPreferences:registerShortcuts({
-    { nil, nil, SystemPreferences.focus, { "View", "Activate" } },
-    { nil, "l", SystemPreferences.showAllPreferences, { "View", "Show All Preferences" } },
-    { { "shift" }, "f", SystemPreferences.search, { "View", "Search" } },
-})
-
-return SystemPreferences
+return Application {
+    name = "System Preferences",
+    getChooserItems = getChooserItems,
+    shortcuts = {
+        { nil, nil, focus, { "View", "Activate" } },
+        { nil, "l", showAllPreferences, { "View", "Show All Preferences" } },
+        { { "shift" }, "f", search, { "View", "Search" } },
+    },
+}
