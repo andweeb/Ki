@@ -70,9 +70,9 @@ src/cheatsheet/cheatsheet.js: src/cheatsheet/node_modules
 cheatsheet: src/cheatsheet/cheatsheet.js src/cheatsheet/node_modules
 
 deps:
-	luarocks install --tree deps fsm 1.1.0-1
-	luarocks install --tree deps lustache 1.3.1-0
-	luarocks install --tree deps middleclass 4.1.1-0
+	luarocks install --lua-version 5.4 --tree deps fsm 1.1.0-1
+	luarocks install --lua-version 5.4 --tree deps lustache 1.3.1-0
+	luarocks install --lua-version 5.4 --tree deps middleclass 4.1.1-0
 
 lint-deps:
 	luarocks install luacheck

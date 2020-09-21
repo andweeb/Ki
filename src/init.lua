@@ -62,7 +62,6 @@ local spoonPath = hs.spoons.scriptPath()
 local luaVersion = _VERSION:match("%d+%.%d+")
 
 package.path = package.path..";"..spoonPath.."?.lua"
-package.cpath = spoonPath.."/deps/lib/lua/"..luaVersion.."/?.so;"..package.cpath
 package.path = spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
 
 _G.SHORTCUT_MODKEY_INDEX = 1
