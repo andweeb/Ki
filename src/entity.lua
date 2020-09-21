@@ -128,7 +128,7 @@ end
 --- Returns:
 ---  * None
 function Entity:initialize(options)
-    local name, shortcuts, autoExitMode
+    local name, actions, shortcuts, autoExitMode, getChooserItems
 
     if type(options) == "string" then
         name = options
@@ -136,11 +136,15 @@ function Entity:initialize(options)
         name, shortcuts, autoExitMode = table.unpack(options)
     else
         name = options.name
+        actions = options.actions
         shortcuts = options.shortcuts
         autoExitMode = options.autoExitMode
+        getChooserItems = options.getChooserItems
     end
 
     self.name = name
+    self.actions = actions
+    self.getChooserItems = getChooserItems
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
     self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
         { { "cmd" }, "space", function(...) self:showActions(...) end, { name, "Show Actions" } },

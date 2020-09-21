@@ -370,7 +370,6 @@ function Application:initialize(options)
     else
         name = options.name
         shortcuts = options.shortcuts
-        self.getChooserItems = options.getChooserItems
     end
 
     local mergedShortcuts = self:mergeShortcuts(shortcuts or {}, {
@@ -384,7 +383,12 @@ function Application:initialize(options)
         { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } },
     })
 
-    Entity.initialize(self, { name, mergedShortcuts })
+    Entity.initialize(self, {
+        name = name,
+        actions = options.actions,
+        shortcuts = mergedShortcuts,
+        getChooserItems = options.getChooserItems,
+    })
 end
 
 return Application

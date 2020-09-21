@@ -116,6 +116,27 @@ Ki.state = {}
 --- A table containing lists of all default entity instances keyed by mode name when the [default config](#useDefaultConfig) is used, `nil` otherwise.
 Ki.defaultEntities = nil
 
+function Ki.getLocalVariables(variableType)
+    local index = 1
+    local variables = {}
+
+    while true do
+        local name, value = debug.getlocal(2, index)
+
+        if name ~= nil and name ~= "(*temporary)" then
+            if type(value) == variableType then
+                variables[name] = value
+            end
+        else
+            break
+        end
+
+        index = index + 1
+    end
+
+    return variables
+end
+
 -- Create a string shortcut key from its modifiers and hotkey
 function Ki.getShortcutKey(modifiers, hotkey)
     if not hotkey or not modifiers then
@@ -128,8 +149,8 @@ function Ki.getShortcutKey(modifiers, hotkey)
     return table.concat(clonedModifiers)..hotkey
 end
 
--- Merge Ki shortcuts with the option of overriding shortcuts
--- Shortcuts with conflicting hotkeys will result in the lhs shortcut being overwritten by the rhs shortcut
+-- Merge Ki shortcuts with the option of overriding shortcuts. Shortcuts with conflicting hotkeys
+-- will result in the lhs shortcut being overwritten by the rhs shortcut
 function Ki:mergeShortcuts(fromList, toList)
     fromList = fromList or {}
     toList = toList or {}
@@ -158,14 +179,12 @@ function Ki:mergeShortcuts(fromList, toList)
     return mergedShortcuts
 end
 
--- A table containing [state transition events](https://github.com/unindented/lua-fsm#usage) that allow transitions between different modes in Ki.
+-- A table containing [state transition events](https://github.com/unindented/lua-fsm#usage) that
+-- allow transitions between different modes in Ki.
 Ki.modeTransitionEvents = {
     -- NORMAL --
     { name = "enterNormalMode", from = "desktop", to = "normal" },
     { name = "exitMode", from = "normal", to = "desktop" },
-    -- ENTITY --
-    { name = "enterEntityMode", from = "normal", to = "entity" },
-    { name = "exitMode", from = "entity", to = "desktop" },
 }
 
 -- A table containing lists of shortcuts keyed by mode name.
@@ -175,10 +194,6 @@ Ki.shortcuts = {
     },
     normal = {
         { nil, "escape", function() Ki.state:exitMode() end, { "Normal Mode", "Exit to Desktop Mode" } },
-        { {"cmd"}, "e", function() Ki.state:enterEntityMode() end, { "Normal Mode", "Enter Entity Mode" } },
-    },
-    entity = {
-        { nil, "escape", function() Ki.state:exitMode() end, { "Entity Mode", "Exit to Desktop Mode" } },
     },
 }
 
@@ -192,11 +207,13 @@ Ki.shortcuts = {
 --- Defaults to an implementation that displays the mode as a menubar item.
 Ki.modeIndicator = nil
 
--- A table that stores the workflow history.
+-- A table that stores the workflow history
 Ki.history = {
     workflow = {},
     action = {},
 }
+
+Ki.modes = {}
 
 function Ki.history:recordEvent(mode, keyName, flags)
     table.insert(self.workflow, {
@@ -206,7 +223,8 @@ function Ki.history:recordEvent(mode, keyName, flags)
     })
 end
 
--- Generate the finite state machine callbacks for all state events, generic `onstatechange` callbacks for recording/resetting event history and state event-specific callbacks
+-- Generate the finite state machine callbacks for all state events, generic `onstatechange`
+-- callbacks for recording/resetting event history and state event-specific callbacks
 function Ki:_createFsmCallbacks()
     local callbacks = {}
 
@@ -229,7 +247,8 @@ function Ki:_createFsmCallbacks()
     return callbacks
 end
 
--- Handle keydown event by triggering the appropriate event handler or entity action dispatcher depending on the mode, modifier keys, and keycode
+-- Handle keydown event by triggering the appropriate event handler or entity action dispatcher
+-- depending on the mode, modifier keys, and keycode
 function Ki:_handleKeyDown(event)
     local mode = self.state.current
     local shortcuts = self.shortcuts[mode]
@@ -296,7 +315,7 @@ function Ki:init()
     self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, eventHandler)
 end
 
---- Ki:registerMode(mode, enterModeShortcut, shortcuts) -> table of state transition events, table of registered shortcuts
+--- Ki:Mode(mode, enterModeShortcut, shortcuts) -> table of state transition events, table of registered shortcuts
 --- Method
 --- Registers a new custom mode and its keyboard shortcuts.
 ---
@@ -321,19 +340,51 @@ end
 ---  },
 ---  ```
 ---  * `shortcuts` - The shortcuts that will be assigned to the new custom mode
-function Ki:registerMode(mode, enterModeShortcut, shortcuts)
-    local modeName = mode:gsub("^%l", string.upper)
+function Ki:Mode(options)
+    local name = options.name
+    local actions = options.actions
+    local shortcut = options.shortcut
+    local shortcuts = options.shortcuts
+
+    if self.modes[name] then
+        self:registerModeShortcuts(name, shortcuts)
+        return
+    end
+
+    self.modes[name] = actions or true
+
+    local modeName = name:gsub("^%l", string.upper)
 
     -- Register the action to enter the mode from normal mode
-    self:registerModeTransition("normal", mode, enterModeShortcut)
+    self:registerModeTransition("normal", name, shortcut)
 
     -- Register the action to exit the mode back to desktop mode
     local metadata = { modeName.." Mode", "Exit to Desktop Mode" }
     local exitModeShortcut = { nil, "escape", nil, metadata }
-    self:registerModeTransition(mode, "desktop", exitModeShortcut, "exitMode")
+    self:registerModeTransition(name, "desktop", exitModeShortcut, "exitMode")
 
     -- Register the new mode shortcuts
-    return self.modeTransitionEvents, self:registerModeShortcuts(mode, shortcuts)
+    self:registerModeShortcuts(name, shortcuts)
+end
+
+function Ki:ModeTransition(transition)
+    local fromMode, toMode, transitionModeShortcut
+
+    if #transition > 0 then
+        fromMode, toMode, transitionModeShortcut = table.unpack(transition)
+    else
+        fromMode = transition.from
+        toMode = transition.to
+        transitionModeShortcut = transition.shortcut
+    end
+
+    self:registerModeTransition(fromMode, toMode, transitionModeShortcut)
+end
+
+function Ki:ModeTransitions(transitionList)
+    for i = 1, #transitionList do
+        self:ModeTransition(transitionList[i])
+    end
 end
 
 --- Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut[, transitionName]) -> table of state transition events, table of registered shortcuts
@@ -360,7 +411,11 @@ end
 function Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut, transitionName)
     transitionName = transitionName or "enter"..toMode:gsub("^%l", string.upper).."Mode"
 
-    local stateEvent = { name = transitionName, from = fromMode, to = toMode }
+    local stateEvent = {
+        name = transitionName,
+        from = fromMode,
+        to = toMode,
+    }
 
     -- Add to mode transition events
     table.insert(self.modeTransitionEvents, stateEvent)
@@ -372,6 +427,14 @@ function Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut, tra
         if onTransition then
             onTransition(self.state, fromMode, toMode)
         end
+    end
+
+    -- Dynamically create transition shortcut metadata
+    if not transitionModeShortcut[_G.SHORTCUT_METADATA_INDEX] then
+        transitionModeShortcut[_G.SHORTCUT_METADATA_INDEX] = {
+            fromMode:gsub("^%l", string.upper).." Mode",
+            "Enter "..toMode:gsub("^%l", string.upper).." Mode",
+        }
     end
 
     -- Register shortcut mode transition shortcut
