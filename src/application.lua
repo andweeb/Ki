@@ -148,11 +148,13 @@ function Application.createMenuItemEvent(menuItem, options)
             Application.focus(app, choice)
         end
 
+        local isRegex = options.isRegex or false
+
         if options.isToggleable then
-            _ = app:selectMenuItem(menuItem[1], options.isRegex)
-                or app:selectMenuItem(menuItem[2], options.isRegex)
+            _ = app:selectMenuItem(menuItem[1], isRegex)
+                or app:selectMenuItem(menuItem[2], isRegex)
         else
-            app:selectMenuItem(menuItem, options.isRegex)
+            app:selectMenuItem(menuItem, isRegex)
         end
 
         if (options.focusAfter) then
