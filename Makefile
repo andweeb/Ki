@@ -62,20 +62,20 @@ watch-docs:
 	$(call monitor-file-changes,$(wd)/src,generate-docs-command)
 
 deps:
-	luarocks install --tree deps fsm 1.1.0-1
-	luarocks install --tree deps lustache 1.3.1-0
-	luarocks install --tree deps middleclass 4.1.1-0
+	luarocks install --lua-version 5.4 --tree deps fsm 1.1.0-1
+	luarocks install --lua-version 5.4 --tree deps lustache 1.3.1-0
+	luarocks install --lua-version 5.4 --tree deps middleclass 4.1.1-0
 
 lint-deps:
-	luarocks install luacheck
+	luarocks install --lua-version 5.4 luacheck
 
 docs-deps:
 	pip install --user jinja2 mistune pygments
 
 test-deps:
-	luarocks install busted
-	luarocks install luacov
-	luarocks install luacov-console
+	luarocks install --lua-version 5.4 busted
+	luarocks install --lua-version 5.4 luacov
+	luarocks install --lua-version 5.4 luacov-console
 
 dev-deps: lint-deps docs-deps test-deps
 
