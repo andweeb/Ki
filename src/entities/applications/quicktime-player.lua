@@ -53,7 +53,7 @@ end
 
 -- Register shortcuts with the actions initialized above
 return Application {
-    name = "QuickTimePlayer",
+    name = "QuickTime Player",
     shortcuts = {
         { nil, "a", newAudioRecording, { "File", "New Audio Recording" } },
         { nil, "e", exportAs, { "File", "Export As" } },

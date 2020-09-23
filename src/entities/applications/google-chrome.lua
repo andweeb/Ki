@@ -132,7 +132,7 @@ local toggleMute = createMediaAction("toggle-mute", "Error (un)muting media")
 local toggleMedia = createMediaAction("toggle-play", "Error toggling media")
 
 -- Register shortcuts with the actions initialized above
-return {
+return Application {
     name = "Google Chrome",
     getChooserItems = getChooserItems,
     shortcuts = {
