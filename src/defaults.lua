@@ -291,7 +291,7 @@ function Defaults.createVolumeEvents()
 
     local function toggleMute()
         local isMuted = hs.audiodevice.defaultOutputDevice():muted()
-        hs.audiodevice.defaultOutputDevice():setMuted(isMuted)
+        hs.audiodevice.defaultOutputDevice():setMuted(not isMuted)
         return true
     end
 
