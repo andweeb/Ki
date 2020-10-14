@@ -16,9 +16,9 @@ local close = Application.createMenuItemEvent({ "Close Tab", "Close" }, {
 return Application {
     name = "Dictionary",
     shortcuts = {
-        { nil, "n", newWindow, { "File", "New Window" } },
-        { nil, "t", newTab, { "File", "New Tab" } },
-        { nil, "w", close, { "File", "Close Tab or Window" } },
-        { { "shift" }, "f", search, { "Edit", "Search For a New Word..." } },
+        { nil, "n", newWindow, "New Window" },
+        { nil, "t", newTab, "New Tab" },
+        { nil, "w", close, "Close Tab or Window" },
+        { { "shift" }, "f", search, "Search For a New Word..." },
     },
 }

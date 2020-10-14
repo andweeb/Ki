@@ -67,7 +67,7 @@ package.path = spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua
 _G.SHORTCUT_MODKEY_INDEX = 1
 _G.SHORTCUT_HOTKEY_INDEX = 2
 _G.SHORTCUT_EVENT_HANDLER_INDEX = 3
-_G.SHORTCUT_METADATA_INDEX = 4
+_G.SHORTCUT_NAME_INDEX = 4
 
 local FSM = require("fsm")
 local Cheatsheet = require("cheatsheet")
@@ -89,11 +89,6 @@ Ki.Application = require("application")
 --- Constant
 --- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some file or directory at an existing file path. Class methods and properties are documented [here](File.html).
 Ki.File = require("file")
-
---- Ki.SmartFolder
---- Constant
---- A [middleclass](https://github.com/kikito/middleclass/wiki) class that represents some [smart folder](https://support.apple.com/kb/PH25589) at an existing file path. Class methods and properties are documented [here](SmartFolder.html).
-Ki.SmartFolder = require("smart-folder")
 
 --- Ki.Website
 --- Constant
@@ -154,22 +149,80 @@ function Ki:mergeShortcuts(fromList, toList)
     fromList = fromList or {}
     toList = toList or {}
 
-    local mergedShortcuts = {table.unpack(fromList)}
-    local memo = {}
+    local mergedShortcuts = {}
 
-    for i = 1, #mergedShortcuts do
-        local shortcut = mergedShortcuts[i]
-        local key = self.getShortcutKey(table.unpack(shortcut))
-        memo[key] = { i, shortcut }
+    -- Memoize `fromList` hotkeys for reference when iterating on `toList`
+    local memo = {}
+    for key, value in pairs(fromList) do
+        if type(key) == "string" and #value > 0 then
+            local categoryName = key
+            local categorizedShortcuts = value
+            for _, shortcut in pairs(categorizedShortcuts) do
+                local memoKey = self.getShortcutKey(table.unpack(shortcut))
+                memo[memoKey] = { shortcut, categoryName }
+            end
+        else
+            local shortcut = value
+            local memoKey = self.getShortcutKey(table.unpack(shortcut))
+            memo[memoKey] = { shortcut }
+        end
     end
 
-    for i = 1, #toList do
-        local shortcut = toList[i]
-        local key = self.getShortcutKey(table.unpack(shortcut))
-        local foundIndex, foundShortcut = table.unpack(memo[key] or {})
+    -- Insert `toList` shortcuts into `mergedShortcuts` that overlap with `fromList`
+    for key, value in pairs(toList) do
+        if type(key) == "string" and #value > 0 then
+            local categoryName = key
+            local categorizedShortcuts = value
 
-        if foundIndex then
-            mergedShortcuts[foundIndex] = foundShortcut
+            for _, shortcut in pairs(categorizedShortcuts) do
+                local memoKey = self.getShortcutKey(table.unpack(shortcut))
+                local foundShortcut, foundCategoryName = table.unpack(memo[memoKey] or {})
+
+                if foundShortcut then
+                    if foundCategoryName then
+                        mergedShortcuts[foundCategoryName] = mergedShortcuts[foundCategoryName] or {}
+                        table.insert(mergedShortcuts[foundCategoryName], foundShortcut)
+                    else
+                        table.insert(mergedShortcuts, foundShortcut)
+                    end
+                else
+                    if categoryName then
+                        mergedShortcuts[categoryName] = mergedShortcuts[categoryName] or {}
+                        table.insert(mergedShortcuts[categoryName], shortcut)
+                    else
+                        table.insert(mergedShortcuts, shortcut)
+                    end
+                end
+
+                memo[memoKey] = nil
+            end
+        else
+            local shortcut = value
+            local memoKey = self.getShortcutKey(table.unpack(shortcut))
+            local foundShortcut, categoryName = table.unpack(memo[memoKey] or {})
+
+            if foundShortcut then
+                if categoryName then
+                    mergedShortcuts[categoryName] = mergedShortcuts[categoryName] or {}
+                    table.insert(mergedShortcuts[categoryName], foundShortcut)
+                else
+                    table.insert(mergedShortcuts, foundShortcut)
+                end
+            else
+                table.insert(mergedShortcuts, shortcut)
+            end
+
+            memo[memoKey] = nil
+        end
+    end
+
+    -- Add any remaining memoized shortcuts to `mergedShortcuts` not in `toList`
+    for _, memoized in pairs(memo) do
+        local shortcut, categoryName = table.unpack(memoized)
+
+        if categoryName then
+            mergedShortcuts[categoryName] = mergedShortcuts[categoryName] or {}
+            table.insert(mergedShortcuts[categoryName], shortcut)
         else
             table.insert(mergedShortcuts, shortcut)
         end
@@ -189,10 +242,10 @@ Ki.modeTransitionEvents = {
 -- A table containing lists of shortcuts keyed by mode name.
 Ki.shortcuts = {
     desktop = {
-        { {"cmd"}, "escape", function() Ki.state:enterNormalMode() end, { "Desktop Mode", "Enter Normal Mode" } },
+        { {"cmd"}, "escape", function() Ki.state:enterNormalMode() end, "Enter Normal Mode" },
     },
     normal = {
-        { nil, "escape", function() Ki.state:exitMode() end, { "Normal Mode", "Exit to Desktop Mode" } },
+        { nil, "escape", function() Ki.state:exitMode() end, "Exit to Desktop Mode" },
     },
 }
 
@@ -352,14 +405,11 @@ function Ki:Mode(options)
 
     self.modes[name] = actions or true
 
-    local modeName = name:gsub("^%l", string.upper)
-
     -- Register the action to enter the mode from normal mode
     self:registerModeTransition("normal", name, shortcut)
 
     -- Register the action to exit the mode back to desktop mode
-    local metadata = { modeName.." Mode", "Exit to Desktop Mode" }
-    local exitModeShortcut = { nil, "escape", nil, metadata }
+    local exitModeShortcut = { nil, "escape", nil, "Exit to Desktop Mode" }
     self:registerModeTransition(name, "desktop", exitModeShortcut, "exitMode")
 
     -- Register the new mode shortcuts
@@ -428,12 +478,9 @@ function Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut, tra
         end
     end
 
-    -- Dynamically create transition shortcut metadata
-    if not transitionModeShortcut[_G.SHORTCUT_METADATA_INDEX] then
-        transitionModeShortcut[_G.SHORTCUT_METADATA_INDEX] = {
-            fromMode:gsub("^%l", string.upper).." Mode",
-            "Enter "..toMode:gsub("^%l", string.upper).." Mode",
-        }
+    -- Dynamically enter create transition shortcut name
+    if not transitionModeShortcut[_G.SHORTCUT_NAME_INDEX] then
+        transitionModeShortcut[_G.SHORTCUT_NAME_INDEX] = "Enter "..toMode:gsub("^%l", string.upper).." Mode"
     end
 
     -- Register shortcut mode transition shortcut
@@ -514,61 +561,31 @@ end
 ---
 --- Parameters:
 ---  * `shortcuts` - A set of shortcuts categorized by either the shortcut category and description (used in the cheatsheet) or by mode and entity name
-function Ki:remapShortcuts(categories)
-    -- Memoize shortcuts using contatenated category and shortcut name keys delimited by "."
+function Ki:remapShortcuts(remappedShortcuts)
     local memo = {}
-    for categoryName, shortcuts in pairs(categories) do
-        for shortcutName, shortcut in pairs(shortcuts) do
-            local key = categoryName.."."..shortcutName
-            memo[key] = shortcut
-        end
+    for _, remapped in pairs(remappedShortcuts) do
+        local key = remapped.mode.."."..remapped.name
+        memo[key] = remapped.shortcut
     end
 
-    -- Iterate through modal shortcuts to either remap or unmap
-    local unmappedModes = {}
+    -- Iterate through modal shortcuts to remap
     for mode, modeShortcuts in pairs(self.shortcuts) do
-        for i, shortcut in pairs(modeShortcuts) do
-            local remappedKeys = {}
-            local modkeyIndex = _G.SHORTCUT_MODKEY_INDEX
-            local hotkeyIndex = _G.SHORTCUT_HOTKEY_INDEX
-            local metaIndex = _G.SHORTCUT_METADATA_INDEX
+        for _, shortcut in pairs(modeShortcuts) do
+            local handler = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+            local name = shortcut[_G.SHORTCUT_NAME_INDEX]
 
-            -- Find shortcut using shortcut metadata
-            local categoryName, shortcutName = table.unpack(shortcut[metaIndex] or {})
-            if categoryName and shortcutName and memo[categoryName.."."..shortcutName] then
-                remappedKeys = memo[categoryName.."."..shortcutName]
+            if not name and type(handler) == "table" then
+                name = handler.name
             end
 
-            -- Find shortcut using the mode and entity name
-            local entity = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
-            if type(entity) == "table" and entity.name and memo[mode.."."..entity.name] then
-                remappedKeys = memo[mode.."."..entity.name]
-            end
+            local key = mode.."."..name
 
-            -- Remap the shortcut if found
-            if remappedKeys.unmap then
-                modeShortcuts[i] = nil
-                unmappedModes[mode] = true
-            elseif #remappedKeys ~= 0 then
-                shortcut[modkeyIndex], shortcut[hotkeyIndex] = table.unpack(remappedKeys)
+            if memo[key] then
+                local remappedShortcut = memo[key]
+                shortcut[_G.SHORTCUT_MODKEY_INDEX] = remappedShortcut[_G.SHORTCUT_MODKEY_INDEX]
+                shortcut[_G.SHORTCUT_HOTKEY_INDEX] = remappedShortcut[_G.SHORTCUT_HOTKEY_INDEX]
             end
         end
-    end
-
-    -- Compact the nil values in modes that had shortcuts unmapped
-    for mode in pairs(unmappedModes) do
-        local compactedList = {}
-        local shortcuts = self.shortcuts[mode]
-
-        for i = 1, #shortcuts do
-            local shortcut = shortcuts[i]
-
-            if shortcut ~= nil then
-                table.insert(compactedList, shortcut)
-            end
-        end
-
-        self.shortcuts[mode] = compactedList
     end
 end
 
@@ -673,20 +690,19 @@ function Ki:start()
 
     -- Make the cheatsheet available in entity mode
     table.insert(self.shortcuts.entity, {
-        { "shift" }, "/", function() self.cheatsheet:show() return true end, { "Entities", "Cheatsheet" },
+        { "shift" }, "/", function() self.cheatsheet:show() return true end, "Cheatsheet",
     })
-
-    -- Collect all shortcuts in a flattened list
-    local shortcuts = {}
-    for _, modeShortcuts in pairs(self.shortcuts) do
-        for _, shortcut in pairs(modeShortcuts) do
-            table.insert(shortcuts, shortcut)
-        end
-    end
 
     -- Initialize cheat sheet with both default and/or custom transition and workflow events
     local description = "Shortcuts for Ki modes and entities"
-    self.cheatsheet = Cheatsheet:new(self.name, description, shortcuts)
+    self.cheatsheet = Cheatsheet:new({
+        name = self.name,
+        description = description,
+        shortcuts = self.shortcuts,
+        categoryFormatter = function(text)
+            return text:gsub("^%l", string.upper).." Mode"
+        end,
+    })
 
     -- Set menu item click callback function to show the cheatsheet
     if self.modeIndicator.isDefault then

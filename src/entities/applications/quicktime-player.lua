@@ -55,14 +55,14 @@ end
 return Application {
     name = "QuickTime Player",
     shortcuts = {
-        { nil, "a", newAudioRecording, { "File", "New Audio Recording" } },
-        { nil, "e", exportAs, { "File", "Export As" } },
-        { nil, "l", toggleFileLoop, { "File", "Toggle File Loop Option" } },
-        { nil, "m", newMovieRecording, { "File", "New Movie Recording" } },
-        { nil, "o", openFile, { "File", "Open File..." } },
-        { nil, "s", newScreenRecording, { "File", "New Screen Recording" } },
-        { nil, "t", trim, { "File", "Trim..." } },
-        { nil, "space", togglePlay, { "Playback", "Toggle Play" } },
-        { { "shift" }, "o", openRecent, { "File", "Open Recent" } },
+        { nil, "a", newAudioRecording, "New Audio Recording" },
+        { nil, "e", exportAs, "Export As" },
+        { nil, "l", toggleFileLoop, "Toggle File Loop Option" },
+        { nil, "m", newMovieRecording, "New Movie Recording" },
+        { nil, "o", openFile, "Open File..." },
+        { nil, "s", newScreenRecording, "New Screen Recording" },
+        { nil, "t", trim, "Trim..." },
+        { nil, "space", togglePlay, "Toggle Play" },
+        { { "shift" }, "o", openRecent, "Open Recent" },
     },
 }

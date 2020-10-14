@@ -11,40 +11,60 @@ local spoonPath = hs.spoons.scriptPath()
 local Cheatsheet = class("Cheatsheet")
 
 -- Generate a view model of shortcuts partitioned into categories
-function Cheatsheet._createShortcutBlocks(shortcutList)
-    shortcutList = shortcutList or {}
-
+function Cheatsheet:createShortcutBlocks()
     local shortcutBlocks = {}
     local nonModeShortcutBlocks = {}
     local modeShortcutBlocks = {}
     local shortcutCategories = {}
 
-    for id, shortcut in pairs(shortcutList) do
+    local function initializeShortcutCategories(id, shortcut, category)
         local shortcutModifierKeys = shortcut[_G.SHORTCUT_MODKEY_INDEX] or {}
         local shortcutKey = shortcut[_G.SHORTCUT_HOTKEY_INDEX] or ""
-        local shortcutMetadata = shortcut[_G.SHORTCUT_METADATA_INDEX]
+        local shortcutEventHandler = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+        local shortcutName = shortcut[_G.SHORTCUT_NAME_INDEX]
 
-        if shortcutMetadata and #shortcutMetadata > 0 and shortcutMetadata[1] then
-            local category = shortcutMetadata[1]
-            local name = shortcutMetadata[2]
+        if not shortcutName and type(shortcutEventHandler) == "table" then
+            shortcutName = shortcutEventHandler.name
+        end
 
-            if not shortcutCategories[category] then
-                shortcutCategories[category] = {}
+        category = category or self.name
+        shortcutName = shortcutName or tostring(shortcutEventHandler)
+
+        if not shortcutCategories[category] then
+            shortcutCategories[category] = {}
+        end
+
+        table.insert(shortcutCategories[category], {
+            hotkey = glyphs.createShortcutText(shortcutModifierKeys, shortcutKey),
+            name = shortcutName,
+            id = id,
+        })
+    end
+
+    local i = 1
+    for key, value in pairs(self.shortcuts) do
+        if type(key) == "string" and type(value) == "table" then
+            local category = key
+            local categorizedShortcuts = value
+            for j, categorizedShortcut in pairs(categorizedShortcuts) do
+                initializeShortcutCategories(i + j, categorizedShortcut, category)
             end
-
-            table.insert(shortcutCategories[category], {
-                hotkey = glyphs.createShortcutText(shortcutModifierKeys, shortcutKey),
-                name = name,
-                id = id,
-            })
+        else
+            i = key
+            local shortcut = value
+            initializeShortcutCategories(key, shortcut)
         end
     end
 
     local index = 1
     for category, shortcuts in pairs(shortcutCategories) do
+        if self.categoryFormatter then
+            category = self.categoryFormatter(category)
+        end
+
         local block = {{
             isTitle = true,
-            id = #shortcutList + index,
+            id = #self.shortcuts + index,
             name = category,
         }}
 
@@ -148,11 +168,12 @@ function Cheatsheet:show(iconURL)
     htmlFile:close()
 
     local title = self.name.." Cheat Sheet"
+    local shortcutBlocks = self:createShortcutBlocks()
     local viewModel = {
         title = title,
         icon = iconURL,
         description = self.description,
-        data = hs.json.encode(self.shortcutBlocks),
+        data = hs.json.encode(shortcutBlocks),
         javascript = javascript,
         stylesheet = css,
     }
@@ -215,13 +236,14 @@ end
 ---
 --- Returns:
 ---  * None
-function Cheatsheet:initialize(name, description, shortcuts, view)
-    self.name = name
-    self.description = description
-    self.shortcuts = shortcuts
-    self.shortcutBlocks = self._createShortcutBlocks(shortcuts)
+function Cheatsheet:initialize(options)
+    self.name = options.name
+    self.description = options.description
+    self.shortcuts = options.shortcuts
+    self.categoryFormatter = options.categoryFormatter
 
-    if not view then
+    local view = options.view
+    if not options.view then
         view = hs.webview.new({ x = 0, y = 0, w = 0, h = 0 })
         view:windowStyle({ "utility", "titled", "closable" })
         view:level(hs.drawing.windowLevels.modalPanel)

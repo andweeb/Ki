@@ -513,20 +513,20 @@ function File:initialize(options)
         end,
     }
     local commonShortcuts = {
-        { nil, nil, actions.open, { path, "Open "..path.." "..attributes.mode } },
-        { { "shift" }, "/", function(...) self:showCheatsheet(...) end, { path, "Show Cheatsheet" } },
+        { nil, nil, actions.open, "Open "..path.." "..attributes.mode },
+        { { "shift" }, "/", function(...) self:showCheatsheet(...) end, "Show Cheatsheet" },
     }
 
     -- Append directory shortcuts if the file entity is representing a directory path
     if isDirectory then
         local commonDirectoryShortcuts = {
-            { nil, "c", function(...) self:copy(...) end, { path, "Copy File to Folder" } },
-            { nil, "d", actions.deleteFileInFolder, { path, "Move File in Folder to Trash" } },
-            { nil, "i", actions.showInfoForFileInFolder, { path, "Open File Info Window" } },
-            { nil, "m", function(...) self:move(...) end, { path, "Move File to Folder" } },
-            { nil, "o", openFileInFolder, { path, "Open File in Folder" } },
-            { nil, "space", actions.quickLookFileInFolder, { path, "Quick Look" } },
-            { { "shift" }, "o", actions.openFileInFolderWith, { path, "Open File in Folder with App" } },
+            { nil, "c", function(...) self:copy(...) end, "Copy File to Folder" },
+            { nil, "d", actions.deleteFileInFolder, "Move File in Folder to Trash" },
+            { nil, "i", actions.showInfoForFileInFolder, "Open File Info Window" },
+            { nil, "m", function(...) self:move(...) end, "Move File to Folder" },
+            { nil, "o", openFileInFolder, "Open File in Folder" },
+            { nil, "space", actions.quickLookFileInFolder, "Quick Look" },
+            { { "shift" }, "o", actions.openFileInFolderWith, "Open File in Folder with App" },
         }
 
         for _, shortcut in pairs(commonDirectoryShortcuts) do

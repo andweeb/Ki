@@ -147,8 +147,8 @@ function Entity:initialize(options)
     self.getChooserItems = getChooserItems
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
     self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
-        { { "cmd" }, "space", function(...) self:showActions(...) end, { name, "Show Actions" } },
-        { { "shift" }, "/", function() self.cheatsheet:show() end, { name, "Show Cheatsheet" } },
+        { { "cmd" }, "space", function(...) self:showActions(...) end, "Show Actions" },
+        { { "shift" }, "/", function() self.cheatsheet:show() end, "Show Cheatsheet" },
     }))
 end
 
@@ -170,22 +170,80 @@ function Entity:mergeShortcuts(fromList, toList)
     fromList = fromList or {}
     toList = toList or {}
 
-    local mergedShortcuts = {table.unpack(fromList)}
-    local memo = {}
+    local mergedShortcuts = {}
 
-    for i = 1, #mergedShortcuts do
-        local shortcut = mergedShortcuts[i]
-        local key = self.getShortcutKey(table.unpack(shortcut))
-        memo[key] = { i, shortcut }
+    -- Memoize `fromList` hotkeys for reference when iterating on `toList`
+    local memo = {}
+    for key, value in pairs(fromList) do
+        if type(key) == "string" and #value > 0 then
+            local categoryName = key
+            local categorizedShortcuts = value
+            for _, shortcut in pairs(categorizedShortcuts) do
+                local memoKey = self.getShortcutKey(table.unpack(shortcut))
+                memo[memoKey] = { shortcut, categoryName }
+            end
+        else
+            local shortcut = value
+            local memoKey = self.getShortcutKey(table.unpack(shortcut))
+            memo[memoKey] = { shortcut }
+        end
     end
 
-    for i = 1, #toList do
-        local shortcut = toList[i]
-        local key = self.getShortcutKey(table.unpack(shortcut))
-        local foundIndex, foundShortcut = table.unpack(memo[key] or {})
+    -- Insert `toList` shortcuts into `mergedShortcuts` that overlap with `fromList`
+    for key, value in pairs(toList) do
+        if type(key) == "string" and #value > 0 then
+            local categoryName = key
+            local categorizedShortcuts = value
 
-        if foundIndex then
-            mergedShortcuts[foundIndex] = foundShortcut
+            for _, shortcut in pairs(categorizedShortcuts) do
+                local memoKey = self.getShortcutKey(table.unpack(shortcut))
+                local foundShortcut, foundCategoryName = table.unpack(memo[memoKey] or {})
+
+                if foundShortcut then
+                    if foundCategoryName then
+                        mergedShortcuts[foundCategoryName] = mergedShortcuts[foundCategoryName] or {}
+                        table.insert(mergedShortcuts[foundCategoryName], foundShortcut)
+                    else
+                        table.insert(mergedShortcuts, foundShortcut)
+                    end
+                else
+                    if categoryName then
+                        mergedShortcuts[categoryName] = mergedShortcuts[categoryName] or {}
+                        table.insert(mergedShortcuts[categoryName], shortcut)
+                    else
+                        table.insert(mergedShortcuts, shortcut)
+                    end
+                end
+
+                memo[memoKey] = nil
+            end
+        else
+            local shortcut = value
+            local memoKey = self.getShortcutKey(table.unpack(shortcut))
+            local foundShortcut, categoryName = table.unpack(memo[memoKey] or {})
+
+            if foundShortcut then
+                if categoryName then
+                    mergedShortcuts[categoryName] = mergedShortcuts[categoryName] or {}
+                    table.insert(mergedShortcuts[categoryName], foundShortcut)
+                else
+                    table.insert(mergedShortcuts, foundShortcut)
+                end
+            else
+                table.insert(mergedShortcuts, shortcut)
+            end
+
+            memo[memoKey] = nil
+        end
+    end
+
+    -- Add any remaining memoized shortcuts to `mergedShortcuts` not in `toList`
+    for _, memoized in pairs(memo) do
+        local shortcut, categoryName = table.unpack(memoized)
+
+        if categoryName then
+            mergedShortcuts[categoryName] = mergedShortcuts[categoryName] or {}
+            table.insert(mergedShortcuts[categoryName], shortcut)
         else
             table.insert(mergedShortcuts, shortcut)
         end
@@ -205,10 +263,14 @@ end
 --- Returns:
 ---   * `shortcuts` - Returns the list of registered shortcuts
 function Entity:registerShortcuts(shortcuts, override)
-    local cheatsheetDescription = self.name and "Ki shortcut keybindings registered for "..self.name or "Ki shortcut keybindings"
+    local description = self.name and "Ki shortcut keybindings registered for "..self.name or "Ki shortcut keybindings"
 
     self.shortcuts = override and shortcuts or self:mergeShortcuts(shortcuts, self.shortcuts or {})
-    self.cheatsheet = Cheatsheet:new(self.name, cheatsheetDescription, self.shortcuts)
+    self.cheatsheet = Cheatsheet:new({
+        name = self.name,
+        description = description,
+        shortcuts = self.shortcuts,
+    })
 
     return self.shortcuts
 end
@@ -406,20 +468,30 @@ end
 ---  * None
 function Entity:showActions()
     local choices = {}
-    local shortcuts = {table.unpack(self.shortcuts)}
-    for index, shortcut in pairs(shortcuts) do
-        local flags, keyName, _, metadata = table.unpack(shortcut)
-        local category, description = table.unpack(metadata or {})
+
+    local function createChoice(index, shortcut, category)
+        local flags, keyName, _, name = table.unpack(shortcut)
         local shortcutText = glyphs.createShortcutText(flags, keyName)
-        local choice = {
-            text = description,
+
+        return {
+            text = name,
             subText = shortcutText ~= glyphs.unmapped.key
                 and category.." action ("..shortcutText..")"
                 or category,
             index = index,
         }
+    end
 
-        table.insert(choices, choice)
+    for key, value in pairs(self.shortcuts) do
+        if type(key) == "string" and type(value) == "table" then
+            local categoryName, categorizedShortcuts = key, value
+            for index, shortcut in pairs(categorizedShortcuts) do
+                table.insert(choices, createChoice(index, shortcut, categoryName))
+            end
+        else
+            local index, shortcut = key, value
+            table.insert(choices, createChoice(index, shortcut, self.name))
+        end
     end
 
     local vowelIndex = self.name:find("[aAeEiIoOuU]")
@@ -429,7 +501,7 @@ function Entity:showActions()
     self:showChooser(choices, function(choice)
         if not choice then return end
 
-        local shortcut = shortcuts[choice.index]
+        local shortcut = self.shortcuts[choice.index]
         local flags = shortcut[_G.SHORTCUT_MODKEY_INDEX]
         local keyName = shortcut[_G.SHORTCUT_HOTKEY_INDEX]
         local action = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
@@ -450,7 +522,7 @@ end
 --- Returns:
 ---  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
 function Entity.getEventHandler(shortcuts, flags, keyName)
-    for _, registeredShortcut in pairs(shortcuts) do
+    local function getEventHandler(registeredShortcut)
         local registeredFlags = registeredShortcut[_G.SHORTCUT_MODKEY_INDEX]
         local registeredKeyName = registeredShortcut[_G.SHORTCUT_HOTKEY_INDEX]
         local registeredHandler = registeredShortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
@@ -459,6 +531,24 @@ function Entity.getEventHandler(shortcuts, flags, keyName)
 
         if areFlagsEqual and keyName == registeredKeyName then
             return registeredHandler
+        end
+    end
+
+    for key, value in pairs(shortcuts) do
+        if type(key) == "string" and type(value) == "table" then
+            local categorizedShortcuts = value
+            for _, registeredShortcut in pairs(categorizedShortcuts) do
+                local registeredHandler = getEventHandler(registeredShortcut)
+                if registeredHandler then
+                    return registeredHandler
+                end
+            end
+        else
+            local registeredShortcut = value
+            local registeredHandler = getEventHandler(registeredShortcut)
+            if registeredHandler then
+                return registeredHandler
+            end
         end
     end
 

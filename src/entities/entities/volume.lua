@@ -31,9 +31,9 @@ local function createVolumeToPercentageEvent(percentage)
 end
 
 local shortcuts = {
-    { nil, "j", turnVolumeDown, { "Volume Control Mode", "Turn Volume Down" } },
-    { nil, "k", turnVolumeUp, { "Volume Control Mode", "Turn Volume Up" } },
-    { nil, "m", toggleMute, { "Volume Control Mode", "Mute or Unmute Volume" } },
+    { nil, "j", turnVolumeDown, "Turn Volume Down" },
+    { nil, "k", turnVolumeUp, "Turn Volume Up" },
+    { nil, "m", toggleMute, "Mute or Unmute Volume" },
 }
 
 -- Generate set volume events for each number (0-9 being 0% to 100%)
@@ -43,7 +43,7 @@ for number = 0, 9 do
         nil,
         tostring(number),
         createVolumeToPercentageEvent(percent),
-        { "Volume Control Mode", "Set Volume to "..tostring(math.floor(percent)).."%" },
+        "Set Volume to "..tostring(math.floor(percent)).."%",
     })
 end
 

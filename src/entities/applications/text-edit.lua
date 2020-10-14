@@ -16,12 +16,12 @@ local duplicateDocument = Application.createMenuItemEvent("Duplicate", { focusAf
 return Application {
     name = "TextEdit",
     shortcuts = {
-        { nil, "n", newDocument, { "File", "New Document" } },
-        { nil, "o", openDocument, { "File", "Open Document" } },
-        { nil, "p", printDocument, { "File", "Print Document" } },
-        { nil, "s", saveDocument, { "File", "Save Document" } },
-        { nil, "w", closeDocument, { "File", "Close Document" } },
-        { { "shift" }, "o", openRecent, { "File", "Open Recent" } },
-        { { "shift" }, "s", duplicateDocument, { "File", "Duplicate Document" } },
+        { nil, "n", newDocument, "New Document" },
+        { nil, "o", openDocument, "Open Document" },
+        { nil, "p", printDocument, "Print Document" },
+        { nil, "s", saveDocument, "Save Document" },
+        { nil, "w", closeDocument, "Close Document" },
+        { { "shift" }, "o", openRecent, "Open Recent" },
+        { { "shift" }, "s", duplicateDocument, "Duplicate Document" },
     },
 }

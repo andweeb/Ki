@@ -16,8 +16,8 @@ local openDiskImage = Application.createMenuItemEvent("Open Disk Image...", {
 return Application {
     name = "Disk Utility",
     shortcuts = {
-        { nil, "n", newBlankImage, { "File", "New Blank Image" } },
-        { nil, "o", openDiskImage, { "File", "Open Disk Image" } },
-        { { "shift" }, "n", newImageFromFolder, { "File", "New Image From Folder" } },
+        { nil, "n", newBlankImage, "New Blank Image" },
+        { nil, "o", openDiskImage, "Open Disk Image" },
+        { { "shift" }, "n", newImageFromFolder, "New Image From Folder" },
     },
 }

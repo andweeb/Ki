@@ -14,10 +14,10 @@ local toggleSong = Application.createMenuItemEvent({ "Play", "Pause" }, { isTogg
 return Application {
     name = "iTunes",
     shortcuts = {
-        { nil, "space", toggleSong, { "Controls", "Play" } },
-        { nil, "p", previousSong, { "Controls", "Previous" } },
-        { nil, "n", nextSong, { "Controls", "Next" } },
-        { nil, "s", stop, { "Controls", "Stop" } },
-        { nil, "l", goToCurrentSong, { "Controls", "Go to Current Song" } },
+        { nil, "space", toggleSong, "Play" },
+        { nil, "p", previousSong, "Previous" },
+        { nil, "n", nextSong, "Next" },
+        { nil, "s", stop, "Stop" },
+        { nil, "l", goToCurrentSong, "Go to Current Song" },
     },
 }

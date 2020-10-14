@@ -13,6 +13,6 @@ local toggle = Application.createMenuItemEvent({ "Turn FaceTime On", "Turn FaceT
 return Application {
     name = "FaceTime",
     shortcuts = {
-        { nil, "space", toggle, { "FaceTime", "Turn FaceTime On or Off" } },
+        { nil, "space", toggle, "Turn FaceTime On or Off" },
     },
 }

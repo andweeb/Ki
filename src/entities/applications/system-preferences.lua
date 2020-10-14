@@ -56,8 +56,8 @@ return Application {
     name = "System Preferences",
     getChooserItems = getChooserItems,
     shortcuts = {
-        { nil, nil, focus, { "View", "Activate" } },
-        { nil, "l", showAllPreferences, { "View", "Show All Preferences" } },
-        { { "shift" }, "f", search, { "View", "Search" } },
+        { nil, nil, focus, "Activate" },
+        { nil, "l", showAllPreferences, "Show All Preferences" },
+        { { "shift" }, "f", search, "Search" },
     },
 }

@@ -375,14 +375,14 @@ function Application:initialize(options)
     end
 
     local mergedShortcuts = self:mergeShortcuts(shortcuts or {}, {
-        { nil, nil, self.focus, { name, "Activate" } },
-        { nil, "a", self.createMenuItemEvent("About "..name), { name, "About "..name } },
-        { nil, "f", self.toggleFullScreen, { "View", "Toggle Full Screen" } },
-        { nil, "h", self.createMenuItemEvent("Hide "..name), { name, "Hide Application" } },
-        { nil, "q", self.createMenuItemEvent("Quit "..name), { name, "Quit Application" } },
-        { nil, ",", self.createMenuItemEvent("Preferences..."), { name, "Open Preferences" } },
-        { { "cmd" }, "space", { function(...) self:showActions(...) end, { openBefore = false } }, { name, "Show Actions" } },
-        { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, { name, "Show Cheatsheet" } },
+        { nil, nil, self.focus, "Activate" },
+        { nil, "a", self.createMenuItemEvent("About "..name), "About "..name },
+        { nil, "f", self.toggleFullScreen, "Toggle Full Screen" },
+        { nil, "h", self.createMenuItemEvent("Hide "..name), "Hide Application" },
+        { nil, "q", self.createMenuItemEvent("Quit "..name), "Quit Application" },
+        { nil, ",", self.createMenuItemEvent("Preferences..."), "Open Preferences" },
+        { { "cmd" }, "space", { function(...) self:showActions(...) end, { openBefore = false } }, "Show Actions" },
+        { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, "Show Cheatsheet" },
     })
 
     Entity.initialize(self, {

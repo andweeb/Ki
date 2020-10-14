@@ -13,9 +13,9 @@ local goToToday = Application.createMenuItemEvent("Go to Today", { focusBefore =
 return Application {
     name = "Reminders",
     shortcuts = {
-        { nil, "n", newReminder, { "File", "New Reminder" } },
-        { nil, "t", goToToday, { "View", "Go to Today" } },
-        { { "shift" }, "f", find, { "Edit", "Find" } },
-        { { "shift" }, "n", newReminderList, { "File", "New List" } },
+        { nil, "n", newReminder, "New Reminder" },
+        { nil, "t", goToToday, "Go to Today" },
+        { { "shift" }, "f", find, "Find" },
+        { { "shift" }, "n", newReminderList, "New List" },
     },
 }

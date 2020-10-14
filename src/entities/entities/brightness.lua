@@ -25,8 +25,8 @@ local function brightnessToPercent(percentage)
 end
 
 local shortcuts = {
-    { nil, "j", lowerBrightness, { "Brightness Control Mode", "Lower Brightness" } },
-    { nil, "k", raiseBrightness, { "Brightness Control Mode", "Raise Brightness" } },
+    { nil, "j", lowerBrightness, "Lower Brightness" },
+    { nil, "k", raiseBrightness, "Raise Brightness" },
 }
 
 -- Generate set brightness events for each number (0-9 being 0% to 100%)
@@ -36,7 +36,7 @@ for number = 0, 9 do
         nil,
         tostring(number),
         brightnessToPercent(percent),
-        { "Brightness Control Mode", "Set Brightness to "..tostring(math.floor(percent)).."%" },
+        "Set Brightness to "..tostring(math.floor(percent)).."%",
     })
 end
 

@@ -22,9 +22,9 @@ local close = Application.createMenuItemEvent({ "Close Tab", "Close Window" }, {
 return Application {
     name = "Terminal",
     shortcuts = {
-        { nil, "n", newWindow, { "Shell", "New Window" } },
-        { nil, "t", newTab, { "Shell", "New Tab" } },
-        { nil, "w", close, { "Shell", "Close Tab or Window" } },
-        { { "shift" }, "f", find, { "Edit", "Find..." } },
+        { nil, "n", newWindow, "New Window" },
+        { nil, "t", newTab, "New Tab" },
+        { nil, "w", close, "Close Tab or Window" },
+        { { "shift" }, "f", find, "Find..." },
     },
 }

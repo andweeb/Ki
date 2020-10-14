@@ -15,10 +15,10 @@ local newCalendarSubscription = Application.createMenuItemEvent("New Calendar Su
 return Application {
     name = "Calendar",
     shortcuts = {
-        { nil, "l", find, { "Edit", "Find" } },
-        { nil, "n", newEvent, { "File", "New Event" } },
-        { { "shift" }, "f", find, { "Edit", "Find" } },
-        { { "shift" }, "n", newCalendar, { "File", "New Calendar" } },
-        { { "shift" }, "s", newCalendarSubscription, { "File", "New Calendar Subscription..." } },
+        { nil, "l", find, "Find" },
+        { nil, "n", newEvent, "New Event" },
+        { { "shift" }, "f", find, "Find" },
+        { { "shift" }, "n", newCalendar, "New Calendar" },
+        { { "shift" }, "s", newCalendarSubscription, "New Calendar Subscription..." },
     },
 }

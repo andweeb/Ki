@@ -52,10 +52,10 @@ end
 return Entity {
     name = "System",
     shortcuts = {
-        { { "ctrl" }, "l", confirmSystemEvent "log out",  { "Normal Mode",  "Log Out" } },
-        { { "ctrl" }, "q", confirmSystemEvent "shut down",  { "Normal Mode",  "Shut Down" } },
-        { { "ctrl" }, "r", confirmSystemEvent "restart",  { "Normal Mode",  "Restart" } },
-        { { "ctrl" }, "s", systemEvent "sleep",  { "Normal Mode",  "Sleep" } },
-        { { "cmd", "ctrl" }, "s", systemEvent "start current screen saver",  { "Normal Mode",  "Enter Screen Saver" } },
+        { { "ctrl" }, "l", confirmSystemEvent "log out", "Log Out" },
+        { { "ctrl" }, "q", confirmSystemEvent "shut down", "Shut Down" },
+        { { "ctrl" }, "r", confirmSystemEvent "restart", "Restart" },
+        { { "ctrl" }, "s", systemEvent "sleep", "Sleep" },
+        { { "cmd", "ctrl" }, "s", systemEvent "start current screen saver", "Enter Screen Saver" },
     },
 }

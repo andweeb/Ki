@@ -53,9 +53,9 @@ return Application {
     name = "Messages",
     getChooserItems = getChooserItems,
     shortcuts = {
-        { nil, nil, focus, { "Messages", "Activate" } },
-        { nil, "l", find, { "Edit", "Search" } },
-        { nil, "n", newMessage, { "File", "New Message" } },
-        { { "shift" }, "f", find, { "Edit", "Search" } },
+        { nil, nil, focus, "Activate" },
+        { nil, "l", find, "Search" },
+        { nil, "n", newMessage, "New Message" },
+        { { "shift" }, "f", find, "Search" },
     },
 }

@@ -239,9 +239,9 @@ function Website:initialize(options)
     self.links = links
 
     local mergedShortcuts = self:mergeShortcuts(shortcuts, {
-        { nil, nil, self.open, { name, "Open "..name.." in Default Browser" } },
-        { { "shift" }, "o", function(...) self:openWith(...) end, { name, "Open "..name.." with Application" } },
-        { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, { name, "Show Cheatsheet" } },
+        { nil, nil, self.open, "Open "..name.." in Default Browser" },
+        { { "shift" }, "o", function(...) self:openWith(...) end, "Open "..name.." with Application" },
+        { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, "Show Cheatsheet" },
     })
 
     Entity.initialize(self, { name, mergedShortcuts })

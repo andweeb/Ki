@@ -15,9 +15,9 @@ local openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent
 return Application {
     name = "Preview",
     shortcuts = {
-        { nil, "o", open, { "File", "Open..." } },
-        { nil, "w", close, { "File", "Close Window" } },
-        { { "cmd" }, "f", find, { "Edit", "Find..." } },
-        { { "shift" }, "o", openRecent, { "File", "Open Recent" } },
+        { nil, "o", open, "Open..." },
+        { nil, "w", close, "Close Window" },
+        { { "cmd" }, "f", find, "Find..." },
+        { { "shift" }, "o", openRecent, "Open Recent" },
     },
 }

@@ -36,13 +36,19 @@ end
 return Application {
     name = "Spotify",
     shortcuts = {
-        { nil, "space", togglePlay, { "Playback", "Toggle Play" } },
-        { nil, "p", playPrevious, { "Playback", "Previous" } },
-        { nil, "n", playNext, { "Playback", "Next" } },
-        { nil, "s", stop, { "Playback", "Stop" } },
-        { nil, "l", search, { "Edit", "Search" } },
-        { { "shift" }, "n", newPlaylist, { "File", "New Playlist" } },
-        { { "shift" }, "f", search, { "Edit", "Search" } },
-        { { "cmd", "shift" }, "n", newPlaylistFolder, { "File", "New Playlist Folder" } },
+        Edit = {
+            { nil, "l", search, "Search" },
+            { { "shift" }, "f", search, "Search" },
+        },
+        Playback = {
+            { nil, "space", togglePlay, "Toggle Play" },
+            { nil, "p", playPrevious, "Previous" },
+            { nil, "n", playNext, "Next" },
+            { nil, "s", stop, "Stop" },
+        },
+        File = {
+            { { "shift" }, "n", newPlaylist, "New Playlist" },
+            { { "cmd", "shift" }, "n", newPlaylistFolder, "New Playlist Folder" },
+        },
     },
 }
