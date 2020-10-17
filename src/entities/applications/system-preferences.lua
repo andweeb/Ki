@@ -5,8 +5,8 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local search = Application.createMenuItemEvent("Search", { focusBefore = true })
-local showAllPreferences = Application.createMenuItemEvent("Show All Preferences", {
+local search = Application:createMenuItemAction("Search", { focusBefore = true })
+local showAllPreferences = Application:createMenuItemAction("Show All Preferences", {
     focusBefore = true,
 })
 

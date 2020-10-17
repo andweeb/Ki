@@ -5,10 +5,10 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local newWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
-local newTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
-local search = Application.createMenuItemEvent("Search For a New Word...", { focusAfter = true })
-local close = Application.createMenuItemEvent({ "Close Tab", "Close" }, {
+local newWindow = Application:createMenuItemAction("New Window", { focusAfter = true })
+local newTab = Application:createMenuItemAction("New Tab", { focusAfter = true })
+local search = Application:createMenuItemAction("Search For a New Word...", { focusAfter = true })
+local close = Application:createMenuItemAction({ "Close Tab", "Close" }, {
     isToggleable = true,
     focusBefore = true,
 })

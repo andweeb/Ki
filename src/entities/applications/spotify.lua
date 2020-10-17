@@ -5,9 +5,9 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local search = Application.createMenuItemEvent("Search", { focusAfter = true })
-local newPlaylist = Application.createMenuItemEvent("New Playlist", { focusAfter = true })
-local newPlaylistFolder = Application.createMenuItemEvent("New Playlist Folder", { focusAfter = true })
+local search = Application:createMenuItemAction("Search", { focusAfter = true })
+local newPlaylist = Application:createMenuItemAction("New Playlist", { focusAfter = true })
+local newPlaylistFolder = Application:createMenuItemAction("New Playlist Folder", { focusAfter = true })
 
 -- Action to play or pause the current song
 local function togglePlay()

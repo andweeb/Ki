@@ -7,6 +7,7 @@ local Entity = require("entity")
 local ApplicationWatcher = require("application-watcher")
 
 local Application = Entity:subclass("Application")
+local Action = Application.Action
 local Behaviors = {}
 
 -- Application behavior function for entity mode
@@ -28,9 +29,10 @@ function Behaviors.entity(self, eventHandler, _, _, workflow)
     -- Handle action-specific options
     local options = nil
     local action = eventHandler
-    if type(eventHandler) == "table" then
-        action = eventHandler[1]
-        options = eventHandler[2]
+
+    if type(eventHandler) == "table" and tostring(eventHandler) == "action" then
+        action = eventHandler.action
+        options = eventHandler.options
     end
 
     -- Create local action execution function to either defer or immediately invoke
@@ -46,9 +48,10 @@ end
 function Behaviors.select(self, eventHandler)
     local options = nil
     local action = eventHandler
-    if type(eventHandler) == "table" then
-        action = eventHandler[1]
-        options = eventHandler[2]
+
+    if type(eventHandler) == "table" and tostring(eventHandler) == "action" then
+        action = eventHandler.action
+        options = eventHandler.options
     end
 
     -- Create local action execution function to either defer or immediately invoke
@@ -80,7 +83,7 @@ Behaviors.default = Behaviors.entity
 -- Dispatch action behavior for application entities to defer action execution after launch
 function Behaviors.dispatchAction(self, action, options)
     options = options or {
-        openBefore = true,
+        activate = true,
     }
 
     local appState = ApplicationWatcher.states[self.name]
@@ -100,7 +103,7 @@ function Behaviors.dispatchAction(self, action, options)
     local isApplicationRunning = app and app:isRunning() or isApplicationOpen
 
     -- Execute the action if the application is already running and return indicator to auto-exit mode
-    if not options.openBefore or isApplicationRunning then
+    if not options.activate or isApplicationRunning then
         local autoExit = action(app)
         return autoExit == nil and self.autoExitMode or autoExit
     end
@@ -159,7 +162,7 @@ function Application:getChooserItems()
     return choices
 end
 
---- Application.createMenuItemEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])
+--- Application.createMenuItemAction(menuItem[, shouldFocusAfter, shouldFocusBefore])
 --- Method
 --- Convenience method to create an event handler that selects a menu item, with optionally specified behavior on how the menu item selection occurs
 ---
@@ -173,74 +176,126 @@ end
 ---
 --- Returns:
 ---  * None
-function Application.createMenuItemEvent(menuItem, options)
+function Application:selectMenuItem(menuItem, app, choice, options)
     options = options or {}
 
-    return function(app, choice)
-        if (options.focusBefore) then
-            Application.focus(app, choice)
-        end
+    if (options.focusBefore) then
+        self.focus(app, choice)
+    end
 
-        local isRegex = options.isRegex or false
+    local isRegex = options.isRegex or false
 
-        if options.isToggleable then
-            _ = app:selectMenuItem(menuItem[1], isRegex)
-                or app:selectMenuItem(menuItem[2], isRegex)
-        else
-            app:selectMenuItem(menuItem, isRegex)
-        end
+    if options.isToggleable then
+        _ = app:selectMenuItem(menuItem[1], isRegex)
+        or app:selectMenuItem(menuItem[2], isRegex)
+    else
+        app:selectMenuItem(menuItem, isRegex)
+    end
 
-        if (options.focusAfter) then
-            Application.focus(app, choice)
-        end
+    if (options.focusAfter) then
+        self.focus(app, choice)
     end
 end
 
---- Application.createMenuItemChooserEvent(menuItem[, shouldFocusAfter, shouldFocusBefore])
---- Method
---- Convenience method to create an event handler that presents a chooser containing menu items that are nested/expandable underneath at the provided `menuItem` path, with optionally specified behavior on how the menu item selection occurs
----
---- Parameters:
----  * `menuItem` - a table list of strings that represent a path to a menu item that expands to menu item list, i.e., `{ "File", "Open Recent" }`
----  * `options` - a optional table containing some or all of the following fields to define the behavior for the menu item selection event:
----     * `focusBefore` - an optional boolean denoting whether to focus the application before the menu item is selected
----     * `focusAfter` - an optional boolean denoting whether to focus the application after the menu item is selected
----
---- Returns:
----  * None
-function Application.createMenuItemChooserEvent(menuItem, options)
+function Application:createMenuItemAction(menuItem, options)
+    return Application.Action {
+        name = type(menuItem) == "table" and menuItem[#menuItem] or menuItem,
+        action = function(app, choice)
+            self:selectMenuItem(menuItem, app, choice, options)
+        end,
+    }
+end
+
+function Application.SelectMenuItem(menuItem)
+    return Application:createMenuItemAction(menuItem)
+end
+
+function Application.FocusAndSelectMenuItem(menuItem)
+    return Application:createMenuItemAction(menuItem, {
+        focusBefore = true,
+        isRegex = true,
+    })
+end
+
+function Application.SelectMenuItemAndFocus(menuItem)
+    return Application:createMenuItemAction(menuItem, {
+        focusAfter = true,
+        isRegex = true,
+    })
+end
+
+function Application.ToggleMenuItem(menuItem)
+    return Application:createMenuItemAction(menuItem, {
+        isToggleable = true,
+    })
+end
+
+function Application.FocusAndToggleMenuItem(menuItem)
+    return Application:createMenuItemAction(menuItem, {
+        isToggleable = true,
+        focusBefore = true,
+        isRegex = true,
+    })
+end
+
+function Application.ToggleMenuItemAndFocus(menuItem)
+    return Application:createMenuItemAction(menuItem, {
+        isToggleable = true,
+        focusAfter = true,
+        isRegex = true,
+    })
+end
+
+function Application:chooseMenuItem(menuItem, app, choice, options)
     options = options or {}
 
-    return function(app, windowChoice)
-        local menuItemList = Application.getMenuItemList(app, menuItem)
-        local choices = {}
+    local menuItemList = self.getMenuItemList(app, menuItem)
+    local choices = {}
 
-        for _, item in pairs(menuItemList) do
-            if item.AXTitle and #item.AXTitle > 0 then
-                table.insert(choices, {
-                    text = item.AXTitle,
-                })
-            end
+    for _, item in pairs(menuItemList) do
+        if item.AXTitle and #item.AXTitle > 0 then
+            table.insert(choices, {
+                text = item.AXTitle,
+            })
         end
-
-        Application:showChooser(choices, function(menuItemChoice)
-            if menuItemChoice then
-                if (options.focusBefore) then
-                    Application.focus(app, windowChoice)
-                end
-
-                local targetMenuItem = {table.unpack(menuItem)}
-
-                table.insert(targetMenuItem, menuItemChoice.text)
-
-                app:selectMenuItem(targetMenuItem)
-
-                if (options.focusAfter) then
-                    Application.focus(app, windowChoice)
-                end
-            end
-        end)
     end
+
+    self:showChooser(choices, function(menuItemChoice)
+        if menuItemChoice then
+            local targetMenuItem = {table.unpack(menuItem)}
+
+            table.insert(targetMenuItem, menuItemChoice.text)
+
+            self:selectMenuItem(targetMenuItem, app, choice, options)
+        end
+    end)
+end
+
+function Application:createChooseMenuItemAction(menuItem, options)
+    return Application.Action {
+        name = type(menuItem) == "table" and menuItem[#menuItem] or menuItem,
+        action = function(app, choice)
+            self:chooseMenuItem(menuItem, app, choice, options)
+        end,
+    }
+end
+
+function Application.ChooseMenuItem(menuItem)
+    return Application:createChooseMenuItemAction(menuItem)
+end
+
+function Application.FocusAndChooseMenuItem(menuItem)
+    return Application:createChooseMenuItemAction(menuItem, {
+        focusBefore = true,
+        isRegex = true,
+    })
+end
+
+function Application.ChooseMenuItemAndFocus(menuItem)
+    return Application:createChooseMenuItemAction(menuItem, {
+        focusAfter = true,
+        isRegex = true,
+    })
 end
 
 --- Application.getMenuItemList(app, menuItemPath) -> table or nil
@@ -356,7 +411,7 @@ end
 ---        * `app` - The [`hs.application`](https://www.hammerspoon.org/docs/hs.application.html) instance if the application is running, `nil` otherwise
 ---        * `choice` - A choice object if the entity was selected using select mode, `nil` otherwise
 ---      * a tuple containing the function with arguments outlined above and the following options:
----        * `openBefore` - A boolean value indicating that the application should be opened if not curently running before applying the action (defaults to `true`)
+---        * `activate` - A boolean value indicating that the application should be opened if not curently running before applying the action (defaults to `true`)
 ---      A boolean return value will tell Ki to automatically exit back to `desktop` mode after the action has completed.
 ---   4. a tuple containing metadata about the shortcut: name of the shortcut category and description of the shortcut to be displayed in the cheatsheet
 ---
@@ -374,15 +429,30 @@ function Application:initialize(options)
         shortcuts = options.shortcuts
     end
 
+    local showActions = Action {
+        name = "Show Actions",
+        action = function(...) self:showActions(...) end,
+        options = {
+            activate = false,
+        },
+    }
+    local showCheatsheet = Action {
+        name = "Show Cheatsheet",
+        action = function(...) self:showCheatsheet(...) end,
+        options = {
+            activate = false,
+        },
+    }
+
     local mergedShortcuts = self:mergeShortcuts(shortcuts or {}, {
         { nil, nil, self.focus, "Activate" },
-        { nil, "a", self.createMenuItemEvent("About "..name), "About "..name },
+        { nil, "a", self:createMenuItemAction("About "..name) },
         { nil, "f", self.toggleFullScreen, "Toggle Full Screen" },
-        { nil, "h", self.createMenuItemEvent("Hide "..name), "Hide Application" },
-        { nil, "q", self.createMenuItemEvent("Quit "..name), "Quit Application" },
-        { nil, ",", self.createMenuItemEvent("Preferences..."), "Open Preferences" },
-        { { "cmd" }, "space", { function(...) self:showActions(...) end, { openBefore = false } }, "Show Actions" },
-        { { "shift" }, "/", { function(...) self:showCheatsheet(...) end, { openBefore = false } }, "Show Cheatsheet" },
+        { nil, "h", self:createMenuItemAction("Hide "..name) },
+        { nil, "q", self:createMenuItemAction("Quit "..name) },
+        { nil, ",", self:createMenuItemAction("Preferences...") },
+        { { "cmd" }, "space", showActions },
+        { { "shift" }, "/", showCheatsheet },
     })
 
     Entity.initialize(self, {

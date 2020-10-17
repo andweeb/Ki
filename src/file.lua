@@ -5,6 +5,7 @@
 local Entity = require("entity")
 local File = Entity:subclass("File")
 local spoonPath = hs.spoons.scriptPath()
+local Action = Entity.Action
 
 --- File.behaviors
 --- Variable
@@ -42,24 +43,6 @@ function File:showCheatsheet(path)
     end
 
     self.cheatsheet:show(iconURI)
-end
-
---- File:createEvent(path, placeholderText, handler) -> function
---- Method
---- Convenience method to create file events that share the similar behavior of allowing navigation before item selection
----
---- Parameters:
----  * `path` - The path of a file
----  * `placeholderText` - Text to display as a placeholder in the chooser
----  * `handler` - the selection event handler function that takes in the following arguments:
----     * `path` - the selected target path
----
---- Returns:
----   * An event handler function
-function File:createEvent(path, placeholderText, handler)
-    return function()
-        self:navigate(path, placeholderText, handler)
-    end
 end
 
 --- File:runApplescriptAction(viewModel)
@@ -458,8 +441,8 @@ end
 --- Returns:
 ---  * None
 function File:initialize(options)
+    -- Parse File entity options
     local name, path, shortcuts
-
     if type(options) == "string" then
         name = options
         path = options
@@ -472,13 +455,17 @@ function File:initialize(options)
         self.getChooserItems = options.getChooserItems
     end
 
+    -- Ensure that the file path actually exists
     local absolutePath = hs.fs.pathToAbsolute(path)
     if not absolutePath then
         self.notifyError("Error initializing File entity", "Path "..path.." may not exist.")
         return
     end
 
-    local success, value = pcall(function() return hs.fs.attributes(absolutePath) or {} end)
+    -- Retrieve file attributes
+    local success, value = pcall(function()
+        return hs.fs.attributes(absolutePath) or {}
+    end)
     if not success then
         self.notifyError("Error initializing File entity", value or "")
         return
@@ -486,51 +473,90 @@ function File:initialize(options)
 
     local attributes = value
     local isDirectory = attributes.mode == "directory"
-    local openFileInFolder = self:createEvent(path, "Open a file", function(...)
-        self.open(...)
-    end)
 
-    local actions = {
-        openFileInFolder = openFileInFolder,
-        openFileInFolderWith = self:createEvent(path, "Open file with application", function(target)
-            self:openWith(target)
-        end),
-        showInfoForFileInFolder = self:createEvent(path, "Show info for file", function(target)
-            self:openInfoWindow(target)
-        end),
-        quickLookFileInFolder = self:createEvent(path, "View file with QuickLook", function(target)
-            hs.execute("qlmanage -p "..target)
-        end),
-        deleteFileInFolder = self:createEvent(path, "Move file to trash", function(target)
-            self:moveToTrash(target)
-        end),
-        open = function(target, shouldNavigate)
-            if shouldNavigate then
-                return openFileInFolder(target)
-            end
-
-            return self.open(target)
-        end,
+    -- Initialize default actions
+    local openFileInFolder = Action {
+        name = "Open File in Folder",
+        action = function()
+            self:navigate(path, "Open a file", function(...)
+                self.open(...)
+            end)
+        end
     }
-    local commonShortcuts = {
-        { nil, nil, actions.open, "Open "..path.." "..attributes.mode },
-        { { "shift" }, "/", function(...) self:showCheatsheet(...) end, "Show Cheatsheet" },
+    local open = Action {
+        name = "Open "..path.." "..attributes.mode,
+        action = function(target, shouldNavigate)
+            return shouldNavigate
+                and openFileInFolder(target)
+                or self.open(target)
+        end
+    }
+    local showCheatsheet = Action {
+        "Show Cheatsheet",
+        function(...) self:showCheatsheet(...) end,
+    }
+    local copy = Action {
+        "Copy File to Folder",
+        function(...) self:copy(...) end
+    }
+    local move = Action {
+        "Move File to Folder",
+        function(...) self:move(...) end
+    }
+
+    local defaultShortcuts = {
+        { nil, nil, open },
+        { { "shift" }, "/", showCheatsheet },
     }
 
     -- Append directory shortcuts if the file entity is representing a directory path
     if isDirectory then
-        local commonDirectoryShortcuts = {
-            { nil, "c", function(...) self:copy(...) end, "Copy File to Folder" },
-            { nil, "d", actions.deleteFileInFolder, "Move File in Folder to Trash" },
-            { nil, "i", actions.showInfoForFileInFolder, "Open File Info Window" },
-            { nil, "m", function(...) self:move(...) end, "Move File to Folder" },
-            { nil, "o", openFileInFolder, "Open File in Folder" },
-            { nil, "space", actions.quickLookFileInFolder, "Quick Look" },
-            { { "shift" }, "o", actions.openFileInFolderWith, "Open File in Folder with App" },
+        -- Define default actions that navigate within the directory path
+        local openFileInFolderWith = Action {
+            name = "Open File in Folder with App",
+            action = function()
+                self:navigate(path, "Open file with application", function(target)
+                    self:openWith(target)
+                end)
+            end
+        }
+        local showInfoForFileInFolder = Action {
+            name = "Open File Info Window",
+            action = function()
+                self:navigate(path, "Show info for file", function(target)
+                    self:openInfoWindow(target)
+                end)
+            end
+        }
+        local quickLookFileInFolder = Action {
+            name = "Quick Look",
+            action = function()
+                self:navigate(path, "View file with QuickLook", function(target)
+                    hs.execute("qlmanage -p "..target)
+                end)
+            end
+        }
+        local deleteFileInFolder = Action {
+            name = "Move File in Folder to Trash",
+            action = function()
+                self:navigate(path, "Move file to trash", function(target)
+                    self:moveToTrash(target)
+                end)
+            end
         }
 
-        for _, shortcut in pairs(commonDirectoryShortcuts) do
-            table.insert(commonShortcuts, shortcut)
+        local defaultDirectoryShortcuts = {
+            { nil, "c", copy },
+            { nil, "d", deleteFileInFolder },
+            { nil, "i", showInfoForFileInFolder },
+            { nil, "m", move },
+            { nil, "o", openFileInFolder },
+            { nil, "space", quickLookFileInFolder },
+            { { "shift" }, "o", openFileInFolderWith },
+        }
+
+        for _, shortcut in pairs(defaultDirectoryShortcuts) do
+            table.insert(defaultShortcuts, shortcut)
         end
     end
 
@@ -538,7 +564,9 @@ function File:initialize(options)
     self.showHiddenFiles = options.showHiddenFiles or false
     self.sortAttribute = options.sortAttribute or "modification"
 
-    Entity.initialize(self, { name, self:mergeShortcuts(shortcuts, commonShortcuts ) })
+    local mergedShortcuts = self:mergeShortcuts(shortcuts, defaultShortcuts)
+
+    Entity.initialize(self, { name, mergedShortcuts })
 end
 
 return File

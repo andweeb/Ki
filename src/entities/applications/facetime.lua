@@ -5,7 +5,7 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local toggle = Application.createMenuItemEvent({ "Turn FaceTime On", "Turn FaceTime Off" }, {
+local toggle = Application:createMenuItemAction({ "Turn FaceTime On", "Turn FaceTime Off" }, {
     isToggleable = true,
     focusBefore = true,
 })

@@ -5,13 +5,13 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local newDocument = Application.createMenuItemEvent("New", { focusAfter = true })
-local saveDocument = Application.createMenuItemEvent("Save", { focusAfter = true })
-local openDocument = Application.createMenuItemEvent("Open...", { focusAfter = true })
-local openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent" }, { focusAfter = true })
-local printDocument = Application.createMenuItemEvent("Print...", { focusBefore = true })
-local closeDocument = Application.createMenuItemEvent("Close", { focusBefore = true })
-local duplicateDocument = Application.createMenuItemEvent("Duplicate", { focusAfter = true })
+local newDocument = Application:createMenuItemAction("New", { focusAfter = true })
+local saveDocument = Application:createMenuItemAction("Save", { focusAfter = true })
+local openDocument = Application:createMenuItemAction("Open...", { focusAfter = true })
+local openRecent = Application:createChooseMenuItemAction({ "File", "Open Recent" }, { focusAfter = true })
+local printDocument = Application:createMenuItemAction("Print...", { focusBefore = true })
+local closeDocument = Application:createMenuItemAction("Close", { focusBefore = true })
+local duplicateDocument = Application:createMenuItemAction("Duplicate", { focusAfter = true })
 
 return Application {
     name = "TextEdit",

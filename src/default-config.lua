@@ -5,7 +5,10 @@
 --
 -- luacov: disable
 local Ki = spoon.Ki
-local File = spoon.Ki.File
+local File = Ki.File
+local Mode = Ki.Mode
+local ModeTransition = Ki.ModeTransition
+local ModeTransitions = Ki.ModeTransitions
 local spoonPath = hs.spoons.scriptPath()
 
 -- Add entities directory to package path and add helper require function
@@ -52,7 +55,7 @@ local entities = {
 }
 
 -- Register entity mode shortcuts
-Ki:Mode {
+Mode {
     name = "entity",
     shortcut = { {"cmd"}, "e" },
     shortcuts = {
@@ -92,7 +95,7 @@ Ki:Mode {
 }
 
 -- Register select mode and assign shortcuts for applicable entities that implement selection
-Ki:Mode {
+Mode {
     name = "select",
     shortcut = { { "cmd" }, "s" },
     shortcuts = {
@@ -137,7 +140,7 @@ local files = {
     Recents      = FinderApplication("Recents"),
 }
 -- Register file mode and assign shortcuts for the initialized file entities
-Ki:Mode {
+Mode {
     name = "file",
     shortcut = { {"cmd"}, "f" },
     shortcuts = {
@@ -183,7 +186,7 @@ local websites = {
     Zillow     = requireEntity("website", "zillow"),
 }
 -- Register Website mode and assign shortcuts for the initialized website entities
-Ki:Mode {
+Mode {
     name = "website",
     shortcut = { {"cmd"}, "w" },
     shortcuts = {
@@ -209,7 +212,7 @@ Ki:Mode {
 
 -- Register volume mode and assign shortcuts
 local Volume = requireEntity("entity", "volume")
-Ki:Mode {
+Mode {
     name = "volume",
     shortcut = { {"cmd"}, "v" },
     shortcuts = Volume.shortcuts,
@@ -217,13 +220,13 @@ Ki:Mode {
 
 -- Register brightness mode and assign shortcuts
 local Brightness = requireEntity("entity", "brightness")
-Ki:Mode {
+Mode {
     name = "brightness",
     shortcut = { {"cmd"}, "b" },
     shortcuts = Brightness.shortcuts,
 }
 
-Ki:ModeTransitions {
+ModeTransitions {
     -- Register mode transitions between select mode and others
     { "entity", "select", { { "cmd" }, "s" } },
     { "select", "entity", { { "cmd" }, "e" } },
@@ -239,16 +242,16 @@ Ki:ModeTransitions {
 
 
 -- Register mode transitions between select mode and others
-Ki:ModeTransition { "entity", "select", { { "cmd" }, "s" } }
-Ki:ModeTransition { "select", "entity", { { "cmd" }, "e" } }
-Ki:ModeTransition { "select", "file", { { "cmd" }, "f" } }
-Ki:ModeTransition { "select", "website", { { "cmd" }, "w" } }
+ModeTransition { "entity", "select", { { "cmd" }, "s" } }
+ModeTransition { "select", "entity", { { "cmd" }, "e" } }
+ModeTransition { "select", "file", { { "cmd" }, "f" } }
+ModeTransition { "select", "website", { { "cmd" }, "w" } }
 
 -- Register mode transitions to allow transitioning from entity to file mode
-Ki:ModeTransition { "entity", "file", { {"cmd"}, "f" } }
+ModeTransition { "entity", "file", { {"cmd"}, "f" } }
 
 -- Register mode transitions to allow transitioning from entity to website mode
-Ki:ModeTransition { "entity", "website", { {"cmd"}, "w" } }
+ModeTransition { "entity", "website", { {"cmd"}, "w" } }
 
 -- Set default entities
 Ki.defaultEntities = {

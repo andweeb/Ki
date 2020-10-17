@@ -5,13 +5,13 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local newAudioRecording = Application.createMenuItemEvent("New Audio Recording")
-local newMovieRecording = Application.createMenuItemEvent("New Movie Recording")
-local openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
-local openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent" }, { focusAfter = true })
-local newScreenRecording = Application.createMenuItemEvent("New Screen Recording")
-local trim = Application.createMenuItemEvent("Trim...", { focusBefore = true })
-local exportAs = Application.createMenuItemChooserEvent({ "File", "Export As" }, { focusBefore = true })
+local newAudioRecording = Application:createMenuItemAction("New Audio Recording")
+local newMovieRecording = Application:createMenuItemAction("New Movie Recording")
+local openFile = Application:createMenuItemAction("Open File...", { focusAfter = true })
+local openRecent = Application:createChooseMenuItemAction({ "File", "Open Recent" }, { focusAfter = true })
+local newScreenRecording = Application:createMenuItemAction("New Screen Recording")
+local trim = Application:createMenuItemAction("Trim...", { focusBefore = true })
+local exportAs = Application:createChooseMenuItemAction({ "File", "Export As" }, { focusBefore = true })
 
 -- Helper method to run AppleScript actions available in `osascripts/google-chrome.applescript`
 local function runApplescriptAction(errorMessage, viewModel)

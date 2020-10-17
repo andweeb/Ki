@@ -5,8 +5,8 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local find = Application.createMenuItemEvent("Find...", { focusBefore = true })
-local newMessage = Application.createMenuItemEvent("New Message", { focusBefore = true })
+local find = Application:createMenuItemAction("Find...", { focusBefore = true })
+local newMessage = Application:createMenuItemAction("New Message", { focusBefore = true })
 
 -- Implement method to support selection of tab titles in select mode
 local function getChooserItems()

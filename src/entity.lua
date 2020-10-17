@@ -142,13 +142,23 @@ function Entity:initialize(options)
         getChooserItems = options.getChooserItems
     end
 
+    local Action = Entity.Action
+    local showActions = Action {
+        name = "Show Actions",
+        action = function(...) self:showActions(...) end,
+    }
+    local showCheatsheet = Action {
+        name = "Show Cheatsheet",
+        action = function(...) self:showCheatsheet(...) end,
+    }
+
     self.name = name
     self.actions = actions
     self.getChooserItems = getChooserItems
     self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
     self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
-        { { "cmd" }, "space", function(...) self:showActions(...) end, "Show Actions" },
-        { { "shift" }, "/", function() self.cheatsheet:show() end, "Show Cheatsheet" },
+        { { "cmd" }, "space", showActions },
+        { { "shift" }, "/", showCheatsheet },
     }))
 end
 
@@ -470,11 +480,11 @@ function Entity:showActions()
     local choices = {}
 
     local function createChoice(index, shortcut, category)
-        local flags, keyName, _, name = table.unpack(shortcut)
+        local flags, keyName, action, name = table.unpack(shortcut)
         local shortcutText = glyphs.createShortcutText(flags, keyName)
 
         return {
-            text = name,
+            text = tostring(action) == "action" and action.name or name,
             subText = shortcutText ~= glyphs.unmapped.key
                 and category.." action ("..shortcutText..")"
                 or category,
@@ -578,6 +588,36 @@ function Entity:dispatchAction(mode, shortcut, workflow)
     else
         return self.autoExitMode
     end
+end
+
+function Entity.Action(options)
+    local Action = {}
+    local name, action, actionOptions
+
+    if #options > 0 then
+        name, action = table.unpack(options)
+    else
+        name = options.name
+        action = options.action
+        actionOptions = options.options
+    end
+
+    -- Add metamethods to allow action to be invokable and indexable
+    setmetatable(Action, {
+        __call = function(_, ...) action(...) end,
+        __tostring = function() return "action" end,
+        __index = function(_, key)
+            if key == "name" then
+                return name
+            elseif key == "action" then
+                return action
+            elseif key == "options" then
+                return actionOptions
+            end
+        end,
+    })
+
+    return Action
 end
 
 return Entity

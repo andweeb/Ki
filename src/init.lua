@@ -337,14 +337,16 @@ function Ki:_handleKeyDown(event)
     if handler then
         self.history:recordEvent(mode, keyName, flags)
 
-        if type(handler) == "table" and handler.dispatchAction then
-            local shouldAutoExit = handler:dispatchAction(mode, self.history.action, self.history.workflow)
+        local isNamedAction = type(handler) == "table" and tostring(handler) == "action"
+
+        if type(handler) == "function" or isNamedAction then
+            local shouldAutoExit = handler(flags, keyName)
 
             if shouldAutoExit then
                 self.state:exitMode()
             end
-        elseif type(handler) == "function" then
-            local shouldAutoExit = handler(flags, keyName)
+        elseif type(handler) == "table" and handler.dispatchAction then
+            local shouldAutoExit = handler:dispatchAction(mode, self.history.action, self.history.workflow)
 
             if shouldAutoExit then
                 self.state:exitMode()
@@ -367,7 +369,7 @@ function Ki:init()
     self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, eventHandler)
 end
 
---- Ki:Mode(mode, enterModeShortcut, shortcuts) -> table of state transition events, table of registered shortcuts
+--- Ki.Mode(mode, enterModeShortcut, shortcuts) -> table of state transition events, table of registered shortcuts
 --- Method
 --- Registers a new custom mode and its keyboard shortcuts.
 ---
@@ -392,31 +394,31 @@ end
 ---  },
 ---  ```
 ---  * `shortcuts` - The shortcuts that will be assigned to the new custom mode
-function Ki:Mode(options)
+function Ki.Mode(options)
     local name = options.name
     local actions = options.actions
     local shortcut = options.shortcut
     local shortcuts = options.shortcuts
 
-    if self.modes[name] then
-        self:registerModeShortcuts(name, shortcuts)
+    if Ki.modes[name] then
+        Ki:registerModeShortcuts(name, shortcuts)
         return
     end
 
-    self.modes[name] = actions or true
+    Ki.modes[name] = actions or true
 
     -- Register the action to enter the mode from normal mode
-    self:registerModeTransition("normal", name, shortcut)
+    Ki:registerModeTransition("normal", name, shortcut)
 
     -- Register the action to exit the mode back to desktop mode
     local exitModeShortcut = { nil, "escape", nil, "Exit to Desktop Mode" }
-    self:registerModeTransition(name, "desktop", exitModeShortcut, "exitMode")
+    Ki:registerModeTransition(name, "desktop", exitModeShortcut, "exitMode")
 
     -- Register the new mode shortcuts
-    self:registerModeShortcuts(name, shortcuts)
+    Ki:registerModeShortcuts(name, shortcuts)
 end
 
-function Ki:ModeTransition(transition)
+function Ki.ModeTransition(transition)
     local fromMode, toMode, transitionModeShortcut
 
     if #transition > 0 then
@@ -427,12 +429,12 @@ function Ki:ModeTransition(transition)
         transitionModeShortcut = transition.shortcut
     end
 
-    self:registerModeTransition(fromMode, toMode, transitionModeShortcut)
+    Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut)
 end
 
-function Ki:ModeTransitions(transitionList)
+function Ki.ModeTransitions(transitionList)
     for i = 1, #transitionList do
-        self:ModeTransition(transitionList[i])
+        Ki.ModeTransition(transitionList[i])
     end
 end
 
@@ -561,16 +563,16 @@ end
 ---
 --- Parameters:
 ---  * `shortcuts` - A set of shortcuts categorized by either the shortcut category and description (used in the cheatsheet) or by mode and entity name
-function Ki:remapShortcuts(remappedShortcuts)
+function Ki:updateShortcuts(remappedShortcuts, onFound)
     local memo = {}
     for _, remapped in pairs(remappedShortcuts) do
         local key = remapped.mode.."."..remapped.name
-        memo[key] = remapped.shortcut
+        memo[key] = remapped
     end
 
-    -- Iterate through modal shortcuts to remap
+    -- Iterate through shortcuts to find any target shortcuts to update
     for mode, modeShortcuts in pairs(self.shortcuts) do
-        for _, shortcut in pairs(modeShortcuts) do
+        for i, shortcut in pairs(modeShortcuts) do
             local handler = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
             local name = shortcut[_G.SHORTCUT_NAME_INDEX]
 
@@ -581,12 +583,41 @@ function Ki:remapShortcuts(remappedShortcuts)
             local key = mode.."."..name
 
             if memo[key] then
-                local remappedShortcut = memo[key]
-                shortcut[_G.SHORTCUT_MODKEY_INDEX] = remappedShortcut[_G.SHORTCUT_MODKEY_INDEX]
-                shortcut[_G.SHORTCUT_HOTKEY_INDEX] = remappedShortcut[_G.SHORTCUT_HOTKEY_INDEX]
+                onFound(mode, i, shortcut, memo[key])
             end
         end
     end
+end
+
+function Ki.Unmap(shortcut)
+    Ki:Unmaps({ shortcut })
+end
+
+function Ki.Unmaps(shortcuts)
+    Ki:updateShortcuts(shortcuts, function(mode, key)
+        Ki.shortcuts[mode][key] = nil
+    end)
+end
+
+function Ki.Remap(remappedShortcut)
+    Ki.Remaps({ remappedShortcut })
+end
+
+function Ki.Remaps(remappedShortcuts)
+    Ki:updateShortcuts(remappedShortcuts, function(_, _, shortcut, found)
+        local modkey, hotkey, handler, name = table.unpack(found.shortcut)
+
+        shortcut[_G.SHORTCUT_MODKEY_INDEX] = modkey
+        shortcut[_G.SHORTCUT_HOTKEY_INDEX] = hotkey
+
+        if handler then
+            shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX] = handler
+        end
+
+        if name then
+            shortcut[_G.SHORTCUT_NAME_INDEX] = name
+        end
+    end)
 end
 
 --- Ki:useDefaultConfig([options])

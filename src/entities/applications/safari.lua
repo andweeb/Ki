@@ -5,46 +5,49 @@ local Website = spoon.Ki.Website
 local Application = spoon.Ki.Application
 
 -- Initialize menu item events
-local addBookmark = Application.createMenuItemEvent("Add Bookmark...", { focusBefore = true })
-local openLocation = Application.createMenuItemEvent("Open Location...", { focusBefore = true })
-local moveTabToNewWindow = Application.createMenuItemEvent("Move Tab to New Window", { focusBefore = true })
-local mergeAllWindows = Application.createMenuItemEvent("Merge All Windows", { focusBefore = true })
-local openNewWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
-local openNewPrivateWindow = Application.createMenuItemEvent("New Private Window", { focusAfter = true })
-local openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
-local openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
-local undoCloseTab = Application.createMenuItemEvent("Reopen Last Closed Tab", { focusBefore = true })
-local showHistory = Application.createMenuItemEvent("Show All History", { focusAfter = true })
-local showWebInspector = Application.createMenuItemEvent({ "Show Web Inspector", "Close Web Inspector" }, {
+local addBookmark = Application:createMenuItemAction("Add Bookmark...", { focusBefore = true })
+local openLocation = Application:createMenuItemAction("Open Location...", { focusBefore = true })
+local moveTabToNewWindow = Application:createMenuItemAction("Move Tab to New Window", { focusBefore = true })
+local mergeAllWindows = Application:createMenuItemAction("Merge All Windows", { focusBefore = true })
+local openNewWindow = Application:createMenuItemAction("New Window", { focusAfter = true })
+local openNewPrivateWindow = Application:createMenuItemAction("New Private Window", { focusAfter = true })
+local openFile = Application:createMenuItemAction("Open File...", { focusAfter = true })
+local openNewTab = Application:createMenuItemAction("New Tab", { focusAfter = true })
+local undoCloseTab = Application:createMenuItemAction("Reopen Last Closed Tab", { focusBefore = true })
+local showHistory = Application:createMenuItemAction("Show All History", { focusAfter = true })
+local showWebInspector = Application:createMenuItemAction({ "Show Web Inspector", "Close Web Inspector" }, {
     isToggleable = true,
     focusBefore = true,
 })
 
 -- Use a helper method to create various media actions
-local function createMediaAction(command, errorMessage)
-    return function (_, choice)
-        local viewModel = {
-            browser = "Safari",
-            command = command,
-            target = choice
+local function createMediaAction(name, command, errorMessage)
+    return Application.Action {
+        name = name,
+        action = function (_, choice)
+            local viewModel = {
+                browser = "Safari",
+                command = command,
+                target = choice
                 and "tab "..choice.tabIndex.." of window id "..choice.windowId
                 or "front document",
-            ["is-safari"] = true,
-        }
-        local script = Application.renderScriptTemplate("browser-media", viewModel)
-        local isOk, _, rawTable = hs.osascript.applescript(script)
+                ["is-safari"] = true,
+            }
+            local script = Application.renderScriptTemplate("browser-media", viewModel)
+            local isOk, _, rawTable = hs.osascript.applescript(script)
 
-        if not isOk then
-            Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
+            if not isOk then
+                Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
+            end
         end
-    end
+    }
 end
-local toggleMute = createMediaAction("toggle-mute", "Error (un)muting video")
-local toggleMedia = createMediaAction("toggle-play", "Error toggling media")
-local nextMedia = createMediaAction("next", "Error going to the next media")
-local previousMedia = createMediaAction("previous", "Error going back to the previous media")
-local toggleCaptions = createMediaAction("toggle-captions", "Error toggling captions")
-local skipMedia = createMediaAction("skip", "Error skipping media")
+local toggleMute = createMediaAction("Toggle Mute", "toggle-mute", "Error (un)muting video")
+local toggleMedia = createMediaAction("Play/Pause Media", "toggle-play", "Error toggling media")
+local nextMedia = createMediaAction("Next Media", "Error going to the next media")
+local previousMedia = createMediaAction("Previous Media", "Error going back to the previous media")
+local toggleCaptions = createMediaAction("Toggle Media Captions", "Error toggling captions")
+local skipMedia = createMediaAction("Skip Media", "Error skipping media")
 
 -- Implement method to support selection of tab titles in select mode
 local function getChooserItems()
@@ -155,30 +158,30 @@ return Application {
 
     shortcuts = {
         { nil, nil, focus, "Activate" },
-        { nil, "d", addBookmark, "Add bookmark" },
-        { nil, "i", showWebInspector, "Toggle Web Inspector" },
-        { nil, "y", showHistory, "Show History" },
+        { nil, "d", addBookmark },
+        { nil, "i", showWebInspector },
+        { nil, "y", showHistory },
         File = {
-            { nil, "l", openLocation, "Open Location..." },
-            { nil, "n", openNewWindow, "Open New Window" },
-            { nil, "o", openFile, "Open File" },
-            { nil, "r", reload, "Reload Page" },
-            { nil, "t", openNewTab, "Open New Tab" },
-            { nil, "u", undoCloseTab, "Undo Close Tab" },
+            { nil, "l", openLocation },
+            { nil, "n", openNewWindow },
+            { nil, "o", openFile },
+            { nil, "r", reload, "Reload Tab or Window" },
+            { nil, "t", openNewTab },
+            { nil, "u", undoCloseTab },
             { nil, "w", close, "Close Tab or Window" },
-            { { "shift" }, "n", openNewPrivateWindow, "Open New Private Window" },
+            { { "shift" }, "n", openNewPrivateWindow },
         },
         Media = {
-            { nil, "m", toggleMute, "Toggle Mute" },
-            { nil, "space", toggleMedia, "Play/Pause Media" },
-            { { "ctrl" }, "c", toggleCaptions, "Toggle Media Captions" },
-            { { "ctrl" }, "n", nextMedia, "Next Media" },
-            { { "ctrl" }, "p", previousMedia, "Previous Media" },
-            { { "ctrl" }, "s", skipMedia, "Skip Media" },
+            { nil, "m", toggleMute },
+            { nil, "space", toggleMedia },
+            { { "ctrl" }, "c", toggleCaptions },
+            { { "ctrl" }, "n", nextMedia },
+            { { "ctrl" }, "p", previousMedia },
+            { { "ctrl" }, "s", skipMedia },
         },
         Window = {
-            { { "ctrl", "cmd" }, "m", moveTabToNewWindow, "Move Tab To New Window" },
-            { { "cmd", "shift" }, "m", mergeAllWindows, "Merge All Windows" },
+            { { "ctrl", "cmd" }, "m", moveTabToNewWindow },
+            { { "cmd", "shift" }, "m", mergeAllWindows },
         },
     },
 

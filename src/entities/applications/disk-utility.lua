@@ -5,11 +5,11 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local newBlankImage = Application.createMenuItemEvent("Blank Image...", { focusAfter = true })
-local newImageFromFolder = Application.createMenuItemEvent("Image From Folder...", {
+local newBlankImage = Application:createMenuItemAction("Blank Image...", { focusAfter = true })
+local newImageFromFolder = Application:createMenuItemAction("Image From Folder...", {
     focusAfter = true,
 })
-local openDiskImage = Application.createMenuItemEvent("Open Disk Image...", {
+local openDiskImage = Application:createMenuItemAction("Open Disk Image...", {
     focusAfter = true,
 })
 

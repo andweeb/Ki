@@ -5,14 +5,14 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local search = Application.createMenuItemEvent("Search", { focusBefore = true })
-local newNote = Application.createMenuItemEvent("New Note", { focusBefore = true })
-local newFolder = Application.createMenuItemEvent("New Folder", { focusBefore = true })
-local toggleFolderView = Application.createMenuItemEvent({ "Show Folders", "Hide Folders" }, {
+local search = Application:createMenuItemAction("Search", { focusBefore = true })
+local newNote = Application:createMenuItemAction("New Note", { focusBefore = true })
+local newFolder = Application:createMenuItemAction("New Folder", { focusBefore = true })
+local toggleFolderView = Application:createMenuItemAction({ "Show Folders", "Hide Folders" }, {
     isToggleable = true,
     focusBefore = true,
 })
-local toggleAttachmentsBrowser = Application.createMenuItemEvent({
+local toggleAttachmentsBrowser = Application:createMenuItemAction({
     "Show Attachments Browser",
     "Hide Attachments Browser"
 }, { isToggleable = true })

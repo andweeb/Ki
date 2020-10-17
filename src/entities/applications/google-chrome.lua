@@ -6,24 +6,24 @@ local Website = Ki.Website
 local Application = Ki.Application
 
 -- Initialize menu item events
-local addBookmark = Application.createMenuItemEvent("Bookmark This Page...", {
+local addBookmark = Application:createMenuItemAction("Bookmark This Page...", {
    focusBefore = true,
    focusAfter = true,
 })
-local showWebInspector = Application.createMenuItemEvent("Developer Tools", {
+local showWebInspector = Application:createMenuItemAction("Developer Tools", {
    focusBefore = true,
    focusAfter = true,
 })
-local openLocation = Application.createMenuItemEvent("Open Location...", {
+local openLocation = Application:createMenuItemAction("Open Location...", {
    focusBefore = true,
    focusAfter = true,
 })
-local openNewWindow = Application.createMenuItemEvent("New Window", { focusAfter = true })
-local openNewIncognitoWindow = Application.createMenuItemEvent("New Incognito Window", { focusAfter = true })
-local openFile = Application.createMenuItemEvent("Open File...", { focusAfter = true })
-local openNewTab = Application.createMenuItemEvent("New Tab", { focusAfter = true })
-local reopenClosedTab = Application.createMenuItemEvent("Reopen Closed Tab", { focusAfter = true })
-local showHistory = Application.createMenuItemEvent("Show Full History", { focusAfter = true })
+local openNewWindow = Application:createMenuItemAction("New Window", { focusAfter = true })
+local openNewIncognitoWindow = Application:createMenuItemAction("New Incognito Window", { focusAfter = true })
+local openFile = Application:createMenuItemAction("Open File...", { focusAfter = true })
+local openNewTab = Application:createMenuItemAction("New Tab", { focusAfter = true })
+local reopenClosedTab = Application:createMenuItemAction("Reopen Closed Tab", { focusAfter = true })
+local showHistory = Application:createMenuItemAction("Show Full History", { focusAfter = true })
 
 -- Implement method to support selection of tab titles in select mode
 local function getChooserItems()

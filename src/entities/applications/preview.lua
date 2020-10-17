@@ -5,10 +5,10 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local close = Application.createMenuItemEvent("Close Window", { focusBefore = true })
-local find = Application.createMenuItemEvent({ "Find", "Find..." }, { focusAfter = true })
-local open = Application.createMenuItemEvent("Open...", { focusAfter = true })
-local openRecent = Application.createMenuItemChooserEvent({ "File", "Open Recent" }, {
+local close = Application:createMenuItemAction("Close Window", { focusBefore = true })
+local find = Application:createMenuItemAction({ "Find", "Find..." }, { focusAfter = true })
+local open = Application:createMenuItemAction("Open...", { focusAfter = true })
+local openRecent = Application:createChooseMenuItemAction({ "File", "Open Recent" }, {
     focusAfter = true,
 })
 

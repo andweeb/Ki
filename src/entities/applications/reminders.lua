@@ -5,10 +5,10 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local find = Application.createMenuItemEvent("Find", { focusBefore = true })
-local newReminder = Application.createMenuItemEvent("New Reminder", { focusBefore = true })
-local newReminderList = Application.createMenuItemEvent("New List", { focusBefore = true })
-local goToToday = Application.createMenuItemEvent("Go to Today", { focusBefore = true })
+local find = Application:createMenuItemAction("Find", { focusBefore = true })
+local newReminder = Application:createMenuItemAction("New Reminder", { focusBefore = true })
+local newReminderList = Application:createMenuItemAction("New List", { focusBefore = true })
+local goToToday = Application:createMenuItemAction("Go to Today", { focusBefore = true })
 
 return Application {
     name = "Reminders",

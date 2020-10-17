@@ -5,16 +5,16 @@ local Ki = spoon.Ki
 local Application = Ki.Application
 
 -- Initialize menu item events
-local find = Application.createMenuItemEvent("Find...", { focusBefore = true })
-local newWindow = Application.createMenuItemEvent("New Window with Profile .+$", {
+local find = Application:createMenuItemAction("Find...", { focusBefore = true })
+local newWindow = Application:createMenuItemAction("New Window with Profile .+$", {
     focusBefore = true,
     isRegex = true,
 })
-local newTab = Application.createMenuItemEvent("New Tab with Profile .+$", {
+local newTab = Application:createMenuItemAction("New Tab with Profile .+$", {
     focusBefore = true,
     isRegex = true,
 })
-local close = Application.createMenuItemEvent({ "Close Tab", "Close Window" }, {
+local close = Application:createMenuItemAction({ "Close Tab", "Close Window" }, {
     isToggleable = true,
     focusBefore = true,
 })
