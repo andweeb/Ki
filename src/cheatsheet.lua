@@ -18,25 +18,22 @@ function Cheatsheet:createShortcutBlocks()
     local shortcutCategories = {}
 
     local function initializeShortcutCategories(id, shortcut, category)
-        local shortcutModifierKeys = shortcut[_G.SHORTCUT_MODKEY_INDEX] or {}
-        local shortcutKey = shortcut[_G.SHORTCUT_HOTKEY_INDEX] or ""
-        local shortcutEventHandler = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
-        local shortcutName = shortcut[_G.SHORTCUT_NAME_INDEX]
+        local mods, key, handler, name = table.unpack(shortcut)
 
-        if not shortcutName and type(shortcutEventHandler) == "table" then
-            shortcutName = shortcutEventHandler.name
+        if not name and type(handler) == "table" then
+            name = handler.name
         end
 
         category = category or self.name
-        shortcutName = shortcutName or tostring(shortcutEventHandler)
+        name = name or tostring(handler)
 
         if not shortcutCategories[category] then
             shortcutCategories[category] = {}
         end
 
         table.insert(shortcutCategories[category], {
-            hotkey = glyphs.createShortcutText(shortcutModifierKeys, shortcutKey),
-            name = shortcutName,
+            hotkey = glyphs.createShortcutText(mods, key),
+            name = name,
             id = id,
         })
     end
@@ -77,7 +74,7 @@ function Cheatsheet:createShortcutBlocks()
 
         local used_shortcuts = {}
         for _, shortcut in pairs(shortcuts) do
-            local isUnmapped = shortcut.hotkey == glyphs.unmapped.text
+            local isUnmapped = shortcut.hotkey == glyphs.unmapped.key
             if isUnmapped then
                 shortcut.hotkey = glyphs.unmapped.key
                 shortcut.name = shortcut.name
@@ -196,10 +193,10 @@ function Cheatsheet:show(iconURL)
     hs.focus()
 
     self.cheatsheetListener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
-        local flags = event:getFlags()
-        local keyName = hs.keycodes.map[event:getKeyCode()]
+        local mods = event:getFlags()
+        local key = hs.keycodes.map[event:getKeyCode()]
 
-        if flags:containExactly({}) and keyName == "escape" then
+        if mods:containExactly({}) and key == "escape" then
             self.view:hide(0.5)
             self.cheatsheetListener:stop()
             frontmostWindow:focus()

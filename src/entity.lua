@@ -29,17 +29,17 @@ end
 --- Variable
 --- A table keyed by mode name to define (optional) entity behavior contextual to the mode at the time of an event. The table values are functions that take in the following arguments to invoke the event handler in some mode-specific way:
 ---  * `self` - the entity (or subclassed entity) instance
----  * `eventHandler` - the event handler to be invoked within the function
+---  * `handler` - the event handler to be invoked within the function
 ---  * `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)
----  * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
+---  * `key` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
 ---
 --- The table is defined with an `__add` metamethod to overwrite the default entity behaviors.
 ---
 --- Currently supported behaviors:
 --- * `default` - triggers the event handler and returns a boolean flag whether to auto-exit back to desktop mode or not, depending on the return value of the handler or the `autoExitMode` variable on the entity class
 Entity.behaviors = {
-    default = function(self, eventHandler)
-        local _, autoExit = eventHandler()
+    default = function(self, handler)
+        local _, autoExit = handler()
 
         return autoExit == nil and self.autoExitMode or autoExit
     end,
@@ -108,70 +108,16 @@ function Entity.renderScriptTemplate(script, viewModel)
     return lustache:render(scriptTemplate, viewModel)
 end
 
---- Entity:initialize(TODO)
---- Method
---- Initializes a new entity instance with its name and shortcuts. By default, a `cheatsheet` object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the `autoExitMode` parameter is explicitly set to `false`.
----
---- Parameters:
----  * `name` - The entity name
----  * `shortcuts` - The list of shortcuts containing keybindings and actions for the entity
----  * `autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
----
---- Each `shortcut` item should be a list with items at the following indices:
----  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`
----  * `2` - The name of a keyboard key. String representations of keys can be found in [`hs.keycodes.map`](https://www.hammerspoon.org/docs/hs.keycodes.html#map).
----  * `3` - The event handler that defines the action for when the shortcut is triggered
----  * `4` - A table containing the metadata for the shortcut, also a list with items at the following indices:
----    * `1` - The category name of the shortcut
----    * `2` - A description of what the shortcut does
----
---- Returns:
----  * None
-function Entity:initialize(options)
-    local name, actions, shortcuts, autoExitMode, getChooserItems
-
-    if type(options) == "string" then
-        name = options
-    elseif #options > 0 then
-        name, shortcuts, autoExitMode = table.unpack(options)
-    else
-        name = options.name
-        actions = options.actions
-        shortcuts = options.shortcuts
-        autoExitMode = options.autoExitMode
-        getChooserItems = options.getChooserItems
-    end
-
-    local Action = Entity.Action
-    local showActions = Action {
-        name = "Show Actions",
-        action = function(...) self:showActions(...) end,
-    }
-    local showCheatsheet = Action {
-        name = "Show Cheatsheet",
-        action = function(...) self:showCheatsheet(...) end,
-    }
-
-    self.name = name
-    self.actions = actions
-    self.getChooserItems = getChooserItems
-    self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
-    self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
-        { { "cmd" }, "space", showActions },
-        { { "shift" }, "/", showCheatsheet },
-    }))
-end
-
--- Create a string shortcut key from its modifiers and hotkey
-function Entity.getShortcutKey(modifiers, hotkey)
-    if not hotkey or not modifiers then
+-- Create a string shortcut key from its modifier keys and hotkey
+function Entity.getShortcutKey(mods, hotkey)
+    if not hotkey or not mods then
         return tostring(hotkey)
     end
 
-    local clonedModifiers = {table.unpack(modifiers)}
-    table.sort(clonedModifiers)
+    local clonedMods = {table.unpack(mods)}
+    table.sort(clonedMods)
 
-    return table.concat(clonedModifiers)..hotkey
+    return table.concat(clonedMods)..hotkey
 end
 
 -- Merge Ki shortcuts with the option of overriding shortcuts
@@ -181,6 +127,7 @@ function Entity:mergeShortcuts(fromList, toList)
     toList = toList or {}
 
     local mergedShortcuts = {}
+    local unmapped = glyphs.unmapped.text
 
     -- Memoize `fromList` hotkeys for reference when iterating on `toList`
     local memo = {}
@@ -189,14 +136,28 @@ function Entity:mergeShortcuts(fromList, toList)
             local categoryName = key
             local categorizedShortcuts = value
             for _, shortcut in pairs(categorizedShortcuts) do
-                local memoKey = self.getShortcutKey(table.unpack(shortcut))
+                local shortcutMods, shortcutKey = table.unpack(shortcut)
+                if shortcutMods == unmapped or shortcutKey == unmapped then
+                    table.insert(mergedShortcuts, shortcut)
+                    goto skip
+                end
+
+                local memoKey = self.getShortcutKey(shortcutMods, shortcutKey)
                 memo[memoKey] = { shortcut, categoryName }
             end
         else
             local shortcut = value
+            local shortcutMods, shortcutKey = table.unpack(shortcut)
+            if shortcutMods == unmapped or shortcutKey == unmapped then
+                table.insert(mergedShortcuts, shortcut)
+                goto skip
+            end
+
             local memoKey = self.getShortcutKey(table.unpack(shortcut))
             memo[memoKey] = { shortcut }
         end
+
+        ::skip::
     end
 
     -- Insert `toList` shortcuts into `mergedShortcuts` that overlap with `fromList`
@@ -456,12 +417,12 @@ function Entity:showChooser(choices, callback, options)
 
     -- Create an event listener while the chooser is visible to select rows with ctrl+j/k
     chooserListener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
-        local flags = event:getFlags()
-        local keyName = hs.keycodes.map[event:getKeyCode()]
-        local chooserEventHandler = self.getEventHandler(self.chooserShortcuts, flags, keyName)
+        local mods = event:getFlags()
+        local key = hs.keycodes.map[event:getKeyCode()]
+        local chooserHandler = self.getHandler(self.chooserShortcuts, mods, key)
 
-        if chooserEventHandler then
-            return chooserEventHandler(chooser)
+        if chooserHandler then
+            return chooserHandler(chooser)
         end
     end)
 
@@ -480,8 +441,8 @@ function Entity:showActions()
     local choices = {}
 
     local function createChoice(index, shortcut, category)
-        local flags, keyName, action, name = table.unpack(shortcut)
-        local shortcutText = glyphs.createShortcutText(flags, keyName)
+        local mods, key, action, name = table.unpack(shortcut)
+        local shortcutText = glyphs.createShortcutText(mods, key)
 
         return {
             text = tostring(action) == "action" and action.name or name,
@@ -512,50 +473,47 @@ function Entity:showActions()
         if not choice then return end
 
         local shortcut = self.shortcuts[choice.index]
-        local flags = shortcut[_G.SHORTCUT_MODKEY_INDEX]
-        local keyName = shortcut[_G.SHORTCUT_HOTKEY_INDEX]
-        local action = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+        local mods, key, action = table.unpack(shortcut)
 
-        self.behaviors.default(self, action, flags, keyName, {})
+        self.behaviors.default(self, action, mods, key, {})
     end, options)
 end
 
---- Entity:getEventHandler(shortcuts, flags, keyName) -> function or nil
+--- Entity:getHandler(shortcuts, flags, key) -> function or nil
 --- Method
 --- Returns the event handler within the provided shortcuts with the given shortcut keybindings, or nil if not found
 ---
 --- Parameters:
 ---  * `shortcuts` - The list of shortcut objects
 ---  * `flags` - A table containing the keyboard modifiers in the keyboard event (from `hs.eventtap.event:getFlags()`)
----  * `keyName` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
+---  * `key` - A string containing the name of a keyboard key (in `hs.keycodes.map`)
 ---
 --- Returns:
 ---  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
-function Entity.getEventHandler(shortcuts, flags, keyName)
-    local function getEventHandler(registeredShortcut)
-        local registeredFlags = registeredShortcut[_G.SHORTCUT_MODKEY_INDEX]
-        local registeredKeyName = registeredShortcut[_G.SHORTCUT_HOTKEY_INDEX]
-        local registeredHandler = registeredShortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
-        local areFlagsEqual = flags == registeredFlags or
-            (flags and flags.containExactly and flags:containExactly(registeredFlags or {}))
+function Entity.getHandler(shortcuts, mods, key)
+    local function getHandler(registeredShortcut)
+        local registeredMods, registeredKey, registeredHandler = table.unpack(registeredShortcut)
+        local areModsEqual = mods == registeredMods
+            or registeredMods ~= glyphs.unmapped.text and
+            (mods and mods.containExactly and mods:containExactly(registeredMods or {}))
 
-        if areFlagsEqual and keyName == registeredKeyName then
+        if areModsEqual and key == registeredKey then
             return registeredHandler
         end
     end
 
-    for key, value in pairs(shortcuts) do
-        if type(key) == "string" and type(value) == "table" then
+    for k, value in pairs(shortcuts) do
+        if type(k) == "string" and type(value) == "table" then
             local categorizedShortcuts = value
             for _, registeredShortcut in pairs(categorizedShortcuts) do
-                local registeredHandler = getEventHandler(registeredShortcut)
+                local registeredHandler = getHandler(registeredShortcut)
                 if registeredHandler then
                     return registeredHandler
                 end
             end
         else
             local registeredShortcut = value
-            local registeredHandler = getEventHandler(registeredShortcut)
+            local registeredHandler = getHandler(registeredShortcut)
             if registeredHandler then
                 return registeredHandler
             end
@@ -572,19 +530,19 @@ end
 --- Parameters:
 ---  * `mode` - The name of the current mode
 ---  * `shortcut` - A shortcut object containing the keybindings and event handler for the entity
----  * `workflow` - The list of events that compose the current workflow
+---  * `command` - The list of events that compose the current command
 ---
 --- Returns:
 ---  * A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
-function Entity:dispatchAction(mode, shortcut, workflow)
-    local flags = shortcut.flags
-    local keyName = shortcut.keyName
-    local eventHandler = self.getEventHandler(self.shortcuts, flags, keyName)
+function Entity:dispatchAction(mode, shortcut, command)
+    local mods = shortcut.mods
+    local key = shortcut.key
+    local handler = self.getHandler(self.shortcuts, mods, key)
 
-    if eventHandler then
+    if handler then
         local executeBehavior = self.behaviors[mode] or self.behaviors.default
 
-        return executeBehavior(self, eventHandler, flags, keyName, workflow)
+        return executeBehavior(self, handler, mods, key, command)
     else
         return self.autoExitMode
     end
@@ -618,6 +576,62 @@ function Entity.Action(options)
     })
 
     return Action
+end
+
+--- Entity:initialize(TODO)
+--- Method
+--- Initializes a new entity instance with its name and shortcuts. By default, a `cheatsheet` object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the `autoExitMode` parameter is explicitly set to `false`.
+---
+--- Parameters:
+---  * `name` - The entity name
+---  * `shortcuts` - The list of shortcuts containing keybindings and actions for the entity
+---  * `autoExitMode` - A boolean denoting to whether enable or disable automatic mode exit after the action has been dispatched
+---
+--- Each `shortcut` item should be a list with items at the following indices:
+---  * `1` - An optional table containing zero or more of the following keyboard modifiers: `"cmd"`, `"alt"`, `"shift"`, `"ctrl"`, `"fn"`
+---  * `2` - The name of a keyboard key. String representations of keys can be found in [`hs.keycodes.map`](https://www.hammerspoon.org/docs/hs.keycodes.html#map).
+---  * `3` - The event handler that defines the action for when the shortcut is triggered
+---  * `4` - A table containing the metadata for the shortcut, also a list with items at the following indices:
+---    * `1` - The category name of the shortcut
+---    * `2` - A description of what the shortcut does
+---
+--- Returns:
+---  * None
+function Entity:initialize(options)
+    local name, actions, shortcuts, autoExitMode, getChooserItems, chooserShortcuts
+
+    if type(options) == "string" then
+        name = options
+    elseif #options > 0 then
+        name, shortcuts, autoExitMode = table.unpack(options)
+    else
+        name = options.name
+        actions = options.actions
+        shortcuts = options.shortcuts
+        autoExitMode = options.autoExitMode
+        getChooserItems = options.getChooserItems
+        chooserShortcuts = options.chooserShortcuts
+    end
+
+    local Action = Entity.Action
+    local showActions = Action {
+        name = "Show Actions",
+        action = function(...) self:showActions(...) end,
+    }
+    local showCheatsheet = Action {
+        name = "Show Cheatsheet",
+        action = function(...) self:showCheatsheet(...) end,
+    }
+
+    self.name = name
+    self.actions = actions
+    self.getChooserItems = getChooserItems
+    self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
+    self:registerChooserShortcuts(chooserShortcuts)
+    self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
+        { { "cmd" }, "space", showActions },
+        { { "shift" }, "/", showCheatsheet },
+    }))
 end
 
 return Entity

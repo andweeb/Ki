@@ -64,13 +64,9 @@ local luaVersion = _VERSION:match("%d+%.%d+")
 package.path = package.path..";"..spoonPath.."?.lua"
 package.path = spoonPath.."/deps/share/lua/"..luaVersion.."/?.lua;deps/share/lua/"..luaVersion.."/?/init.lua;"..package.path
 
-_G.SHORTCUT_MODKEY_INDEX = 1
-_G.SHORTCUT_HOTKEY_INDEX = 2
-_G.SHORTCUT_EVENT_HANDLER_INDEX = 3
-_G.SHORTCUT_NAME_INDEX = 4
-
 local FSM = require("fsm")
 local Cheatsheet = require("cheatsheet")
+local glyphs = require("glyphs")
 
 -- Allow Spotlight to be used to find alternate names for applications
 hs.application.enableSpotlightForNameSearches(true)
@@ -110,6 +106,8 @@ Ki.state = {}
 --- A table containing lists of all default entity instances keyed by mode name when the [default config](#useDefaultConfig) is used, `nil` otherwise.
 Ki.defaultEntities = nil
 
+Ki.unmapped = glyphs.unmapped.text
+
 function Ki.getLocalVariables(variableType)
     local index = 1
     local variables = {}
@@ -132,15 +130,15 @@ function Ki.getLocalVariables(variableType)
 end
 
 -- Create a string shortcut key from its modifiers and hotkey
-function Ki.getShortcutKey(modifiers, hotkey)
-    if not hotkey or not modifiers then
-        return tostring(hotkey)
+function Ki.getShortcutKey(mods, key)
+    if not key or not mods then
+        return tostring(key)
     end
 
-    local clonedModifiers = {table.unpack(modifiers)}
-    table.sort(clonedModifiers)
+    local clonedMods = {table.unpack(mods)}
+    table.sort(clonedMods)
 
-    return table.concat(clonedModifiers)..hotkey
+    return table.concat(clonedMods)..key
 end
 
 -- Merge Ki shortcuts with the option of overriding shortcuts. Shortcuts with conflicting hotkeys
@@ -254,24 +252,24 @@ Ki.shortcuts = {
 --- A module that defines the behavior for displaying the current mode. The `show` function should reset the previous display and show the current transitioned mode. The following methods should be available on the object:
 ---  * `show` - A function invoked when a mode transition event occurs, with the following arguments:
 ---    * `mode - A string value containing the name of the current mode
----    * `action` - An action if specified in the executed workflow, `nil` otherwise
+---    * `action` - An action if specified in the executed command, `nil` otherwise
 ---
 --- Defaults to an implementation that displays the mode as a menubar item.
 Ki.modeIndicator = nil
 
--- A table that stores the workflow history
+-- A table that stores the command history
 Ki.history = {
-    workflow = {},
+    command = {},
     action = {},
 }
 
 Ki.modes = {}
 
-function Ki.history:recordEvent(mode, keyName, flags)
-    table.insert(self.workflow, {
+function Ki.history:recordEvent(mode, key, mods)
+    table.insert(self.command, {
         mode = mode,
-        flags = flags,
-        keyName = keyName,
+        mods = mods,
+        key = key,
     })
 end
 
@@ -280,7 +278,7 @@ end
 function Ki:_createFsmCallbacks()
     local callbacks = {}
 
-    -- Add generic state change callback for all events to record and reset workflow event history
+    -- Add generic state change callback for all events to record and reset command event history
     callbacks.on_enter_state = function(_, _, _, nextState, stateMachine)
         if not self.listener or not self.listener:isEnabled() then
             return
@@ -289,9 +287,9 @@ function Ki:_createFsmCallbacks()
         -- Update the current mode in the mode indicator
         self.modeIndicator:show(stateMachine.current, self.history.action)
 
-        -- Record the event to the workflow history
+        -- Record the event to the command history
         if nextState == "desktop" then
-            self.history.workflow = {}
+            self.history.command = {}
             self.history.action = {}
         end
     end
@@ -306,26 +304,26 @@ function Ki:_handleKeyDown(event)
     local shortcuts = self.shortcuts[mode]
     local handler = nil
 
-    local flags = event:getFlags()
-    local keyName = hs.keycodes.map[event:getKeyCode()]
+    local mods = event:getFlags()
+    local key = hs.keycodes.map[event:getKeyCode()]
 
     -- Determine event handler
     for _, shortcut in pairs(shortcuts) do
-        local eventModifiers = shortcut[_G.SHORTCUT_MODKEY_INDEX] or {}
-        local eventKeyName = shortcut[_G.SHORTCUT_HOTKEY_INDEX]
-        local eventTrigger = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+        shortcut = shortcut or {}
 
-        if flags:containExactly(eventModifiers) and keyName == eventKeyName then
-            handler = eventTrigger
+        local shortcutMods, shortcutKey, shortcutHandler = table.unpack(shortcut)
+
+        if mods:containExactly(shortcutMods or {}) and key == shortcutKey then
+            handler = shortcutHandler
         end
     end
 
     -- Create action handlers at runtime to automatically enter entity mode with the intended event
     if mode == "normal" and not handler then
-        handler = function(actionFlags, actionKeyName)
+        handler = function(actionMods, actionKey)
             local action = {
-                flags = actionFlags,
-                keyName = actionKeyName,
+                mods = actionMods,
+                key = actionKey,
             }
 
             self.history.action = action
@@ -335,18 +333,18 @@ function Ki:_handleKeyDown(event)
 
     -- Avoid propagating existing handler or non-existent handler in any mode besides normal mode
     if handler then
-        self.history:recordEvent(mode, keyName, flags)
+        self.history:recordEvent(mode, key, mods)
 
         local isNamedAction = type(handler) == "table" and tostring(handler) == "action"
 
         if type(handler) == "function" or isNamedAction then
-            local shouldAutoExit = handler(flags, keyName)
+            local shouldAutoExit = handler(mods, key)
 
             if shouldAutoExit then
                 self.state:exitMode()
             end
         elseif type(handler) == "table" and handler.dispatchAction then
-            local shouldAutoExit = handler:dispatchAction(mode, self.history.action, self.history.workflow)
+            local shouldAutoExit = handler:dispatchAction(mode, self.history.action, self.history.command)
 
             if shouldAutoExit then
                 self.state:exitMode()
@@ -365,8 +363,8 @@ end
 -- Primary init function to initialize the primary event handler
 function Ki:init()
     -- Set keydown listener with the primary event handler
-    local eventHandler = function(event) return self:_handleKeyDown(event) end
-    self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, eventHandler)
+    local handler = function(event) return self:_handleKeyDown(event) end
+    self.listener = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, handler)
 end
 
 --- Ki.Mode(mode, enterModeShortcut, shortcuts) -> table of state transition events, table of registered shortcuts
@@ -471,9 +469,12 @@ function Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut, tra
     -- Add to mode transition events
     table.insert(self.modeTransitionEvents, stateEvent)
 
-    -- Compose the transition mode transition event handler with the transition callback
-    local onTransition = transitionModeShortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
-    transitionModeShortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX] = function()
+    local SHORTCUT_NAME_INDEX = 4
+    local SHORTCUT_HANDLER_INDEX = 3
+    local _, _, onTransition, shortcutName = table.unpack(transitionModeShortcut)
+
+    -- Compose the transition mode transition handler with the transition callback
+    transitionModeShortcut[SHORTCUT_HANDLER_INDEX] = function()
         self.state[transitionName](self.state)
         if onTransition then
             onTransition(self.state, fromMode, toMode)
@@ -481,8 +482,9 @@ function Ki:registerModeTransition(fromMode, toMode, transitionModeShortcut, tra
     end
 
     -- Dynamically enter create transition shortcut name
-    if not transitionModeShortcut[_G.SHORTCUT_NAME_INDEX] then
-        transitionModeShortcut[_G.SHORTCUT_NAME_INDEX] = "Enter "..toMode:gsub("^%l", string.upper).." Mode"
+    if not shortcutName then
+        local name = "Enter "..toMode:gsub("^%l", string.upper).." Mode"
+        transitionModeShortcut[SHORTCUT_NAME_INDEX] = name
     end
 
     -- Register shortcut mode transition shortcut
@@ -573,8 +575,7 @@ function Ki:updateShortcuts(remappedShortcuts, onFound)
     -- Iterate through shortcuts to find any target shortcuts to update
     for mode, modeShortcuts in pairs(self.shortcuts) do
         for i, shortcut in pairs(modeShortcuts) do
-            local handler = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
-            local name = shortcut[_G.SHORTCUT_NAME_INDEX]
+            local _, _, handler, name = table.unpack(shortcut)
 
             if not name and type(handler) == "table" then
                 name = handler.name
@@ -605,17 +606,22 @@ end
 
 function Ki.Remaps(remappedShortcuts)
     Ki:updateShortcuts(remappedShortcuts, function(_, _, shortcut, found)
-        local modkey, hotkey, handler, name = table.unpack(found.shortcut)
+        local SHORTCUT_MODKEY_INDEX = 1
+        local SHORTCUT_HOTKEY_INDEX = 2
+        local SHORTCUT_HANDLER_INDEX = 3
+        local SHORTCUT_NAME_INDEX = 4
 
-        shortcut[_G.SHORTCUT_MODKEY_INDEX] = modkey
-        shortcut[_G.SHORTCUT_HOTKEY_INDEX] = hotkey
+        local mods, key, handler, name = table.unpack(found.shortcut)
+
+        shortcut[SHORTCUT_MODKEY_INDEX] = mods
+        shortcut[SHORTCUT_HOTKEY_INDEX] = key
 
         if handler then
-            shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX] = handler
+            shortcut[SHORTCUT_HANDLER_INDEX] = handler
         end
 
         if name then
-            shortcut[_G.SHORTCUT_NAME_INDEX] = name
+            shortcut[SHORTCUT_NAME_INDEX] = name
         end
     end)
 end
@@ -675,15 +681,18 @@ function Ki:useDefaultConfig(options)
         defaultShortcuts[mode] = {}
 
         for _, shortcut in pairs(shortcuts) do
-            local entity = shortcut[_G.SHORTCUT_EVENT_HANDLER_INDEX]
+            local _, _, handler = table.unpack(shortcut)
 
-            if type(entity) == "table" then
+            if type(handler) == "table" then
+                local entity = handler
+
                 if options.include and (
                     includes[entity.name] or
                     (entity.name and includes[mode.."."..entity.name])
                 ) then
                     table.insert(defaultShortcuts[mode], shortcut)
                 end
+
                 if options.exclude and (
                     not excludes[entity.name] and
                     (not excludes[mode.."."..(entity.name or "")])
@@ -701,7 +710,7 @@ end
 
 --- Ki:start() -> hs.eventtap
 --- Method
---- Initializes the mode indicator, creates all transition and workflow events, and starts the event listener
+--- Initializes the mode indicator, creates all transition and command events, and starts the event listener
 ---
 --- Parameters:
 ---  * None
@@ -724,7 +733,7 @@ function Ki:start()
         { "shift" }, "/", function() self.cheatsheet:show() return true end, "Cheatsheet",
     })
 
-    -- Initialize cheat sheet with both default and/or custom transition and workflow events
+    -- Initialize cheat sheet with both default and/or custom transition and command events
     local description = "Shortcuts for Ki modes and entities"
     self.cheatsheet = Cheatsheet:new({
         name = self.name,

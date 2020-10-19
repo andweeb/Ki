@@ -1,4 +1,4 @@
-local modifiers = {
+local mods = {
     cmd   = "⌘",
     alt   = "⌥",
     shift = "⇧",
@@ -26,23 +26,23 @@ local unmapped = {
     text = "﴾unmapped﴿",
 }
 
-local function createShortcutText(shortcutModifierKeys, shortcutKey)
+local function createShortcutText(shortcutMods, shortcutKey)
     local hotkey = ""
 
-    if shortcutKey == nil and shortcutModifierKeys == nil then
+    if shortcutKey == nil and shortcutMods == nil then
         return "default"
     end
-    if shortcutModifierKeys == unmapped.text or shortcutKey == unmapped.text then
+    if shortcutMods == unmapped.text or shortcutKey == unmapped.text then
         return unmapped.key
     end
 
     shortcutKey = shortcutKey or ""
-    shortcutModifierKeys = shortcutModifierKeys or {}
+    shortcutMods = shortcutMods or {}
 
     -- Create shortcut text
-    for modifierKey, glyph in pairs(modifiers) do
-        for _, shortcutModifierKey in pairs(shortcutModifierKeys) do
-            if modifierKey == shortcutModifierKey then
+    for mod, glyph in pairs(mods) do
+        for _, shortcutMod in pairs(shortcutMods) do
+            if mod == shortcutMod then
                 hotkey = hotkey..glyph
                 break
             end
@@ -55,8 +55,8 @@ local function createShortcutText(shortcutModifierKeys, shortcutKey)
 end
 
 return {
+    mods = mods,
     keys = keys,
-    modifiers = modifiers,
     createShortcutText = createShortcutText,
     unmapped = unmapped,
 }

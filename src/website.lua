@@ -44,13 +44,13 @@ Website:registerChooserShortcuts({
 --- Currently supported behaviors:
 --- * `default` - Simply triggers the event handler with the initialized website url
 --- * `select` - Generates a list of choice items from [`Website:getChooserItems`](#getChooserItems) and displays them in a chooser for selection
---- * `website` - Triggers the appropriate event handler for the website. Depending on whether the workflow includes select mode, the select mode behavior will be triggered instead
+--- * `website` - Triggers the appropriate event handler for the website. Depending on whether the command includes select mode, the select mode behavior will be triggered instead
 Website.behaviors = Entity.behaviors + {
-    default = function(self, eventHandler)
-        eventHandler(self.url)
+    default = function(self, handler)
+        handler(self.url)
         return true
     end,
-    select = function(self, eventHandler)
+    select = function(self, handler)
         local choices = self:getChooserItems()
         local function updateChoices()
             return choices
@@ -59,7 +59,7 @@ Website.behaviors = Entity.behaviors + {
         if choices and #choices > 0 then
             local function onSelection(choice)
                 if choice then
-                    eventHandler(choice.url or self.url, choice)
+                    handler(choice.url or self.url, choice)
                 end
             end
 
@@ -68,10 +68,10 @@ Website.behaviors = Entity.behaviors + {
 
         return true
     end,
-    website = function(self, eventHandler, _, _, workflow)
+    website = function(self, handler, _, _, command)
         local shouldSelect = false
 
-        for _, event in pairs(workflow) do
+        for _, event in pairs(command) do
             if event.mode == "select" then
                 shouldSelect = true
                 break
@@ -79,10 +79,10 @@ Website.behaviors = Entity.behaviors + {
         end
 
         if shouldSelect and Website.behaviors.select then
-            return Website.behaviors.select(self, eventHandler)
+            return Website.behaviors.select(self, handler)
         end
 
-        return self.behaviors.default(self, eventHandler)
+        return self.behaviors.default(self, handler)
     end,
 }
 
@@ -220,7 +220,7 @@ end
 --- Returns:
 ---  * None
 function Website:initialize(options)
-    local name, url, links, shortcuts
+    local name, url, links, shortcuts, chooserShortcuts
 
     if type(options) == "string" then
         name = options
@@ -233,6 +233,7 @@ function Website:initialize(options)
         links = options.links
         shortcuts = options.shortcuts
         self.getChooserItems = options.getChooserItems
+        chooserShortcuts = options.chooserShortcuts
     end
 
     self.url = url
@@ -244,7 +245,11 @@ function Website:initialize(options)
         { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, "Show Cheatsheet" },
     })
 
-    Entity.initialize(self, { name, mergedShortcuts })
+    Entity.initialize(self, {
+        name = name,
+        shortcuts = mergedShortcuts,
+        chooserShortcuts = chooserShortcuts,
+    })
 end
 
 return Website

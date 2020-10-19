@@ -12,23 +12,23 @@ local Action = Entity.Action
 --- File [behaviors](Entity.html#behaviors) defined to invoke event handlers with the file path.
 --- Currently supported behaviors:
 --- * `default` - simply triggers the event handler with the instance's url string.
---- * `file` - triggers the appropriate event handler for the file entity instance. Depending on whether the workflow includes select mode, the event handler will be invoked with `shouldNavigate` set to `true`.
+--- * `file` - triggers the appropriate event handler for the file entity instance. Depending on whether the command includes select mode, the event handler will be invoked with `shouldNavigate` set to `true`.
 File.behaviors = Entity.behaviors + {
-    default = function(self, eventHandler)
-        eventHandler(self.path)
+    default = function(self, handler)
+        handler(self.path)
         return true
     end,
-    file = function(self, eventHandler, _, _, workflow)
+    file = function(self, handler, _, _, command)
         local shouldNavigate = false
 
-        for _, event in pairs(workflow) do
+        for _, event in pairs(command) do
             if event.mode == "select" then
                 shouldNavigate = true
                 break
             end
         end
 
-        eventHandler(self.path, shouldNavigate)
+        handler(self.path, shouldNavigate)
 
         return true
     end,
@@ -442,7 +442,8 @@ end
 ---  * None
 function File:initialize(options)
     -- Parse File entity options
-    local name, path, shortcuts
+    local name, path, shortcuts, getChooserItems, chooserShortcuts
+
     if type(options) == "string" then
         name = options
         path = options
@@ -452,7 +453,8 @@ function File:initialize(options)
         name = options.name
         path = options.path
         shortcuts = options.shortcuts
-        self.getChooserItems = options.getChooserItems
+        getChooserItems = options.getChooserItems
+        chooserShortcuts = options.chooserShortcuts
     end
 
     -- Ensure that the file path actually exists
@@ -566,7 +568,12 @@ function File:initialize(options)
 
     local mergedShortcuts = self:mergeShortcuts(shortcuts, defaultShortcuts)
 
-    Entity.initialize(self, { name, mergedShortcuts })
+    Entity.initialize(self, {
+        name = name,
+        shortcuts = mergedShortcuts,
+        getChooserItems = getChooserItems,
+        chooserShortcuts = chooserShortcuts,
+    })
 end
 
 return File

@@ -11,28 +11,28 @@ local Action = Application.Action
 local Behaviors = {}
 
 -- Application behavior function for entity mode
-function Behaviors.entity(self, eventHandler, _, _, workflow)
-    -- Determine whether the workflow includes select mode
+function Behaviors.entity(self, handler, _, _, command)
+    -- Determine whether the command includes select mode
     local shouldSelect = false
-    for _, event in pairs(workflow) do
+    for _, event in pairs(command) do
         if event.mode == "select" then
             shouldSelect = true
             break
         end
     end
 
-    -- Execute the select behavior if the workflow includes select mode
+    -- Execute the select behavior if the command includes select mode
     if shouldSelect then
-        return Behaviors.select(self, eventHandler)
+        return Behaviors.select(self, handler)
     end
 
     -- Handle action-specific options
     local options = nil
-    local action = eventHandler
+    local action = handler
 
-    if type(eventHandler) == "table" and tostring(eventHandler) == "action" then
-        action = eventHandler.action
-        options = eventHandler.options
+    if type(handler) == "table" and tostring(handler) == "action" then
+        action = handler.action
+        options = handler.options
     end
 
     -- Create local action execution function to either defer or immediately invoke
@@ -45,13 +45,13 @@ function Behaviors.entity(self, eventHandler, _, _, workflow)
 end
 
 -- Application behavior function for select mode
-function Behaviors.select(self, eventHandler)
+function Behaviors.select(self, handler)
     local options = nil
-    local action = eventHandler
+    local action = handler
 
-    if type(eventHandler) == "table" and tostring(eventHandler) == "action" then
-        action = eventHandler.action
-        options = eventHandler.options
+    if type(handler) == "table" and tostring(handler) == "action" then
+        action = handler.action
+        options = handler.options
     end
 
     -- Create local action execution function to either defer or immediately invoke
@@ -418,7 +418,7 @@ end
 --- Returns:
 ---  * None
 function Application:initialize(options)
-    local name, shortcuts
+    local name, shortcuts, getChooserItems, chooserShortcuts
 
     if type(options) == "string" then
         name = options
@@ -427,6 +427,8 @@ function Application:initialize(options)
     else
         name = options.name
         shortcuts = options.shortcuts
+        getChooserItems = options.getChooserItems
+        chooserShortcuts = options.chooserShortcuts
     end
 
     local showActions = Action {
@@ -459,7 +461,8 @@ function Application:initialize(options)
         name = name,
         actions = options.actions,
         shortcuts = mergedShortcuts,
-        getChooserItems = options.getChooserItems,
+        getChooserItems = getChooserItems,
+        chooserShortcuts = chooserShortcuts,
     })
 end
 
