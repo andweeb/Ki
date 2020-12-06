@@ -5,7 +5,7 @@
 local Entity = require("entity")
 local File = Entity:subclass("File")
 local spoonPath = hs.spoons.scriptPath()
-local Action = Entity.Action
+local Action = require("action")
 
 --- File.behaviors
 --- Variable
@@ -45,6 +45,27 @@ function File:showCheatsheet(path)
     self.cheatsheet:show(iconURI)
 end
 
+--- File.triggerAfterConfirmation(question, details, action)
+--- Method
+--- Opens a dialog block alert for user confirmation before triggering an action
+---
+--- Parameters:
+---  * `question` - Text to display in the block alert as the title
+---  * `details` - Text to display in the block alert as the description
+---  * `action` - The callback function to be invoked after user confirmation
+---
+--- Returns:
+---   * None
+function File.triggerAfterConfirmation(question, details, action)
+    hs.timer.doAfter(0, function()
+        hs.focus()
+
+        local answer = hs.dialog.blockAlert(question, details, "Confirm", "Cancel")
+
+        if answer == "Confirm" then action() end
+    end)
+end
+
 --- File:runApplescriptAction(viewModel)
 --- Method
 --- Convenience method to render and run the `file.applescript` file and notify on execution errors. Refer to the applescript template file itself to see available view model records.
@@ -79,7 +100,6 @@ function File.getFileName(path)
 
     return path:match("^.+/(.+)$")
 end
-
 
 --- File:getFileIcon(path) -> [`hs.image`](http://www.hammerspoon.org/docs/hs.image.html)
 --- Method
@@ -441,21 +461,19 @@ end
 --- Returns:
 ---  * None
 function File:initialize(options)
-    -- Parse File entity options
-    local name, path, shortcuts, getChooserItems, chooserShortcuts
+    local entityOptions = {}
 
     if type(options) == "string" then
-        name = options
-        path = options
+        entityOptions.name = options
+        entityOptions.path = options
     elseif #options > 0 then
-        path, shortcuts, options = table.unpack(options)
+        entityOptions.path, entityOptions.shortcuts, entityOptions.autoExitMode = table.unpack(options)
+        entityOptions.name = entityOptions.path
     else
-        name = options.name
-        path = options.path
-        shortcuts = options.shortcuts
-        getChooserItems = options.getChooserItems
-        chooserShortcuts = options.chooserShortcuts
+        entityOptions = options
     end
+
+    local path = entityOptions.path
 
     -- Ensure that the file path actually exists
     local absolutePath = hs.fs.pathToAbsolute(path)
@@ -562,18 +580,11 @@ function File:initialize(options)
         end
     end
 
-    self.path = path
-    self.showHiddenFiles = options.showHiddenFiles or false
-    self.sortAttribute = options.sortAttribute or "modification"
+    entityOptions.showHiddenFiles = options.showHiddenFiles or false
+    entityOptions.sortAttribute = options.sortAttribute or "modification"
+    entityOptions.shortcuts = self:mergeShortcuts(entityOptions.shortcuts, defaultShortcuts)
 
-    local mergedShortcuts = self:mergeShortcuts(shortcuts, defaultShortcuts)
-
-    Entity.initialize(self, {
-        name = name,
-        shortcuts = mergedShortcuts,
-        getChooserItems = getChooserItems,
-        chooserShortcuts = chooserShortcuts,
-    })
+    Entity.initialize(self, entityOptions)
 end
 
 return File

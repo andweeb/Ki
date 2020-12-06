@@ -3,6 +3,7 @@
 --- Website class that subclasses [Entity](Entity.html) to represent some automatable website entity
 ---
 local File = require("file")
+local Action = require("action")
 local Entity = require("entity")
 local Website = Entity:subclass("Website")
 local spoonPath = hs.spoons.scriptPath()
@@ -220,36 +221,45 @@ end
 --- Returns:
 ---  * None
 function Website:initialize(options)
-    local name, url, links, shortcuts, chooserShortcuts
+    local entityOptions = {}
 
     if type(options) == "string" then
-        name = options
-        url = options
+        entityOptions.name = options
+        entityOptions.url = options
     elseif #options > 0 then
-        name, url, links = table.unpack(options)
+        entityOptions.name, entityOptions.url, entityOptions.links = table.unpack(options)
     else
-        url = options.url
-        name = options.name
-        links = options.links
-        shortcuts = options.shortcuts
-        self.getChooserItems = options.getChooserItems
-        chooserShortcuts = options.chooserShortcuts
+        entityOptions = options
     end
 
-    self.url = url
-    self.links = links
+    local url = entityOptions.url
+    local name = entityOptions.name
 
-    local mergedShortcuts = self:mergeShortcuts(shortcuts, {
-        { nil, nil, self.open, "Open "..name.." in Default Browser" },
-        { { "shift" }, "o", function(...) self:openWith(...) end, "Open "..name.." with Application" },
-        { { "shift" }, "/", function() self.cheatsheet:show(self:getFaviconURL(url, 144)) end, "Show Cheatsheet" },
+    local Open = Action {
+        name = "Open "..name.." in Default Browser",
+        action = self.open,
+    }
+    local OpenWithApplication = Action {
+        name =  "Open "..name.." with Application",
+        action = function(...)
+            self:openWith(...)
+        end,
+    }
+    local OpenCheatsheet = Action {
+        name = "Show Cheatsheet",
+        action = function()
+            local faviconURL = self:getFaviconURL(url, 144)
+            self.cheatsheet:show(faviconURL)
+        end,
+    }
+
+    entityOptions.shortcuts = self:mergeShortcuts(entityOptions.shortcuts, {
+        { nil, nil, Open },
+        { { "shift" }, "o", OpenWithApplication },
+        { { "shift" }, "/", OpenCheatsheet },
     })
 
-    Entity.initialize(self, {
-        name = name,
-        shortcuts = mergedShortcuts,
-        chooserShortcuts = chooserShortcuts,
-    })
+    Entity.initialize(self, entityOptions)
 end
 
 return Website

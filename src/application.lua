@@ -4,10 +4,10 @@
 ---
 
 local Entity = require("entity")
+local Action = require("action")
 local ApplicationWatcher = require("application-watcher")
 
 local Application = Entity:subclass("Application")
-local Action = Application.Action
 local Behaviors = {}
 
 -- Application behavior function for entity mode
@@ -198,7 +198,7 @@ function Application:selectMenuItem(menuItem, app, choice, options)
 end
 
 function Application:createMenuItemAction(menuItem, options)
-    return Application.Action {
+    return Action {
         name = type(menuItem) == "table" and menuItem[#menuItem] or menuItem,
         action = function(app, choice)
             self:selectMenuItem(menuItem, app, choice, options)
@@ -272,7 +272,7 @@ function Application:chooseMenuItem(menuItem, app, choice, options)
 end
 
 function Application:createChooseMenuItemAction(menuItem, options)
-    return Application.Action {
+    return Action {
         name = type(menuItem) == "table" and menuItem[#menuItem] or menuItem,
         action = function(app, choice)
             self:chooseMenuItem(menuItem, app, choice, options)
@@ -418,17 +418,14 @@ end
 --- Returns:
 ---  * None
 function Application:initialize(options)
-    local name, shortcuts, getChooserItems, chooserShortcuts
+    local entityOptions = {}
 
     if type(options) == "string" then
-        name = options
+        entityOptions.name = options
     elseif #options > 0 then
-        name, shortcuts = table.unpack(options)
+        entityOptions.name, entityOptions.shortcuts, entityOptions.autoExitMode = table.unpack(options)
     else
-        name = options.name
-        shortcuts = options.shortcuts
-        getChooserItems = options.getChooserItems
-        chooserShortcuts = options.chooserShortcuts
+        entityOptions = options
     end
 
     local showActions = Action {
@@ -446,24 +443,15 @@ function Application:initialize(options)
         },
     }
 
-    local mergedShortcuts = self:mergeShortcuts(shortcuts or {}, {
+    entityOptions.shortcuts = self:mergeShortcuts(entityOptions.shortcuts or {}, {
         { nil, nil, self.focus, "Activate" },
-        { nil, "a", self:createMenuItemAction("About "..name) },
         { nil, "f", self.toggleFullScreen, "Toggle Full Screen" },
-        { nil, "h", self:createMenuItemAction("Hide "..name) },
-        { nil, "q", self:createMenuItemAction("Quit "..name) },
-        { nil, ",", self:createMenuItemAction("Preferences...") },
+        { nil, ",", self:SelectMenuItem("Preferences...") },
         { { "cmd" }, "space", showActions },
         { { "shift" }, "/", showCheatsheet },
     })
 
-    Entity.initialize(self, {
-        name = name,
-        actions = options.actions,
-        shortcuts = mergedShortcuts,
-        getChooserItems = getChooserItems,
-        chooserShortcuts = chooserShortcuts,
-    })
+    Entity.initialize(self, entityOptions)
 end
 
 return Application

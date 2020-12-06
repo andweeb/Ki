@@ -6,8 +6,10 @@ local class = require("middleclass")
 local lustache = require("lustache")
 local Cheatsheet = require("cheatsheet")
 local glyphs = require("glyphs")
+local Action = require("action")
 
 local Entity = class("Entity")
+Entity.unmapped = glyphs.unmapped.text
 
 -- Helper method to clone table
 local function cloneTable(input)
@@ -114,7 +116,7 @@ function Entity.getShortcutKey(mods, hotkey)
         return tostring(hotkey)
     end
 
-    local clonedMods = {table.unpack(mods)}
+    local clonedMods = { table.unpack(mods) }
     table.sort(clonedMods)
 
     return table.concat(clonedMods)..hotkey
@@ -127,7 +129,6 @@ function Entity:mergeShortcuts(fromList, toList)
     toList = toList or {}
 
     local mergedShortcuts = {}
-    local unmapped = glyphs.unmapped.text
 
     -- Memoize `fromList` hotkeys for reference when iterating on `toList`
     local memo = {}
@@ -136,28 +137,14 @@ function Entity:mergeShortcuts(fromList, toList)
             local categoryName = key
             local categorizedShortcuts = value
             for _, shortcut in pairs(categorizedShortcuts) do
-                local shortcutMods, shortcutKey = table.unpack(shortcut)
-                if shortcutMods == unmapped or shortcutKey == unmapped then
-                    table.insert(mergedShortcuts, shortcut)
-                    goto skip
-                end
-
-                local memoKey = self.getShortcutKey(shortcutMods, shortcutKey)
+                local memoKey = self.getShortcutKey(table.unpack(shortcut))
                 memo[memoKey] = { shortcut, categoryName }
             end
         else
             local shortcut = value
-            local shortcutMods, shortcutKey = table.unpack(shortcut)
-            if shortcutMods == unmapped or shortcutKey == unmapped then
-                table.insert(mergedShortcuts, shortcut)
-                goto skip
-            end
-
             local memoKey = self.getShortcutKey(table.unpack(shortcut))
             memo[memoKey] = { shortcut }
         end
-
-        ::skip::
     end
 
     -- Insert `toList` shortcuts into `mergedShortcuts` that overlap with `fromList`
@@ -237,6 +224,7 @@ function Entity:registerShortcuts(shortcuts, override)
     local description = self.name and "Ki shortcut keybindings registered for "..self.name or "Ki shortcut keybindings"
 
     self.shortcuts = override and shortcuts or self:mergeShortcuts(shortcuts, self.shortcuts or {})
+
     self.cheatsheet = Cheatsheet:new({
         name = self.name,
         description = description,
@@ -244,6 +232,14 @@ function Entity:registerShortcuts(shortcuts, override)
     })
 
     return self.shortcuts
+end
+
+function Entity:Shortcut(...)
+    self:registerShortcuts({...})
+end
+
+function Entity:Shortcuts(...)
+    self:registerShortcuts(...)
 end
 
 --- Entity:getChooserItems() -> table of choices or nil
@@ -257,27 +253,6 @@ function Entity:getChooserItems() -- luacheck: ignore
     return nil
 end
 -- luacov: enable
-
---- Entity.triggerAfterConfirmation(question, details, action)
---- Method
---- Opens a dialog block alert for user confirmation before triggering an action
----
---- Parameters:
----  * `question` - Text to display in the block alert as the title
----  * `details` - Text to display in the block alert as the description
----  * `action` - The callback function to be invoked after user confirmation
----
---- Returns:
----   * None
-function Entity.triggerAfterConfirmation(question, details, action)
-    hs.timer.doAfter(0, function()
-        hs.focus()
-
-        local answer = hs.dialog.blockAlert(question, details, "Confirm", "Cancel")
-
-        if answer == "Confirm" then action() end
-    end)
-end
 
 --- Entity.chooserShortcuts
 --- Variable
@@ -548,36 +523,6 @@ function Entity:dispatchAction(mode, shortcut, command)
     end
 end
 
-function Entity.Action(options)
-    local Action = {}
-    local name, action, actionOptions
-
-    if #options > 0 then
-        name, action = table.unpack(options)
-    else
-        name = options.name
-        action = options.action
-        actionOptions = options.options
-    end
-
-    -- Add metamethods to allow action to be invokable and indexable
-    setmetatable(Action, {
-        __call = function(_, ...) action(...) end,
-        __tostring = function() return "action" end,
-        __index = function(_, key)
-            if key == "name" then
-                return name
-            elseif key == "action" then
-                return action
-            elseif key == "options" then
-                return actionOptions
-            end
-        end,
-    })
-
-    return Action
-end
-
 --- Entity:initialize(TODO)
 --- Method
 --- Initializes a new entity instance with its name and shortcuts. By default, a `cheatsheet` object will be initialized on the entity object with metadata in the provided shortcut keybindings, and dispatched actions will automatically exit the current mode by default unless the `autoExitMode` parameter is explicitly set to `false`.
@@ -598,40 +543,39 @@ end
 --- Returns:
 ---  * None
 function Entity:initialize(options)
-    local name, actions, shortcuts, autoExitMode, getChooserItems, chooserShortcuts
-
     if type(options) == "string" then
-        name = options
+        self.name = options
     elseif #options > 0 then
-        name, shortcuts, autoExitMode = table.unpack(options)
+        self.name, self.shortcuts, self.autoExitMode = table.unpack(options)
     else
-        name = options.name
-        actions = options.actions
-        shortcuts = options.shortcuts
-        autoExitMode = options.autoExitMode
-        getChooserItems = options.getChooserItems
-        chooserShortcuts = options.chooserShortcuts
+        for key, option in pairs(options) do
+            self[key] = option
+        end
     end
 
-    local Action = Entity.Action
+    -- Default mode auto-exit flag to true
+    self.autoExitMode = self.autoExitMode == nil and true or self.autoExitMode
+
     local showActions = Action {
         name = "Show Actions",
-        action = function(...) self:showActions(...) end,
+        action = function(...)
+            self:showActions(...)
+        end,
     }
     local showCheatsheet = Action {
         name = "Show Cheatsheet",
-        action = function(...) self:showCheatsheet(...) end,
+        action = function(...)
+            self.cheatsheet:show(...)
+        end,
     }
 
-    self.name = name
-    self.actions = actions
-    self.getChooserItems = getChooserItems
-    self.autoExitMode = autoExitMode ~= nil and autoExitMode or true
-    self:registerChooserShortcuts(chooserShortcuts)
-    self:registerShortcuts(self:mergeShortcuts(shortcuts or {}, {
+    local mergedShortcuts = self:mergeShortcuts(self.shortcuts or {}, {
         { { "cmd" }, "space", showActions },
         { { "shift" }, "/", showCheatsheet },
-    }))
+    })
+
+    self:registerShortcuts(mergedShortcuts)
+    self:registerChooserShortcuts(self.chooserShortcuts)
 end
 
 return Entity

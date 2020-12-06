@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 -- Safari application
 --
+local Action = spoon.Ki.Action
 local Website = spoon.Ki.Website
 local Application = spoon.Ki.Application
 
@@ -22,7 +23,7 @@ local showWebInspector = Application:createMenuItemAction({ "Show Web Inspector"
 
 -- Use a helper method to create various media actions
 local function createMediaAction(name, command, errorMessage)
-    return Application.Action {
+    return Action {
         name = name,
         action = function (_, choice)
             local viewModel = {

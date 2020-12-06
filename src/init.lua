@@ -96,6 +96,11 @@ Ki.Website = require("website")
 --- A module that wraps [`hs.application.watcher`](http://www.hammerspoon.org/docs/hs.application.watcher.html) to track application states. Methods and properties are documented [here](ApplicationWatcher.html).
 Ki.ApplicationWatcher = require("application-watcher")
 
+--- Ki.ApplicationWatcher
+--- Constant
+--- TODO
+Ki.Action = require("action")
+
 --- Ki.state
 --- Constant
 --- The [finite state machine](https://github.com/unindented/lua-fsm#usage) used to manage modes in Ki.
@@ -107,27 +112,6 @@ Ki.state = {}
 Ki.defaultEntities = nil
 
 Ki.unmapped = glyphs.unmapped.text
-
-function Ki.getLocalVariables(variableType)
-    local index = 1
-    local variables = {}
-
-    while true do
-        local name, value = debug.getlocal(2, index)
-
-        if name ~= nil and name ~= "(*temporary)" then
-            if type(value) == variableType then
-                variables[name] = value
-            end
-        else
-            break
-        end
-
-        index = index + 1
-    end
-
-    return variables
-end
 
 -- Create a string shortcut key from its modifiers and hotkey
 function Ki.getShortcutKey(mods, key)
@@ -335,23 +319,24 @@ function Ki:_handleKeyDown(event)
     if handler then
         self.history:recordEvent(mode, key, mods)
 
+        local shouldAutoExit, shouldDeleteEvent
         local isNamedAction = type(handler) == "table" and tostring(handler) == "action"
 
         if type(handler) == "function" or isNamedAction then
-            local shouldAutoExit = handler(mods, key)
+            shouldAutoExit, shouldDeleteEvent = handler(mods, key)
 
             if shouldAutoExit then
                 self.state:exitMode()
             end
         elseif type(handler) == "table" and handler.dispatchAction then
-            local shouldAutoExit = handler:dispatchAction(mode, self.history.action, self.history.command)
+            shouldAutoExit, shouldDeleteEvent = handler:dispatchAction(mode, self.history.action, self.history.command)
 
             if shouldAutoExit then
                 self.state:exitMode()
             end
         end
 
-        return true
+        return shouldDeleteEvent == nil and true or shouldDeleteEvent
     elseif mode ~= "desktop" then
         hs.sound.getByName("Funk"):volume(1):play()
         return true
@@ -577,7 +562,7 @@ function Ki:updateShortcuts(remappedShortcuts, onFound)
         for i, shortcut in pairs(modeShortcuts) do
             local _, _, handler, name = table.unpack(shortcut)
 
-            if not name and type(handler) == "table" then
+            if not name and type(handler) == "table" or tostring(handler) == "action" then
                 name = handler.name
             end
 
