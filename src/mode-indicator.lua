@@ -17,7 +17,7 @@ ModeIndicator.isDarkMode = false
 
 -- Text styles
 local smallMenlo = { name = "Menlo", size = 9 }
-local darkColor = { red = 0.2, blue = 0.2, green = 0.2 }
+local darkColor = { red = 0.5, blue = 0.5, green = 0.5 }
 local darkTextStyle = { color = darkColor, font = smallMenlo }
 local lightColor = { red = 0.8, blue = 0.8, green = 0.8 }
 local lightTextStyle = { color = lightColor, font = smallMenlo }
