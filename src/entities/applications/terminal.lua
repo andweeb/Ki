@@ -1,30 +1,118 @@
 ----------------------------------------------------------------------------------------------------
--- Terminal application
+-- Terminal application config
 --
 local Ki = spoon.Ki
 local Application = Ki.Application
-
--- Initialize menu item events
-local find = Application:createMenuItemAction("Find...", { focusBefore = true })
-local newWindow = Application:createMenuItemAction("New Window with Profile .+$", {
-    focusBefore = true,
-    isRegex = true,
-})
-local newTab = Application:createMenuItemAction("New Tab with Profile .+$", {
-    focusBefore = true,
-    isRegex = true,
-})
-local close = Application:createMenuItemAction({ "Close Tab", "Close Window" }, {
-    isToggleable = true,
-    focusBefore = true,
-})
+local ChooseMenuItemAndFocus = Application.ChooseMenuItemAndFocus
+local SelectMenuItemAndFocus = Application.SelectMenuItemAndFocus
+local ToggleMenuItemAndFocus = Application.ToggleMenuItemAndFocus
+local unmapped = Application.unmapped
 
 return Application {
     name = "Terminal",
     shortcuts = {
-        { nil, "n", newWindow, "New Window" },
-        { nil, "t", newTab, "New Tab" },
-        { nil, "w", close, "Close Tab or Window" },
-        { { "shift" }, "f", find, "Find..." },
+        Terminal = {
+            { nil, ",", SelectMenuItemAndFocus { "Terminal", "Preferences…" } },
+            { nil, "h", SelectMenuItemAndFocus { "Terminal", "Hide Terminal" } },
+            { nil, "q", SelectMenuItemAndFocus { "Terminal", "Quit Terminal" } },
+            { { "alt" }, "h", SelectMenuItemAndFocus { "Terminal", "Hide Others" } },
+            { { "alt" }, "q", SelectMenuItemAndFocus { "Terminal", "Quit and Keep Windows" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Terminal", "About Terminal" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Terminal", "Secure Keyboard Entry" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Terminal", "Services" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Terminal", "Show All" } },
+        },
+        Shell = {
+            { nil, "i", ToggleMenuItemAndFocus { "Show Inspector", "Hide Inspector" } },
+            { nil, "o", SelectMenuItemAndFocus { "Shell", "Import..." } },
+            { nil, "p", SelectMenuItemAndFocus { "Shell", "Print…" } },
+            { nil, "s", SelectMenuItemAndFocus { "Shell", "Export Text As…" } },
+            { nil, "w", SelectMenuItemAndFocus { "Shell", "Close Window" } },
+            { { "alt" }, "i", SelectMenuItemAndFocus { "Shell", "Edit Background Color" } },
+            { { "alt" }, "p", SelectMenuItemAndFocus { "Shell", "Print Selection…" } },
+            { { "alt" }, "r", SelectMenuItemAndFocus { "Shell", "Reset" } },
+            { { "alt" }, "w", SelectMenuItemAndFocus { "Shell", "Close All" } },
+            { { "alt", "ctrl" }, "r", SelectMenuItemAndFocus { "Shell", "Hard Reset" } },
+            { { "shift" }, "i", SelectMenuItemAndFocus { "Shell", "Edit Title" } },
+            { { "shift" }, "k", SelectMenuItemAndFocus { "Shell", "New Remote Connection…" } },
+            { { "shift" }, "n", SelectMenuItemAndFocus { "Shell", "New Command…" } },
+            { { "shift" }, "s", SelectMenuItemAndFocus { "Shell", "Export Selected Text As…" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Shell", "Export Settings…" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Shell", "New Tab" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Shell", "New Window" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Shell", "Use Settings as Default" } },
+        },
+        Edit = {
+            { nil, "a", SelectMenuItemAndFocus { "Edit", "Select All" } },
+            { nil, "c", SelectMenuItemAndFocus { "Edit", "Copy" } },
+            { nil, "k", SelectMenuItemAndFocus { "Edit", "Clear to Start" } },
+            { nil, "l", SelectMenuItemAndFocus { "Edit", "Clear to Previous Mark" } },
+            { nil, "v", SelectMenuItemAndFocus { "Edit", "Paste" } },
+            { nil, "x", SelectMenuItemAndFocus { "Edit", "Cut" } },
+            { nil, "z", SelectMenuItemAndFocus { "Edit", "Undo" } },
+            { { "alt" }, "k", SelectMenuItemAndFocus { "Edit", "Clear Scrollback" } },
+            { { "alt" }, "l", SelectMenuItemAndFocus { "Edit", "Clear to Previous Bookmark" } },
+            { { "alt" }, "o", SelectMenuItemAndFocus { "Edit", "Use Option as Meta Key" } },
+            { { "alt", "ctrl" }, "l", SelectMenuItemAndFocus { "Edit", "Fill Screen" } },
+            { { "ctrl" }, "l", SelectMenuItemAndFocus { "Edit", "Clear Screen" } },
+            { { "ctrl" }, "v", SelectMenuItemAndFocus { "Edit", "Paste Escaped Text" } },
+            { { "shift" }, "a", SelectMenuItemAndFocus { "Edit", "Select Between Marks" } },
+            { { "shift" }, "c", ToggleMenuItemAndFocus { "Show Colors", "Hide Colors" } },
+            { { "shift" }, "v", SelectMenuItemAndFocus { "Edit", "Paste Selection" } },
+            { { "shift" }, "z", SelectMenuItemAndFocus { "Edit", "Redo" } },
+            { { "shift", "ctrl" }, "v", SelectMenuItemAndFocus { "Edit", "Paste Escaped Selection" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Edit", "Bookmarks" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Edit", "Copy Special" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Edit", "Emoji & Symbols" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Edit", "Find" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Edit", "Marks" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Edit", "Navigate" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Edit", "Num Lock" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Edit", "Start Dictation" } },
+        },
+        View = {
+            { nil, "+", SelectMenuItemAndFocus { "View", "Bigger" } },
+            { nil, "-", SelectMenuItemAndFocus { "View", "Smaller" } },
+            { nil, "0", SelectMenuItemAndFocus { "View", "Default Font Size" } },
+            { nil, "d", SelectMenuItemAndFocus { "View", "Split Pane" } },
+            { nil, "r", SelectMenuItemAndFocus { "View", "Allow Mouse Reporting" } },
+            { { "ctrl" }, "f", ToggleMenuItemAndFocus { "Enter Full Screen", "Exit Full Screen" } },
+            { { "shift" }, "\\", ToggleMenuItemAndFocus { "Show All Tabs", "Exit Tab Overview" } },
+            { { "shift" }, "d", SelectMenuItemAndFocus { "View", "Close Split Pane" } },
+            { { "shift" }, "t", ToggleMenuItemAndFocus { "Show Tab Bar", "Hide Tab Bar" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Hide Alternate Screen" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Line Down" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Line Up" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Page Down" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Page Up" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Scroll to Bottom" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Scroll to Top" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "View", "Show Alternate Screen" } },
+            { unmapped, unmapped, ToggleMenuItemAndFocus { "Show Marks", "Hide Marks" } },
+        },
+        Window = {
+            { nil, "`", SelectMenuItemAndFocus { "Window", "Cycle Through Windows" } },
+            { nil, "m", SelectMenuItemAndFocus { "Window", "Minimize" } },
+            { { "alt" }, "m", SelectMenuItemAndFocus { "Window", "Minimize All" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Arrange in Front" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Bring All to Front" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Merge All Windows" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Move Tab to New Window" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Move Window to Left Side of Screen" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Move Window to Right Side of Screen" } },
+            { unmapped, unmapped, ChooseMenuItemAndFocus { "Window", "Open Window Group" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Return All to Default Size" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Return to Default Size" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Save Windows as Group…" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Show Next Tab" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Show Previous Tab" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Zoom All" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Window", "Zoom" } },
+        },
+        Help = {
+            { { "alt", "ctrl" }, "/", SelectMenuItemAndFocus { "Help", "Search man Page Index for Selection" } },
+            { { "ctrl" }, "?", SelectMenuItemAndFocus { "Help", "Open man Page for Selection" } },
+            { unmapped, unmapped, SelectMenuItemAndFocus { "Help", "Terminal Help" } },
+        },
     },
 }

@@ -111,15 +111,23 @@ function Entity.renderScriptTemplate(script, viewModel)
 end
 
 -- Create a string shortcut key from its modifier keys and hotkey
-function Entity.getShortcutKey(mods, hotkey)
-    if not hotkey or not mods then
+function Entity:getShortcutKey(shortcut)
+    local modifiers, hotkey, action, description = table.unpack(shortcut)
+
+    if not hotkey or not modifiers then
         return tostring(hotkey)
     end
 
-    local clonedMods = { table.unpack(mods) }
-    table.sort(clonedMods)
+    if hotkey == self.unmapped then
+        local name = tostring(action) == "action" and action.name or description
+        name = name or tostring(action)
+        return self.unmapped..name
+    end
 
-    return table.concat(clonedMods)..hotkey
+    local clonedModifiers = { table.unpack(modifiers) }
+    table.sort(clonedModifiers)
+
+    return table.concat(clonedModifiers)..hotkey
 end
 
 -- Merge Ki shortcuts with the option of overriding shortcuts
@@ -136,13 +144,14 @@ function Entity:mergeShortcuts(fromList, toList)
         if type(key) == "string" and #value > 0 then
             local categoryName = key
             local categorizedShortcuts = value
+
             for _, shortcut in pairs(categorizedShortcuts) do
-                local memoKey = self.getShortcutKey(table.unpack(shortcut))
+                local memoKey = self:getShortcutKey(shortcut)
                 memo[memoKey] = { shortcut, categoryName }
             end
         else
             local shortcut = value
-            local memoKey = self.getShortcutKey(table.unpack(shortcut))
+            local memoKey = self:getShortcutKey(shortcut)
             memo[memoKey] = { shortcut }
         end
     end
@@ -154,7 +163,7 @@ function Entity:mergeShortcuts(fromList, toList)
             local categorizedShortcuts = value
 
             for _, shortcut in pairs(categorizedShortcuts) do
-                local memoKey = self.getShortcutKey(table.unpack(shortcut))
+                local memoKey = self:getShortcutKey(shortcut)
                 local foundShortcut, foundCategoryName = table.unpack(memo[memoKey] or {})
 
                 if foundShortcut then
@@ -177,7 +186,7 @@ function Entity:mergeShortcuts(fromList, toList)
             end
         else
             local shortcut = value
-            local memoKey = self.getShortcutKey(table.unpack(shortcut))
+            local memoKey = self:getShortcutKey(shortcut)
             local foundShortcut, categoryName = table.unpack(memo[memoKey] or {})
 
             if foundShortcut then
@@ -418,25 +427,36 @@ function Entity:showActions()
     local function createChoice(index, shortcut, category)
         local mods, key, action, name = table.unpack(shortcut)
         local shortcutText = glyphs.createShortcutText(mods, key)
+        local categoryText = category or self.name
+        categoryText = categoryText == self.name
+            and self.name
+            or self.name.." "..categoryText
+
+        name = name or "Unnamed action"
+
+        if tostring(action) == "action" and action.name then
+            name = action.name
+        end
 
         return {
-            text = tostring(action) == "action" and action.name or name,
-            subText = shortcutText ~= glyphs.unmapped.key
-                and category.." action ("..shortcutText..")"
-                or category,
+            text = name,
+            subText = shortcutText == glyphs.unmapped.key
+                and categoryText.." action (unmapped)"
+                or categoryText.." action ("..shortcutText..")",
             index = index,
-        }
+            category = category,
+       }
     end
 
     for key, value in pairs(self.shortcuts) do
         if type(key) == "string" and type(value) == "table" then
             local categoryName, categorizedShortcuts = key, value
-            for index, shortcut in pairs(categorizedShortcuts) do
+            for index, shortcut in ipairs(categorizedShortcuts) do
                 table.insert(choices, createChoice(index, shortcut, categoryName))
             end
         else
             local index, shortcut = key, value
-            table.insert(choices, createChoice(index, shortcut, self.name))
+            table.insert(choices, createChoice(index, shortcut))
         end
     end
 
@@ -447,7 +467,9 @@ function Entity:showActions()
     self:showChooser(choices, function(choice)
         if not choice then return end
 
-        local shortcut = self.shortcuts[choice.index]
+        local shortcut = choice.category
+            and self.shortcuts[choice.category][choice.index]
+            or self.shortcuts[choice.index]
         local mods, key, action = table.unpack(shortcut)
 
         self.behaviors.default(self, action, mods, key, {})

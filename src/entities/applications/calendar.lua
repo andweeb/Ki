@@ -1,24 +1,102 @@
 ----------------------------------------------------------------------------------------------------
--- Calendar application
+-- Calendar application config
 --
 local Ki = spoon.Ki
 local Application = Ki.Application
-
--- Initialize menu item events
-local find = Application:createMenuItemAction("Find", { focusAfter = true })
-local newEvent = Application:createMenuItemAction("New Event", { focusAfter = true })
-local newCalendar = Application:createMenuItemAction("New Calendar", { focusAfter = true })
-local newCalendarSubscription = Application:createMenuItemAction("New Calendar Subscription...", {
-    focusAfter = true,
-})
+local ChooseMenuItem = Application.ChooseMenuItem
+local SelectMenuItem = Application.SelectMenuItem
+local ToggleMenuItem = Application.ToggleMenuItem
+local unmapped = Application.unmapped
 
 return Application {
     name = "Calendar",
     shortcuts = {
-        { nil, "l", find, "Find" },
-        { nil, "n", newEvent, "New Event" },
-        { { "shift" }, "f", find, "Find" },
-        { { "shift" }, "n", newCalendar, "New Calendar" },
-        { { "shift" }, "s", newCalendarSubscription, "New Calendar Subscription..." },
+        Calendar = {
+            { nil, ",", SelectMenuItem { "Calendar", "Preferences…" } },
+            { nil, "h", SelectMenuItem { "Calendar", "Hide Calendar" } },
+            { nil, "q", SelectMenuItem { "Calendar", "Quit Calendar" } },
+            { { "alt" }, "h", SelectMenuItem { "Calendar", "Hide Others" } },
+            { { "alt" }, "q", SelectMenuItem { "Calendar", "Quit and Keep Windows" } },
+            { unmapped, unmapped, SelectMenuItem { "Calendar", "About Calendar" } },
+            { unmapped, unmapped, SelectMenuItem { "Calendar", "Accounts..." } },
+            { unmapped, unmapped, SelectMenuItem { "Calendar", "Add Account..." } },
+            { unmapped, unmapped, ChooseMenuItem { "Calendar", "Services" } },
+            { unmapped, unmapped, SelectMenuItem { "Calendar", "Show All" } },
+        },
+        File = {
+            { nil, "n", SelectMenuItem { "File", "New Event" } },
+            { nil, "p", SelectMenuItem { "File", "Print…" } },
+            { nil, "w", SelectMenuItem { "File", "Close" } },
+            { { "alt" }, "n", SelectMenuItem { "File", "New Calendar" } },
+            { { "alt" }, "s", SelectMenuItem { "File", "New Calendar Subscription…" } },
+            { { "alt" }, "w", SelectMenuItem { "File", "Close All" } },
+            { unmapped, unmapped, ChooseMenuItem { "File", "Export" } },
+            { unmapped, unmapped, SelectMenuItem { "File", "Import…" } },
+        },
+        Edit = {
+            { nil, ":", SelectMenuItem { "Edit", "Show Spelling and Grammar" } },
+            { nil, "a", SelectMenuItem { "Edit", "Select All" } },
+            { nil, "c", SelectMenuItem { "Edit", "Copy" } },
+            { nil, "d", SelectMenuItem { "Edit", "Duplicate" } },
+            { nil, "e", SelectMenuItem { "Edit", "Edit Event" } },
+            { nil, "f", SelectMenuItem { "Edit", "Find" } },
+            { nil, "i", SelectMenuItem { "Edit", "Get Info" } },
+            { nil, "v", SelectMenuItem { "Edit", "Paste" } },
+            { nil, "x", SelectMenuItem { "Edit", "Cut" } },
+            { nil, "z", SelectMenuItem { "Edit", "Undo" } },
+            { { "alt" }, "i", SelectMenuItem { "Edit", "Show Inspector" } },
+            { { "shift" }, "z", SelectMenuItem { "Edit", "Redo" } },
+            { unmapped, unmapped, SelectMenuItem { "Edit", "Delete" } },
+            { unmapped, unmapped, SelectMenuItem { "Edit", "Emoji & Symbols" } },
+            { unmapped, unmapped, ChooseMenuItem { "Edit", "Merge Calendar" } },
+            { unmapped, unmapped, SelectMenuItem { "Edit", "Resend Invitations…" } },
+            { unmapped, unmapped, SelectMenuItem { "Edit", "Share Calendar…" } },
+            { unmapped, unmapped, SelectMenuItem { "Edit", "Start Dictation" } },
+            { unmapped, unmapped, SelectMenuItem { "Edit", "Stop Sharing…" } },
+        },
+        View = {
+            { nil, "+", SelectMenuItem { "View", "Make Text Bigger" } },
+            { nil, "-", SelectMenuItem { "View", "Make Text Smaller" } },
+            { nil, "1", SelectMenuItem { "View", "By Day" } },
+            { nil, "2", SelectMenuItem { "View", "By Week" } },
+            { nil, "3", SelectMenuItem { "View", "By Month" } },
+            { nil, "4", SelectMenuItem { "View", "By Year" } },
+            { nil, "r", SelectMenuItem { "View", "Refresh Calendars" } },
+            { nil, "t", SelectMenuItem { "View", "Go to Today" } },
+            { { "ctrl" }, "f", ToggleMenuItem { "Enter Full Screen", "Exit Full Screen" } },
+            { { "shift" }, "\\", SelectMenuItem { "View", "Show All Tabs" } },
+            { { "shift" }, "t", SelectMenuItem { "View", "Go to Date…" } },
+            { unmapped, unmapped, SelectMenuItem { "View", "Next Alternate" } },
+            { unmapped, unmapped, SelectMenuItem { "View", "Next" } },
+            { unmapped, unmapped, SelectMenuItem { "View", "Previous Alternate" } },
+            { unmapped, unmapped, SelectMenuItem { "View", "Previous" } },
+            { unmapped, unmapped, SelectMenuItem { "View", "Show All-Day Events" } },
+            { unmapped, unmapped, ToggleMenuItem { "Show Calendar List", "Hide Calendar List" } },
+            { unmapped, unmapped, SelectMenuItem { "View", "Show Declined Events" } },
+            { unmapped, unmapped, ToggleMenuItem { "Show Notifications", "Hide Notifications" } },
+            { unmapped, unmapped, ToggleMenuItem { "Show Tab Bar", "Hide Tab Bar" } },
+            { unmapped, unmapped, SelectMenuItem { "View", "Show Travel Time" } },
+        },
+        Window = {
+            { nil, "0", SelectMenuItem { "Window", "Calendar" } },
+            { nil, "m", SelectMenuItem { "Window", "Minimize" } },
+            { { "alt" }, "m", SelectMenuItem { "Window", "Minimize All" } },
+            { { "shift" }, "a", SelectMenuItem { "Window", "Availability Panel" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Arrange in Front" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Bring All to Front" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Contacts" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Merge All Windows" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Move Tab to New Window" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Move Window to Left Side of Screen" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Move Window to Right Side of Screen" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Show Next Tab" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Show Previous Tab" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Zoom All" } },
+            { unmapped, unmapped, SelectMenuItem { "Window", "Zoom" } },
+        },
+        Help = {
+            { unmapped, unmapped, SelectMenuItem { "Help", "Calendar Help" } },
+            { unmapped, unmapped, SelectMenuItem { "Help", "Keyboard Shortcuts" } },
+        },
     },
 }

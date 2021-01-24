@@ -1,23 +1,136 @@
 ----------------------------------------------------------------------------------------------------
--- Preview application
+-- Preview application config
 --
 local Ki = spoon.Ki
 local Application = Ki.Application
-
--- Initialize menu item events
-local close = Application:createMenuItemAction("Close Window", { focusBefore = true })
-local find = Application:createMenuItemAction({ "Find", "Find..." }, { focusAfter = true })
-local open = Application:createMenuItemAction("Open...", { focusAfter = true })
-local openRecent = Application:createChooseMenuItemAction({ "File", "Open Recent" }, {
-    focusAfter = true,
-})
+local FocusAndChooseMenuItem = Application.FocusAndChooseMenuItem
+local FocusAndSelectMenuItem = Application.FocusAndSelectMenuItem
+local FocusAndToggleMenuItem = Application.FocusAndToggleMenuItem
+local unmapped = Application.unmapped
 
 return Application {
     name = "Preview",
     shortcuts = {
-        { nil, "o", open, "Open..." },
-        { nil, "w", close, "Close Window" },
-        { { "cmd" }, "f", find, "Find..." },
-        { { "shift" }, "o", openRecent, "Open Recent" },
+        Preview = {
+            { nil, ",", FocusAndSelectMenuItem { "Preview", "Preferences…" } },
+            { nil, "h", FocusAndSelectMenuItem { "Preview", "Hide Preview" } },
+            { nil, "q", FocusAndSelectMenuItem { "Preview", "Quit Preview" } },
+            { { "alt" }, "h", FocusAndSelectMenuItem { "Preview", "Hide Others" } },
+            { { "alt" }, "q", FocusAndSelectMenuItem { "Preview", "Quit and Keep Windows" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Preview", "About Preview" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "Preview", "Services" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Preview", "Show All" } },
+        },
+        File = {
+            { nil, "n", FocusAndSelectMenuItem { "File", "New from Clipboard" } },
+            { nil, "o", FocusAndSelectMenuItem { "File", "Open…" } },
+            { nil, "p", FocusAndSelectMenuItem { "File", "Print…" } },
+            { nil, "s", FocusAndSelectMenuItem { "File", "Save" } },
+            { nil, "w", FocusAndSelectMenuItem { "File", "Close Window" } },
+            { { "alt" }, "w", FocusAndSelectMenuItem { "File", "Close All" } },
+            { { "shift" }, "s", FocusAndSelectMenuItem { "File", "Duplicate" } },
+            { { "shift" }, "w", FocusAndSelectMenuItem { "File", "Close Selected PDF Document" } },
+            { { "shift", "alt" }, "s", FocusAndSelectMenuItem { "File", "Save As…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "File", "Enter Password…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "File", "Export as PDF…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "File", "Export…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "File", "Move To…" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "File", "Open Recent" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "File", "Rename…" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "File", "Revert To" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "File", "Share" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "File", "Take Screenshot" } },
+        },
+        Edit = {
+            { nil, "a", FocusAndSelectMenuItem { "Edit", "Select All" } },
+            { nil, "c", FocusAndSelectMenuItem { "Edit", "Copy" } },
+            { nil, "v", FocusAndSelectMenuItem { "Edit", "Paste" } },
+            { nil, "x", FocusAndSelectMenuItem { "Edit", "Cut" } },
+            { nil, "z", FocusAndSelectMenuItem { "Edit", "Undo" } },
+            { { "shift" }, "i", FocusAndSelectMenuItem { "Edit", "Invert Selection" } },
+            { { "shift" }, "z", FocusAndSelectMenuItem { "Edit", "Redo" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Delete" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Emoji & Symbols" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "Edit", "Find" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "Edit", "Insert" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Move to Trash" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "Edit", "Speech" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "Edit", "Spelling and Grammar" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Start Dictation" } },
+        },
+        View = {
+            { nil, "*", FocusAndSelectMenuItem { "View", "Zoom to Selection" } },
+            { nil, "+", FocusAndSelectMenuItem { "View", "Zoom In" } },
+            { nil, "-", FocusAndSelectMenuItem { "View", "Zoom Out" } },
+            { nil, "0", FocusAndSelectMenuItem { "View", "Actual Size" } },
+            { nil, "1", FocusAndSelectMenuItem { "View", "Continuous Scroll" } },
+            { nil, "2", FocusAndSelectMenuItem { "View", "Single Page" } },
+            { nil, "3", FocusAndSelectMenuItem { "View", "Two Pages" } },
+            { nil, "9", FocusAndSelectMenuItem { "View", "Zoom to Fit" } },
+            { { "alt" }, "+", FocusAndSelectMenuItem { "View", "Zoom All In" } },
+            { { "alt" }, "-", FocusAndSelectMenuItem { "View", "Zoom All Out" } },
+            { { "alt" }, "0", FocusAndSelectMenuItem { "View", "Actual Size on All" } },
+            { { "alt" }, "1", FocusAndSelectMenuItem { "View", "Hide Sidebar" } },
+            { { "alt" }, "2", FocusAndSelectMenuItem { "View", "Thumbnails" } },
+            { { "alt" }, "3", FocusAndSelectMenuItem { "View", "Table of Contents" } },
+            { { "alt" }, "4", FocusAndSelectMenuItem { "View", "Highlights and Notes" } },
+            { { "alt" }, "5", FocusAndSelectMenuItem { "View", "Bookmarks" } },
+            { { "alt" }, "6", FocusAndSelectMenuItem { "View", "Contact Sheet" } },
+            { { "alt" }, "9", FocusAndSelectMenuItem { "View", "Zoom All to Fit" } },
+            { { "alt" }, "b", FocusAndSelectMenuItem { "View", "Show Document Background" } },
+            { { "alt" }, "t", FocusAndToggleMenuItem { "Show Toolbar", "Hide Toolbar" } },
+            { { "ctrl" }, "f", FocusAndToggleMenuItem { "Enter Full Screen", "Exit Full Screen" } },
+            { { "shift" }, "\\", FocusAndSelectMenuItem { "View", "Show All Tabs" } },
+            { { "shift" }, "a", FocusAndToggleMenuItem { "Show Markup Toolbar", "Hide Markup Toolbar" } },
+            { { "shift" }, "f", FocusAndSelectMenuItem { "View", "Slideshow" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "View", "Customize Toolbar…" } },
+            { unmapped, unmapped, FocusAndToggleMenuItem { "Show Tab Bar", "Hide Tab Bar" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "View", "Soft Proof with Profile" } },
+        },
+        Go = {
+            { nil, "[", FocusAndSelectMenuItem { "Go", "Back" } },
+            { nil, "]", FocusAndSelectMenuItem { "Go", "Forward" } },
+            { { "alt" }, "g", FocusAndSelectMenuItem { "Go", "Go to Page…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Go", "Down" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Go", "Next Document" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Go", "Next Item" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Go", "Previous Document" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Go", "Previous Item" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Go", "Up" } },
+        },
+        Tools = {
+            { nil, "d", FocusAndSelectMenuItem { "Tools", "Add Bookmark" } },
+            { nil, "i", FocusAndToggleMenuItem { "Show Inspector", "Hide Inspector" } },
+            { nil, "k", FocusAndSelectMenuItem { "Tools", "Crop" } },
+            { nil, "l", FocusAndSelectMenuItem { "Tools", "Rotate Left" } },
+            { nil, "r", FocusAndSelectMenuItem { "Tools", "Rotate Right" } },
+            { { "alt" }, "c", FocusAndSelectMenuItem { "Tools", "Adjust Color…" } },
+            { {  }, "`", FocusAndToggleMenuItem { "Show Magnifier", "Hide Magnifier" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Tools", "Adjust Size…" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "Tools", "Annotate" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Tools", "Assign Profile…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Tools", "Flip Horizontal" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Tools", "Flip Vertical" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Tools", "Rectangular Selection" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Tools", "Show Location Info" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Tools", "Text Selection" } },
+        },
+        Window = {
+            { nil, "m", FocusAndSelectMenuItem { "Window", "Minimize" } },
+            { { "alt" }, "m", FocusAndSelectMenuItem { "Window", "Minimize All" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Arrange in Front" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Bring All to Front" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Merge All Windows" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Move Tab to New Window" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Move Window to Left Side of Screen" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Move Window to Right Side of Screen" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Show Next Tab" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Show Previous Tab" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Zoom All" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Zoom" } },
+        },
+        Help = {
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Help", "Preview Help" } },
+        },
     },
 }

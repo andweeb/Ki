@@ -198,8 +198,14 @@ function Application:selectMenuItem(menuItem, app, choice, options)
 end
 
 function Application:createMenuItemAction(menuItem, options)
+    options = options or {}
+
+    local name = type(menuItem) == "table"
+        and menuItem[options.isToggleable and 1 or #menuItem]
+        or menuItem
+
     return Action {
-        name = type(menuItem) == "table" and menuItem[#menuItem] or menuItem,
+        name = name,
         action = function(app, choice)
             self:selectMenuItem(menuItem, app, choice, options)
         end,
@@ -207,7 +213,9 @@ function Application:createMenuItemAction(menuItem, options)
 end
 
 function Application.SelectMenuItem(menuItem)
-    return Application:createMenuItemAction(menuItem)
+    return Application:createMenuItemAction(menuItem, {
+        isRegex = true,
+    })
 end
 
 function Application.FocusAndSelectMenuItem(menuItem)
@@ -428,16 +436,20 @@ function Application:initialize(options)
         entityOptions = options
     end
 
-    local showActions = Action {
+    local ShowActions = Action {
         name = "Show Actions",
-        action = function(...) self:showActions(...) end,
+        action = function(...)
+            self:showActions(...)
+        end,
         options = {
             activate = false,
         },
     }
     local showCheatsheet = Action {
         name = "Show Cheatsheet",
-        action = function(...) self:showCheatsheet(...) end,
+        action = function(...)
+            self:showCheatsheet(...)
+        end,
         options = {
             activate = false,
         },
@@ -446,8 +458,8 @@ function Application:initialize(options)
     entityOptions.shortcuts = self:mergeShortcuts(entityOptions.shortcuts or {}, {
         { nil, nil, self.focus, "Activate" },
         { nil, "f", self.toggleFullScreen, "Toggle Full Screen" },
-        { nil, ",", self:SelectMenuItem("Preferences...") },
-        { { "cmd" }, "space", showActions },
+        { nil, ",", self.SelectMenuItem("Preferences...") },
+        { { "cmd" }, "space", ShowActions },
         { { "shift" }, "/", showCheatsheet },
     })
 

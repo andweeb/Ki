@@ -713,13 +713,19 @@ function Ki:start()
         callbacks = self:_createFsmCallbacks()
     })
 
+    local ShowCheatsheet = self.Action {
+        name = "Cheatsheet",
+        action = function()
+            self.cheatsheet:show()
+            return true
+        end,
+    }
+
     -- Make the cheatsheet available in entity mode
-    table.insert(self.shortcuts.entity, {
-        { "shift" }, "/", function() self.cheatsheet:show() return true end, "Cheatsheet",
-    })
+    table.insert(self.shortcuts.entity, { { "shift" }, "/", ShowCheatsheet })
 
     -- Initialize cheat sheet with both default and/or custom transition and command events
-    local description = "Shortcuts for Ki modes and entities"
+    local description = "Shortcuts for Ki modes"
     self.cheatsheet = Cheatsheet:new({
         name = self.name,
         description = description,

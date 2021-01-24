@@ -1,68 +1,103 @@
 ----------------------------------------------------------------------------------------------------
--- QuickTime Player application
+-- QuickTime Player application config
 --
 local Ki = spoon.Ki
 local Application = Ki.Application
+local FocusAndChooseMenuItem = Application.FocusAndChooseMenuItem
+local FocusAndSelectMenuItem = Application.FocusAndSelectMenuItem
+local FocusAndToggleMenuItem = Application.FocusAndToggleMenuItem
+local unmapped = Application.unmapped
 
--- Initialize menu item events
-local newAudioRecording = Application:createMenuItemAction("New Audio Recording")
-local newMovieRecording = Application:createMenuItemAction("New Movie Recording")
-local openFile = Application:createMenuItemAction("Open File...", { focusAfter = true })
-local openRecent = Application:createChooseMenuItemAction({ "File", "Open Recent" }, { focusAfter = true })
-local newScreenRecording = Application:createMenuItemAction("New Screen Recording")
-local trim = Application:createMenuItemAction("Trim...", { focusBefore = true })
-local exportAs = Application:createChooseMenuItemAction({ "File", "Export As" }, { focusBefore = true })
-
--- Helper method to run AppleScript actions available in `osascripts/google-chrome.applescript`
-local function runApplescriptAction(errorMessage, viewModel)
-    local script = Application.renderScriptTemplate("quicktime-player", viewModel)
-    local isOk, result, rawTable = hs.osascript.applescript(script)
-
-    if not isOk then
-        Application.notifyError(errorMessage, rawTable.NSLocalizedFailureReason)
-    end
-
-    return result
-end
-
--- Action to play or pause the frontmost or explicitly specified QuickTime Player video
-local function togglePlay(_, choice)
-    local target = choice
-        and "document "..choice.windowIndex
-        or "the first document"
-
-    runApplescriptAction("Error toggling play", {
-        action = "toggle-play",
-        target = target,
-    })
-end
-
--- Action to toggle the file loop status on the frontmost or explicitly specified QuickTime Player window
-local function toggleFileLoop(_, choice)
-    local target = choice
-        and "document "..choice.windowIndex
-        or "the first document"
-    local isLooping = runApplescriptAction("Error toggling file loop", {
-        action = "toggle-looping",
-        target = target,
-    })
-    local toggleText = isLooping and "ON" or "OFF"
-
-    hs.notify.show("Ki", "QuickTime Player", "Turned File Loop "..toggleText)
-end
-
--- Register shortcuts with the actions initialized above
 return Application {
     name = "QuickTime Player",
     shortcuts = {
-        { nil, "a", newAudioRecording, "New Audio Recording" },
-        { nil, "e", exportAs, "Export As" },
-        { nil, "l", toggleFileLoop, "Toggle File Loop Option" },
-        { nil, "m", newMovieRecording, "New Movie Recording" },
-        { nil, "o", openFile, "Open File..." },
-        { nil, "s", newScreenRecording, "New Screen Recording" },
-        { nil, "t", trim, "Trim..." },
-        { nil, "space", togglePlay, "Toggle Play" },
-        { { "shift" }, "o", openRecent, "Open Recent" },
+        ["QuickTime Player"] = {
+            { nil, "h", FocusAndSelectMenuItem { "QuickTime Player", "Hide QuickTime Player" } },
+            { nil, "q", FocusAndSelectMenuItem { "QuickTime Player", "Quit QuickTime Player" } },
+            { { "alt" }, "h", FocusAndSelectMenuItem { "QuickTime Player", "Hide Others" } },
+            { { "alt" }, "q", FocusAndSelectMenuItem { "QuickTime Player", "Quit and Keep Windows" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "QuickTime Player", "About QuickTime Player" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "QuickTime Player", "Services" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "QuickTime Player", "Show All" } },
+        },
+        File = {
+            { nil, "l", FocusAndSelectMenuItem { "File", "Open Location…" } },
+            { nil, "o", FocusAndSelectMenuItem { "File", "Open File…" } },
+            { nil, "s", FocusAndSelectMenuItem { "File", "Save…" } },
+            { nil, "w", FocusAndSelectMenuItem { "File", "Close" } },
+            { { "alt" }, "n", FocusAndSelectMenuItem { "File", "New Movie Recording" } },
+            { { "alt" }, "w", FocusAndSelectMenuItem { "File", "Close All" } },
+            { { "alt", "ctrl" }, "n", FocusAndSelectMenuItem { "File", "New Audio Recording" } },
+            { { "ctrl" }, "n", FocusAndSelectMenuItem { "File", "New Screen Recording" } },
+            { { "shift" }, "o", FocusAndSelectMenuItem { "File", "Open Image Sequence…" } },
+            { { "shift" }, "s", FocusAndSelectMenuItem { "File", "Duplicate" } },
+            { { "shift", "alt" }, "s", FocusAndSelectMenuItem { "File", "Save As…" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "File", "Export As" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "File", "Move To…" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "File", "Open Recent" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "File", "Rename…" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "File", "Share" } },
+        },
+        Edit = {
+            { nil, "a", FocusAndSelectMenuItem { "Edit", "Select All" } },
+            { nil, "c", FocusAndSelectMenuItem { "Edit", "Copy" } },
+            { nil, "t", FocusAndSelectMenuItem { "Edit", "Trim…" } },
+            { nil, "v", FocusAndSelectMenuItem { "Edit", "Paste" } },
+            { nil, "x", FocusAndSelectMenuItem { "Edit", "Cut" } },
+            { nil, "y", FocusAndSelectMenuItem { "Edit", "Split Clip" } },
+            { nil, "z", FocusAndSelectMenuItem { "Edit", "Undo" } },
+            { { "shift" }, "h", FocusAndSelectMenuItem { "Edit", "Flip Horizontal" } },
+            { { "shift" }, "l", FocusAndSelectMenuItem { "Edit", "Rotate Left" } },
+            { { "shift" }, "r", FocusAndSelectMenuItem { "Edit", "Rotate Right" } },
+            { { "shift" }, "v", FocusAndSelectMenuItem { "Edit", "Flip Vertical" } },
+            { { "shift" }, "z", FocusAndSelectMenuItem "Redo .*" },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "Edit", "Clip Alignment" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Delete" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Emoji & Symbols" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Insert Clip After Selection…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Insert Clip Before Selection…" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Remove Audio" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Remove Video" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Edit", "Start Dictation" } },
+        },
+        View = {
+            { nil, "+", FocusAndSelectMenuItem { "View", "Increase Size" } },
+            { nil, "-", FocusAndSelectMenuItem { "View", "Decrease Size" } },
+            { nil, "1", FocusAndSelectMenuItem { "View", "Actual Size" } },
+            { nil, "3", FocusAndSelectMenuItem { "View", "Fit to Screen" } },
+            { nil, "4", FocusAndSelectMenuItem { "View", "Fill Screen" } },
+            { nil, "5", FocusAndSelectMenuItem { "View", "Panoramic" } },
+            { nil, "e", FocusAndSelectMenuItem { "View", "Show Clips" } },
+            { nil, "u", FocusAndToggleMenuItem { "Show Audio Track", "Hide Audio Track" } },
+            { { "alt" }, "l", FocusAndSelectMenuItem { "View", "Loop" } },
+            { { "ctrl" }, "f", FocusAndToggleMenuItem { "Enter Full Screen", "Exit Full Screen" } },
+            { { "shift" }, "\\", FocusAndSelectMenuItem { "View", "Show All Tabs" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "View", "Float on Top" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "View", "Languages" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "View", "Next Chapter" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "View", "Previous Chapter" } },
+            { unmapped, unmapped, FocusAndToggleMenuItem { "Show Tab Bar", "Hide Tab Bar" } },
+            { unmapped, unmapped, FocusAndChooseMenuItem { "View", "Subtitles" } },
+        },
+        Window = {
+            { nil, "i", FocusAndToggleMenuItem { "Show Movie Inspector", "Hide Movie Inspector" } },
+            { nil, "m", FocusAndSelectMenuItem { "Window", "Minimize" } },
+            { { "alt" }, "m", FocusAndSelectMenuItem { "Window", "Minimize All" } },
+            { { "alt" }, "p", FocusAndToggleMenuItem { "Show Export Progress", "Hide Export Progress" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Arrange in Front" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Bring All to Front" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Merge All Windows" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Move Tab to New Window" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Move Window to Left Side of Screen" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Move Window to Right Side of Screen" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Show Next Tab" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Show Previous Tab" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Untitled" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Zoom All" } },
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Window", "Zoom" } },
+        },
+        Help = {
+            { unmapped, unmapped, FocusAndSelectMenuItem { "Help", "QuickTime Player Help" } },
+        },
     },
 }
